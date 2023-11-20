@@ -1,4 +1,4 @@
-=== WooCommerce CyberSource Gateway ===
+=== WooCommerce Cobalt Tech Gateway ===
 Author: Cobalt Tech
 Tags: woocommerce
 Requires PHP: 7.0
