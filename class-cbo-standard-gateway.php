@@ -222,6 +222,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 				'redirect' => $this->api_url . '/checkout/' . $checkout['slug']
 			);
 		} catch (\CBOException $e) {
+            CBOLog::error("Error generating payment - " . $e->getMessage() . ": " . $e->getTraceAsString());
 			if (!$e->isSuccessResponse()) {
 				wc_add_notice(  'No se ha podido generar el pago. Por favor contacte con el comercio.', 'error' );
 			} else {
@@ -281,7 +282,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 			header( 'HTTP/1.1 204 OK' );
 
 		} catch (\CBOException $e) {
-			CBOLog::debug("Error getting transaction " . $data['tid'] . ' - ' .$e->getMessage());
+			CBOLog::debug("Error getting transaction " . $data['tid'] . ' - ' .$e->getMessage() . ": " . $e->getTraceAsString());
 			header( 'HTTP/1.1 400 Bad Request' );
 
 		}
