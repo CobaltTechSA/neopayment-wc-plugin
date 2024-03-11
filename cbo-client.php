@@ -89,13 +89,13 @@ class CBOClient {
 	}
 
 
-	/**
-	 * @param WC_Order $order
-	 *
-	 * @return mixed
-	 * @throws CBOException
-	 */
-	public function checkout(WC_Order $order) {
+    /**
+     * @param WC_Order $order
+     * @param $paymentType
+     * @return mixed
+     * @throws CBOException
+     */
+	public function checkout(WC_Order $order, $paymentType) {
 
 		\CBOLog::debug("Order ID: " . $order->get_id());
 
@@ -117,7 +117,7 @@ class CBOClient {
 				'platform' => 'Woocommerce',
 				'version' => CBOConstants::PLUGIN_VERSION,
 				'order_id' => $order->get_id(),
-				'payment_type' => 'TELERED'
+				'payment_type' => $paymentType
 			],
 			'tip' => 0,
 			'tax' => $tax,

@@ -66,12 +66,11 @@ class WC_CBO_Loader {
 			return;
 		}
 
+		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-standard-gateway.php';
 		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-telered-gateway.php';
 
 		// fire it up!
-		if ( function_exists( 'cbo_payment_gateway' ) ) {
-			cbo_payment_gateway();
-		}
+        cbo_payment_gateway();
 	}
 
 	/**
@@ -375,6 +374,23 @@ class WC_CBO_Loader {
 	}
 
 
+}
+
+/*
+ * This action hook registers our PHP class as a WooCommerce payment gateway
+ */
+function cbo_add_payment_gateway_class( $gateways ) {
+    $gateways[] = 'WC_CBO_Telered_Gateway'; // your class name is here
+    $gateways[] = 'WC_CBO_Standard_Gateway'; // your class name is here
+    return $gateways;
+}
+
+/**
+ * @return WC_CBO_Telered_Gateway
+ */
+function cbo_payment_gateway() {
+    add_filter( 'woocommerce_payment_gateways', 'cbo_add_payment_gateway_class' );
+    //return \WC_CBO_Telered_Gateway::instance();
 }
 
 // fire it up!

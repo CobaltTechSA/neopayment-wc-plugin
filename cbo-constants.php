@@ -16,4 +16,9 @@ class CBOConstants {
 
 	// Minimum WooCommerce version required by this plugin.
 	const MINIMUM_WC_VERSION = '5.3';
+
+
+    const PAYMENT_TYPE_TELERED = 'TELERED';
+    const PAYMENT_TYPE_VISA = 'MASTERCARD';
+    const PAYMENT_TYPE_MASTERCARD = 'MASTERCARD';
 }

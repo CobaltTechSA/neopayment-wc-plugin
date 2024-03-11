@@ -14,7 +14,7 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 		$this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
 		$this->has_fields = false; // in case you need a custom credit card form
 		$this->method_title = 'CBO Clave Gateway';
-		$this->method_description = 'Clave'; // will be displayed on the options page
+		$this->method_description = 'Aceptación de pagos con Clave'; // will be displayed on the options page
 
 		// gateways can support subscriptions, refunds, saved payment methods,
 		// but in this tutorial we begin with simple payments
@@ -185,7 +185,7 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 
 		$cboClient = new CBOClient($this->api_url, $this->api_key);
 		try {
-			$checkout = $cboClient->checkout($order);
+			$checkout = $cboClient->checkout($order, CBOConstants::PAYMENT_TYPE_TELERED);
 			CBOLog::debug("Checkout data: " . json_encode($checkout));
 
 			// Mark as on-hold (we're awaiting the cheque)
@@ -272,20 +272,4 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 		}
 		return self::$instance;
 	}
-}
-
-/*
- * This action hook registers our PHP class as a WooCommerce payment gateway
- */
-function cbo_add_payment_gateway_class( $gateways ) {
-	$gateways[] = 'WC_CBO_Telered_Gateway'; // your class name is here
-	return $gateways;
-}
-
-/**
- * @return WC_CBO_Telered_Gateway
- */
-function cbo_payment_gateway() {
-	add_filter( 'woocommerce_payment_gateways', 'cbo_add_payment_gateway_class' );
-	return \WC_CBO_Telered_Gateway::instance();
 }

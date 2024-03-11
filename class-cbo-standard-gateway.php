@@ -14,7 +14,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 		$this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
 		$this->has_fields = false; // in case you need a custom credit card form
 		$this->method_title = 'CBO Standard Gateway';
-		$this->method_description = 'Visa / Mastercard'; // will be displayed on the options page
+		$this->method_description = 'Aceptación de pagos con Visa / Mastercard'; // will be displayed on the options page
 
 		// gateways can support subscriptions, refunds, saved payment methods,
 		// but in this tutorial we begin with simple payments
@@ -31,9 +31,8 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 		$this->description = $this->get_option( 'description' );
 		$this->enabled = $this->get_option( 'enabled' );
 		$this->testmode = 'yes' === $this->get_option( 'testmode' );
-		$this->api_url = $this->get_api_url($this->testmode);
+		$this->api_url = $this->testmode ? $this->get_option( 'test_api_url' ) : $this->get_option( 'api_url' );
 		$this->api_key = $this->testmode ? $this->get_option( 'test_api_key' ) : $this->get_option( 'api_key' );
-
 
 		// This action hook saves the settings
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -42,33 +41,11 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 		add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
 
 		// You can also register a webhook here
-		add_action( "woocommerce_api_" . CBOConstants::STANDARD_GATEWAY_ID, array( $this, 'webhook' ) );
+		add_action( "woocommerce_api_" . $this->id, array( $this, 'webhook' ) );
 
 		//URL OK y KO
-		add_action( "woocommerce_api_" . CBOConstants::STANDARD_GATEWAY_ID . '_status', array( $this, 'callback_url' ) );
+		add_action( "woocommerce_api_" . $this->id . '_status', array( $this, 'callback_url' ) );
 
-
-	}
-
-	/**
-	 * @param $testMode
-	 *
-	 * @return array|string|string[]
-	 */
-	public function get_api_url($testMode = false) {
-		if ($testMode) {
-			return $this->get_option( 'test_api_url' );
-		}
-
-		$prodUrl = $this->get_option( 'api_url' );
-        if (str_contains('cbo.cobalt.tech', $prodUrl)) {
-            $prodUrl = str_replace('cbo.cobalt.tech', 'metrobank.cobalt.tech', $prodUrl);
-
-            //Override option
-            $this->update_option('api_url', $prodUrl);
-        }
-
-		return $prodUrl;
 
 	}
 
@@ -79,10 +56,12 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 			'<img src="' . WC_HTTPS::force_https_url( $path . 'assets/images/mastercard.svg' ) . '" alt="Mastercard" />',
 		);
 
-		$payIcons = '';
+		$payIcons = '<div style="vertical-align: middle; display: inline-block; margin-left: 22px">';
 		foreach ($icons as $icon) {
 			$payIcons .= $icon;
 		}
+
+		$payIcons .= '</div>';
 
 		return apply_filters ('woocommerce_gateway_icon', $payIcons, $this->id);
 	}
@@ -103,14 +82,14 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 				'title'       => 'Title',
 				'type'        => 'text',
 				'description' => 'This controls the title which the user sees during checkout.',
-				'default'     => 'VISA, Mastercard o Clave',
+				'default'     => 'VISA, Mastercard',
 				'desc_tip'    => true,
 			),
 			'description' => array(
 				'title'       => 'Description',
 				'type'        => 'textarea',
 				'description' => 'This controls the description which the user sees during checkout.',
-				'default'     => 'Paga con tu tarjeta VISA, Mastercard o Clave',
+				'default'     => 'Paga con tu tarjeta VISA, Mastercard',
 			),
 			'testmode' => array(
 				'title'       => 'Test mode',
@@ -207,7 +186,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 
 		$cboClient = new CBOClient($this->api_url, $this->api_key);
 		try {
-			$checkout = $cboClient->checkout($order);
+			$checkout = $cboClient->checkout($order, CBOConstants::PAYMENT_TYPE_VISA);
 			CBOLog::debug("Checkout data: " . json_encode($checkout));
 
 			// Mark as on-hold (we're awaiting the cheque)
@@ -218,8 +197,8 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 				'redirect' => $this->api_url . '/checkout/' . $checkout['slug']
 			);
 		} catch (\CBOException $e) {
-            CBOLog::error("Error generating payment - " . $e->getMessage() . ": " . $e->getTraceAsString());
 			if (!$e->isSuccessResponse()) {
+				CBOLog::debug($e->getMessage() . " - " . json_encode($e->getResponse()));
 				wc_add_notice(  'No se ha podido generar el pago. Por favor contacte con el comercio.', 'error' );
 			} else {
 				wc_add_notice(  'No se ha podido procesar el pago. Por favor contacte con el comercio.', 'error' );
@@ -248,13 +227,14 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 
 		global $woocommerce;
 
-		$data = $_GET;
-		CBOLog::debug("Webhook: Tx  " . $data['tid']);
+		$data = json_decode(file_get_contents('php://input'), true);
+		CBOLog::debug("Webhook: Tx #" . $data['identifier'] . ": " . json_encode($data));
 
-		$client = new CBOClient($this->api_url, $this->api_key);
+		//$client = new CBOClient($this->api_url, $this->api_key);
 
 		try {
-			$transaction = $client->transaction($data['tid']);
+			//$transaction = $client->transaction($data['tid']);
+			$transaction = $data;
 
 
 			$metas = $transaction['metadatas'];
@@ -272,13 +252,13 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 				$order->payment_complete($transaction['identifier']);
 				$woocommerce->cart->empty_cart();
 			} else {
-				$order->update_status('failed', __( 'Payment failed', 'woocommerce' ));
+				$order->update_status('failed', __( 'Pago fallido', 'woocommerce' ));
 			}
 
 			header( 'HTTP/1.1 204 OK' );
 
 		} catch (\CBOException $e) {
-			CBOLog::debug("Error getting transaction " . $data['tid'] . ' - ' .$e->getMessage() . ": " . $e->getTraceAsString());
+			CBOLog::debug("Error getting transaction " . $data['tid'] . ' - ' .$e->getMessage());
 			header( 'HTTP/1.1 400 Bad Request' );
 
 		}
@@ -293,20 +273,4 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 		}
 		return self::$instance;
 	}
-}
-
-/*
- * This action hook registers our PHP class as a WooCommerce payment gateway
- */
-function cbo_add_payment_gateway_class( $gateways ) {
-	$gateways[] = 'WC_CBO_Standard_Gateway'; // your class name is here
-	return $gateways;
-}
-
-/**
- * @return WC_CBO_Standard_Gateway
- */
-function cbo_payment_gateway() {
-	add_filter( 'woocommerce_payment_gateways', 'cbo_add_payment_gateway_class' );
-	return \WC_CBO_Standard_Gateway::instance();
 }
