@@ -1,0 +1,157 @@
+# Copyright (C) 2024 Cobalt Tech
+# This file is distributed under the same license as the CBO Payment Gateway plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: CBO Payment Gateway 1.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cobalt-plugin-"
+"woocommerce\n"
+"POT-Creation-Date: 2024-10-09T17:39:58+00:00\n"
+"PO-Revision-Date: 2024-10-09 14:59-0500\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+"X-Domain: cbo-payment-gateway\n"
+
+#. Plugin Name of the plugin
+#: cbo-payment-gateway.php
+msgid "CBO Payment Gateway"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: cbo-payment-gateway.php
+msgid "https://cobalt.tech/plugins/wc"
+msgstr ""
+
+#. Description of the plugin
+#: cbo-payment-gateway.php
+msgid "Payments with VISA, MasterCard and Clave"
+msgstr "Payments with VISA, MasterCard and Clave"
+
+#. Author of the plugin
+#: cbo-payment-gateway.php
+msgid "Cobalt Tech"
+msgstr ""
+
+#. Author URI of the plugin
+#: cbo-payment-gateway.php
+msgid "https://cobalt.tech"
+msgstr ""
+
+#. CBO Standard Gateway Description
+#: class-cbo-standard-gateway.php
+msgid "Acceptance of payments with Visa / Mastercard"
+msgstr "Acceptance of payments with Visa / Mastercard"
+
+#. CBO Standard Gateway Enabled/Disable title
+#: class-cbo-standard-gateway.php
+msgid "Enable/Disable"
+msgstr "Enable/Disable"
+
+#. CBO Standard Gateway Enabled/Disable label
+#: class-cbo-standard-gateway.php
+msgid "Enable CBO Payment Gateway"
+msgstr "Enable CBO Payment Gateway"
+
+#. CBO Standard Gateway Title title
+#: class-cbo-standard-gateway.php
+msgid "Title"
+msgstr "Title"
+
+#. CBO Standard Gateway Title description
+#: class-cbo-standard-gateway.php
+msgid "This controls the title which the user sees during checkout."
+msgstr "This controls the title which the user sees during checkout."
+
+#. CBO Standard Gateway Description title
+#: class-cbo-standard-gateway.php
+msgid "Description"
+msgstr "Description"
+
+#. CBO Standard Gateway Description description
+#: class-cbo-standard-gateway.php
+msgid "This controls the description which the user sees during checkout."
+msgstr "This controls the description which the user sees during checkout."
+
+#. CBO Standard Gateway Description default
+#: class-cbo-standard-gateway.php
+msgid "Pay with your VISA or Mastercard card"
+msgstr "Pay with your VISA or Mastercard card"
+
+#. CBO Standard Gateway TestMode title
+#: class-cbo-standard-gateway.php
+msgid "Test mode"
+msgstr "Test mode"
+
+#. CBO Standard Gateway TestMode label
+#: class-cbo-standard-gateway.php
+msgid "Enable Test Mode"
+msgstr "Enable Test Mode"
+
+#. CBO Standard Gateway TestMode description
+#: class-cbo-standard-gateway.php
+msgid "Place the payment gateway in test mode using test API keys."
+msgstr "Place the payment gateway in test mode using test API keys."
+
+#. CBO Standard Gateway Test API URL title
+#: class-cbo-standard-gateway.php
+msgid "Test API URL"
+msgstr "Test API URL"
+
+#. CBO Standard Gateway Test API Key title
+#: class-cbo-standard-gateway.php
+msgid "Test API Key"
+msgstr "Test API Key"
+
+#. CBO Standard Gateway Production API URL title
+#: class-cbo-standard-gateway.php
+msgid "Production API URL"
+msgstr "Production API URL"
+
+#. CBO Standard Gateway Production API Key title
+#: class-cbo-standard-gateway.php
+msgid "Production API Key"
+msgstr "Production API Key"
+
+#. CBO Standard Gateway Production API Key title
+#: class-cbo-standard-gateway.php
+msgid "TEST MODE ENABLED"
+msgstr "TEST MODE ENABLED"
+
+#. CBO Standard Gateway CardNumber validation
+#: class-cbo-standard-gateway.php
+msgid "Invalid card number"
+msgstr "Invalid card number"
+
+#. CBO Standard Gateway CardNumber validation
+#: class-cbo-standard-gateway.php
+msgid "Invalid expiry date"
+msgstr "Invalid expiry date"
+
+#. CBO Standard Gateway Payment Generation error
+#: class-cbo-standard-gateway.php
+msgid "Cannot generate the payment. Please, contact with commerce."
+msgstr "Cannot generate the payment. Please, contact with commerce."
+
+#. CBO Standard Gateway Payment Processment error
+#: class-cbo-standard-gateway.php
+msgid "Cannot process the payment. Please, contact with commerce."
+msgstr "Cannot process the payment. Please, contact with commerce."
+
+#. CBO Standard Gateway Payment completed
+#: class-cbo-standard-gateway.php
+msgid "Payment completed"
+msgstr "Payment completed"
+
+#. CBO Standard Gateway Payment failed
+#: class-cbo-standard-gateway.php
+msgid "Failed payment"
+msgstr "Failed payment"
+
+#. Card holder
+#: class-cbo-payment-gateway-cc.php
+msgid "Card holder"
+msgstr "Card holder"

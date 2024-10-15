@@ -1,6 +1,9 @@
 <?php
 
 include_once 'cbo-constants.php';
+include_once 'cbo-helpers.php';
+include_once 'class-cbo-payment-gateway-cc.php';
+
 class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 
 	protected static $instance;
@@ -12,9 +15,9 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 
 		$this->id = CBOConstants::STANDARD_GATEWAY_ID; // payment gateway plugin ID
 		$this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
-		$this->has_fields = false; // in case you need a custom credit card form
+		$this->has_fields = true; // in case you need a custom credit card form
 		$this->method_title = 'CBO Standard Gateway';
-		$this->method_description = 'Aceptación de pagos con Visa / Mastercard'; // will be displayed on the options page
+		$this->method_description = __("Acceptance of payments with Visa / Mastercard", "cbo-payment-gateway"); // will be displayed on the options page
 
 		// gateways can support subscriptions, refunds, saved payment methods,
 		// but in this tutorial we begin with simple payments
@@ -72,54 +75,67 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'       => 'Enable/Disable',
-				'label'       => 'Enable CBO Payment Gateway',
+				'title'       => __('Enable/Disable', 'cbo-payment-gateway'),
+				'label'       => __('Enable CBO Payment Gateway', 'woocommerce'),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no'
 			),
 			'title' => array(
-				'title'       => 'Title',
+				'title'       => __('Title', 'woocommerce'),
 				'type'        => 'text',
-				'description' => 'This controls the title which the user sees during checkout.',
+				'description' => __('This controls the title which the user sees during checkout.', 'woocommerce'),
 				'default'     => 'VISA, Mastercard',
 				'desc_tip'    => true,
 			),
 			'description' => array(
-				'title'       => 'Description',
+				'title'       => __('Description', 'woocommerce'),
 				'type'        => 'textarea',
-				'description' => 'This controls the description which the user sees during checkout.',
-				'default'     => 'Paga con tu tarjeta VISA, Mastercard',
+				'description' => __('This controls the description which the user sees during checkout.', 'woocommerce'),
+				'default'     => __('Pay with your VISA or Mastercard card', 'woocommerce'),
 			),
 			'testmode' => array(
-				'title'       => 'Test mode',
-				'label'       => 'Enable Test Mode',
+				'title'       => __('Test mode', 'woocommerce'),
+				'label'       => __('Enable Test Mode', 'woocommerce'),
 				'type'        => 'checkbox',
-				'description' => 'Place the payment gateway in test mode using test API keys.',
+				'description' => __('Place the payment gateway in test mode using test API keys.', 'woocommerce'),
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
 			'test_api_url' => array(
-				'title'       => 'Test API URL',
+				'title'       => __('Test API URL', 'woocommerce'),
 				'type'        => 'text'
 			),
 			'test_api_key' => array(
-				'title'       => 'Test API Key',
+				'title'       => __('Test API Key', 'woocommerce'),
 				'type'        => 'password',
 			),
 			'api_url' => array(
-				'title'       => 'Production API URL',
+				'title'       => __('Production API URL', 'woocommerce'),
 				'type'        => 'text'
 			),
 			'api_key' => array(
-				'title'       => 'Production API Key',
+				'title'       => __('Production API Key', 'woocommerce'),
 				'type'        => 'password'
 			)
 		);
 
 	}
 
-	/**
+    /**
+     * @param $args
+     * @param $fields
+     * @return void
+     */
+    public function credit_card_form($args = array(), $fields = array())
+    {
+        $cc_form           = new CBO_Payment_Gateway_CC();
+        $cc_form->id       = $this->id;
+        $cc_form->supports = $this->supports;
+        $cc_form->form();
+    }
+
+    /**
 	 * You will need it if you want your custom credit card form, Step 4 is about it
 	 */
 	public function payment_fields() {
@@ -128,36 +144,38 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 		if ( $this->description ) {
 			// you can instructions for test mode, I mean test card numbers etc.
 			if ( $this->testmode ) {
-				$this->description .= ' TEST MODE ENABLED.';
+				$this->description .= ' ' . __('TEST MODE ENABLED', 'woocommerce') . '.';
 				$this->description  = trim( $this->description );
 			}
 			// display the description with <p> tags etc.
 			echo wpautop( wp_kses_post( $this->description ) );
 		}
+        $this->credit_card_form();
+        /*echo '<fieldset id="wc-' . esc_attr( $this->id ) . '-cc-form" class="wc-credit-card-form wc-payment-form" style="background:transparent;">';
 
-		/*// I will echo() the form, but you can close PHP tags and print it directly in HTML
-		echo '<fieldset id="wc-' . esc_attr( $this->id ) . '-cc-form" class="wc-credit-card-form wc-payment-form" style="background:transparent;">';
+        do_action( 'woocommerce_credit_card_form_start', $this->id );
 
-		// Add this action hook if you want your custom payment gateway to support it
-		do_action( 'woocommerce_credit_card_form_start', $this->id );
+        echo '
+				<div class="form-row form-row-wide"><label>Número de tarjeta<span class="required">*</span></label>
+					<input id="wc-' . esc_attr( $this->id ) . '-card_number" type="tel" autocomplete="off" name="card_number" minlength="16" maxlength="16" required>
+				</div>
+				<div class="form-row form-row-wide"><label>Nombre en la tarjeta<span class="required">*</span></label>
+					<input id="wc-' . esc_attr( $this->id ) . '-card_holder" type="text" autocomplete="off" name="card_holder" required>
+				</div>
+				<div class="form-row form-row-first">
+					<label>Fecha de expiración<span class="required">*</span></label>
+					<input id="wc-' . esc_attr( $this->id ) . '-exp_date" type="tel" autocomplete="off" placeholder="MM / AA" name="exp_date" pattern="^(0[1-9]|1[0-2])\/([0-9]{2})$" minlength="5" maxlength="5" required>
+				</div>
+				<div class="form-row form-row-last">
+					<label>CVV<span class="required">*</span></label>
+					<input id="wc-' . esc_attr( $this->id ) . '-cvv" type="password" autocomplete="off" placeholder="CVV" name="cvv" minlength="3" maxlength="3" required>
+				</div>
+				<div class="clear"></div>';
 
-		// I recommend to use inique IDs, because other gateways could already use #ccNo, #expdate, #cvc
-		echo '<div class="form-row form-row-wide"><label>Card Number <span class="required">*</span></label>
-		<input id="misha_ccNo" type="text" autocomplete="off">
-		</div>
-		<div class="form-row form-row-first">
-			<label>Expiry Date <span class="required">*</span></label>
-			<input id="misha_expdate" type="text" autocomplete="off" placeholder="MM / YY">
-		</div>
-		<div class="form-row form-row-last">
-			<label>Card Code (CVC) <span class="required">*</span></label>
-			<input id="misha_cvv" type="password" autocomplete="off" placeholder="CVC">
-		</div>
-		<div class="clear"></div>';
+        do_action( 'woocommerce_credit_card_form_end', $this->id );
 
-		do_action( 'woocommerce_credit_card_form_end', $this->id );
+        echo '<div class="clear"></div></fieldset>';*/
 
-		echo '<div class="clear"></div></fieldset>';*/
 
 	}
 
@@ -172,7 +190,38 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 	  * Fields validation, more in Step 5
 	 */
 	public function validate_fields() {
-		return true;
+        $cardNumber = $_POST[$this->id . '-card-number'];
+        $cardExpiry = $_POST[$this->id . '-card-expiry'];
+        $cardCvv = $_POST[$this->id . '-card-cvc'];
+        $cardHolder = $_POST[$this->id . '-card-holder'];
+
+        CBOLog::debug("cardNumber=$cardNumber, cardExpiry=$cardExpiry, cardCvv=$cardCvv, cardHolder=$cardHolder");
+        $valid = true;
+
+        $cardNumber = str_replace(" ", "", $cardNumber);
+        if (!is_valid_luhn($cardNumber)) {
+            wc_add_notice( __('Invalid card number', 'woocommerce'), 'error' );
+            $valid = false;
+        }
+
+        $cardExpiry = str_replace(" ", "", $cardExpiry);
+        if (!is_valid_expiry_date($cardExpiry)) {
+            wc_add_notice( __('Invalid expiry date', 'woocommerce'), 'error' );
+            $valid = false;
+        }
+
+        if (!is_valid_card_holder($cardHolder)) {
+            wc_add_notice( __('Invalid card holder', 'woocommerce'), 'error' );
+            $valid = false;
+        }
+
+        if (!is_valid_cvv($cardCvv)) {
+            wc_add_notice( __('Invalid card code (CVV)', 'woocommerce'), 'error' );
+            $valid = false;
+        }
+
+
+		return $valid;
 
 	}
 
@@ -181,30 +230,69 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {
 
-		// we need it to get any order detailes
+		// we need it to get any order details
 		$order = wc_get_order( $order_id );
 
 		$cboClient = new CBOClient($this->api_url, $this->api_key);
 		try {
-			$checkout = $cboClient->checkout($order, CBOConstants::PAYMENT_TYPE_VISA);
-			CBOLog::debug("Checkout data: " . json_encode($checkout));
+            $cardNumber = $_POST[$this->id . '-card-number'];
+            $cardExpiry = $_POST[$this->id . '-card-expiry'];
+            $cardCvv = $_POST[$this->id . '-card-cvc'];
+            $cardHolder = $_POST[$this->id . '-card-holder'];
 
-			// Mark as on-hold (we're awaiting the cheque)
-			//$order->update_status('on-hold', __( 'Awaiting cheque payment', 'woocommerce' ));
+            $cardNumber = str_replace(" ", "", $cardNumber);
+            $cardExpiry = str_replace(" ", "", $cardExpiry);
 
-			return array(
-				'result' => 'success',
-				'redirect' => $this->api_url . '/checkout/' . $checkout['slug']
-			);
+			$transaction = $cboClient->sale($order, $cardNumber, $cardExpiry, $cardCvv, $cardHolder);
+			CBOLog::debug("Checkout data: " . json_encode($transaction));
+
+            if ($this->validate_payment($transaction)) {
+                return array(
+                    'result' => 'success',
+                    'redirect' => $order->get_checkout_order_received_url()
+                );
+
+            } else if ($transaction['status'] === 'refused') {
+                wc_add_notice(  __('We were unable to complete the payment. Please contact with commerce.', 'woocommerce'), 'error' );
+            } else {
+                wc_add_notice(  __('We were unable to complete the payment. Please check your card details or contact your bank.', 'woocommerce'), 'error' );
+
+            }
 		} catch (\CBOException $e) {
 			if (!$e->isSuccessResponse()) {
 				CBOLog::debug($e->getMessage() . " - " . json_encode($e->getResponse()));
-				wc_add_notice(  'No se ha podido generar el pago. Por favor contacte con el comercio.', 'error' );
+				wc_add_notice(  __('No se ha podido generar el pago. Por favor contacte con el comercio.', 'woocommerce'), 'error' );
 			} else {
-				wc_add_notice(  'No se ha podido procesar el pago. Por favor contacte con el comercio.', 'error' );
+				wc_add_notice(  __('No se ha podido procesar el pago. Por favor contacte con el comercio.', 'woocommerce'), 'error' );
 			}
 		}
 	}
+
+    private function validate_payment($transaction)
+    {
+        global $woocommerce;
+
+        $metas = $transaction['metadatas'];
+        $order_id = $metas['order_id'];
+        $order = wc_get_order( $order_id );
+
+        $status = $transaction['status'];
+        $successStatus = ['authorized', 'notified'];
+        $order->add_meta_data('cbo_bank_code', $transaction['response_code']);
+        $order->add_meta_data('cbo_transaction_id', $transaction['identifier']);
+        $order->add_meta_data('cbo_bank_authorization', $transaction['authorization_number']);
+
+        if (in_array($status, $successStatus)) {
+            $order->update_status('completed', __( 'Payment  completed', 'cbo-payment-gateway' ));
+            $order->payment_complete($transaction['identifier']);
+            $woocommerce->cart->empty_cart();
+            return true;
+        } else {
+            $order->update_status('failed', __( 'Failed payment', 'cbo-payment-gateway' ));
+        }
+
+        return false;
+    }
 
 	public function callback_url() {
 		$order_id = $_GET['oid'];
@@ -225,35 +313,12 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 	 */
 	public function webhook() {
 
-		global $woocommerce;
-
 		$data = json_decode(file_get_contents('php://input'), true);
 		CBOLog::debug("Webhook: Tx #" . $data['identifier'] . ": " . json_encode($data));
 
-		//$client = new CBOClient($this->api_url, $this->api_key);
-
 		try {
 			//$transaction = $client->transaction($data['tid']);
-			$transaction = $data;
-
-
-			$metas = $transaction['metadatas'];
-			$order_id = $metas['order_id'];
-			$order = wc_get_order( $order_id );
-
-			$status = $transaction['status'];
-			$successStatus = ['authorized', 'notified'];
-			$order->add_meta_data('cbo_bank_code', $transaction['response_code']);
-			$order->add_meta_data('cbo_transaction_id', $transaction['identifier']);
-			$order->add_meta_data('cbo_bank_authorization', $transaction['authorization_number']);
-
-			if (in_array($status, $successStatus)) {
-				$order->update_status('completed', __( 'Pago completado', 'woocommerce' ));
-				$order->payment_complete($transaction['identifier']);
-				$woocommerce->cart->empty_cart();
-			} else {
-				$order->update_status('failed', __( 'Pago fallido', 'woocommerce' ));
-			}
+			$validTransaction = $this->validate_payment($data);
 
 			header( 'HTTP/1.1 204 OK' );
 
@@ -262,9 +327,6 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 			header( 'HTTP/1.1 400 Bad Request' );
 
 		}
-
-		return;
-
 	}
 
 	public static function instance() {

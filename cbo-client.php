@@ -144,6 +144,50 @@ class CBOClient {
 		}
 	}
 
+	public function sale(WC_Order $order, $cardNumber, $expiryDate, $cvv, $cardHolder, $metadatas = array()) {
+
+		\CBOLog::debug("Order ID: " . $order->get_id());
+
+		$tax = $order->get_total_tax() * 100;
+		$total = $order->get_total() * 100;
+		$totalWithoutTax = $total - $tax;
+
+        $finalMetadatas = [
+            'entry' => 'e-Commerce',
+            'platform' => 'Woocommerce',
+            'version' => CBOConstants::PLUGIN_VERSION,
+            'order_id' => $order->get_id(),
+            'payment_reference' => $order->get_id(),
+            'source' => get_bloginfo('url')
+        ];
+
+        $finalMetadatas = array_merge($finalMetadatas, $metadatas);
+
+		$body = [
+			'metas' => $finalMetadatas,
+			'tip' => 0,
+			'tax' => $tax,
+			'amount' => $totalWithoutTax,
+			'currency_code' => $order->get_currency(),
+            'pan' => $cardNumber,
+            'exp_date' => $expiryDate,
+            'cvv2' => $cvv,
+            'card_holder' => $cardHolder,
+		];
+
+		/*if ($onlyTelered) {
+			$body['metadatas']['card_brand'] = 'TELERED';
+		}*/
+
+		$response = $this->post('/api/transactions/sale', $body);
+		\CBOLog::debug("Response: " . json_encode($response));
+		if ($response['code'] == 200) {
+			return $response['body']['data'];
+		} else {
+			throw new CBOException('Error processing payment', $response);
+		}
+	}
+
 	/**
 	 * @return mixed
 	 * @throws CBOException
