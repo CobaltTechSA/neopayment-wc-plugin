@@ -195,7 +195,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
         $cardCvv = $_POST[$this->id . '-card-cvc'];
         $cardHolder = $_POST[$this->id . '-card-holder'];
 
-        CBOLog::debug("cardNumber=$cardNumber, cardExpiry=$cardExpiry, cardCvv=$cardCvv, cardHolder=$cardHolder");
+        //CBOLog::debug("cardNumber=$cardNumber, cardExpiry=$cardExpiry, cardCvv=$cardCvv, cardHolder=$cardHolder");
         $valid = true;
 
         $cardNumber = str_replace(" ", "", $cardNumber);
