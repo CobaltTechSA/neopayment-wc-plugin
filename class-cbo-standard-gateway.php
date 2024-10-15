@@ -261,9 +261,9 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 		} catch (\CBOException $e) {
 			if (!$e->isSuccessResponse()) {
 				CBOLog::debug($e->getMessage() . " - " . json_encode($e->getResponse()));
-				wc_add_notice(  __('No se ha podido generar el pago. Por favor contacte con el comercio.', 'cbo-payment-gateway'), 'error' );
+				wc_add_notice(  __('Cannot generate the payment. Please, contact with commerce.', 'cbo-payment-gateway'), 'error' );
 			} else {
-				wc_add_notice(  __('No se ha podido procesar el pago. Por favor contacte con el comercio.', 'cbo-payment-gateway'), 'error' );
+				wc_add_notice(  __('Cannot process the payment. Please, contact with commerce.', 'cbo-payment-gateway'), 'error' );
 			}
 		}
 	}
@@ -283,7 +283,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
         $order->add_meta_data('cbo_bank_authorization', $transaction['authorization_number']);
 
         if (in_array($status, $successStatus)) {
-            $order->update_status('completed', __( 'Payment  completed', 'cbo-payment-gateway' ));
+            $order->update_status('completed', __( 'Payment completed', 'cbo-payment-gateway' ));
             $order->payment_complete($transaction['identifier']);
             $woocommerce->cart->empty_cart();
             return true;
