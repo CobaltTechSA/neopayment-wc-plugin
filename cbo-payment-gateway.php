@@ -44,7 +44,9 @@ class WC_CBO_Loader {
 		// If the environment check fails, initialize the plugin.
 		if ( $this->is_environment_compatible() ) {
 			add_action( 'plugins_loaded', array( $this, 'init_plugin' ) );
-		}
+            add_action( 'init', array($this, 'load_translations' ) );
+
+        }
 	}
 
 	public function __clone() {
@@ -75,6 +77,9 @@ class WC_CBO_Loader {
         cbo_payment_gateway();
 	}
 
+    public function load_translations() {
+        load_plugin_textdomain( 'cbo-payment-gateway', false, basename( dirname( __FILE__ ) ) . '/i18n/' );
+    }
 	/**
 	 * Checks the server environment and other factors and deactivates plugins as necessary.
 	 *
