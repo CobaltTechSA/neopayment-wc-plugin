@@ -1,3 +1,6 @@
+2024.11.23 - version 2.0.0
+ * Adapted for API V2
+
 2024.10.15 - version 1.2.0
  * Added native payments for VISA and Mastercard
  * Added translations
