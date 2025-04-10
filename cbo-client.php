@@ -252,15 +252,6 @@ class CBOClient {
 
 		\CBOLog::debug("Order ID: " . $order->get_id());
 
-		/*$commerceService = $this->commerce();
-		if ($commerceService['status'] !== 'active') {
-			throw new CBOException('Commerce service is not active', $commerceService);
-		}
-		$hasVisaAndMC = $commerceService['merchant_id'];
-		$hasTelered = $commerceService['telered_id'];
-
-		$onlyTelered = $hasTelered && !$hasVisaAndMC;*/
-
 		$tax = $order->get_total_tax() * 100;
 		$total = $order->get_total() * 100;
 		$totalWithoutTax = $total - $tax;
