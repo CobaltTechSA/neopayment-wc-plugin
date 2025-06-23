@@ -1,0 +1,14 @@
+{
+  "name": "cbo-payment-gateway-blocks",
+  "version": "2.0.0",
+  "description": "Blocks integration for CBO payment gateway",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "start": "webpack --watch"
+  },
+  "devDependencies": {
+    "@woocommerce/dependency-extraction-webpack-plugin": "^3.1.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

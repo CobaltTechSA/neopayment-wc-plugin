@@ -15,6 +15,8 @@ include_once 'cbo-logger.php';
 include_once 'cbo-constants.php';
 include_once 'cbo-client.php';
 
+define( 'CBO_PG_PATH', plugin_dir_path( __FILE__ ) );
+define( 'CBO_PG_URL', plugin_dir_url( __FILE__ ) );
 
 class WC_CBO_Loader {
 
@@ -72,6 +74,7 @@ class WC_CBO_Loader {
 
 		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-standard-gateway.php';
 		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-telered-gateway.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-cbo-blocks-support.php';
 
 		// fire it up!
         cbo_payment_gateway();
@@ -397,6 +400,15 @@ function cbo_add_payment_gateway_class( $gateways ) {
  */
 function cbo_payment_gateway() {
     add_filter( 'woocommerce_payment_gateways', 'cbo_add_payment_gateway_class' );
+    add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+            'cart_checkout_blocks',
+            __FILE__,
+            true
+        );
+    }
+	} );
     //return \WC_CBO_Telered_Gateway::instance();
 }
 
