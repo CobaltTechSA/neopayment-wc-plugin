@@ -15,6 +15,8 @@ include_once 'cbo-logger.php';
 include_once 'cbo-constants.php';
 include_once 'cbo-client.php';
 
+define( 'CBO_PG_PATH', plugin_dir_path( __FILE__ ) );
+define( 'CBO_PG_URL', plugin_dir_url( __FILE__ ) );
 
 class WC_CBO_Loader {
 
@@ -72,7 +74,9 @@ class WC_CBO_Loader {
 
 		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-standard-gateway.php';
 		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-telered-gateway.php';
-
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-cbo-blocks-support.php';
+		\CBO\Blocks\CBO_Blocks_Support::init();
+		
 		// fire it up!
         cbo_payment_gateway();
 	}
@@ -396,8 +400,61 @@ function cbo_add_payment_gateway_class( $gateways ) {
  * @return WC_CBO_Telered_Gateway
  */
 function cbo_payment_gateway() {
-    add_filter( 'woocommerce_payment_gateways', 'cbo_add_payment_gateway_class' );
-    //return \WC_CBO_Telered_Gateway::instance();
+    add_filter('woocommerce_payment_gateways', 'cbo_add_payment_gateway_class');
+	add_action('before_woocommerce_init', function () {
+
+		if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+				'cart_checkout_blocks',
+				__FILE__,
+				true
+			);
+		}
+	});
+	/**
+	 * Makes the gateway appear as “supported” in Checkout Blocks.
+	 */
+	add_filter(
+		'woocommerce_blocks_supported_payment_methods',
+		function ($methods) {
+			$methods[] = array(
+				'name'     => 'cbo_standard_gateway',                      
+				'label'    => __('Card (Visa/Mastercard)', 'cbo-payment-gateway'),
+				'supports' => array('products'),                             
+			);
+			return $methods;
+		}
+	);
+
+	/**
+	 * Maps the JS payment method ID to the WC_Payment_Gateway.
+	 */
+	add_filter(
+		'woocommerce_blocks_payment_method_id_to_gateway_mapping',
+		function ($mapping) {
+			$mapping['cbo_standard_gateway'] = 'cbo_standard_gateway';
+			return $mapping;
+		}
+	);
+	/**
+	 * Add the payment method to the list of available payment methods in the Store API.
+	 *   This is required for Checkout Blocks to display the payment method.
+	 */
+	add_filter('woocommerce_store_api_payment_methods', 'cbo_add_payment_gateway_class');
+
+	// Add the gateway ID to the list of payment method IDs
+	add_filter('woocommerce_store_api_payment_method_ids', function ($ids) {
+		$ids[] = 'cbo_standard_gateway';
+		return $ids;
+	});
+
+	add_filter('woocommerce_store_api_payment_method_schema', function ($schema, $method_id) {
+		if ('cbo_standard_gateway' === $method_id) {
+			$schema['supports']['payment_method_options'] = true;
+		}
+		return $schema;
+	}, 10, 2);
+	//return \WC_CBO_Telered_Gateway::instance();
 }
 
 // fire it up!
