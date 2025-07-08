@@ -304,7 +304,7 @@ class CBOClient {
 		$totalWithoutTax = $total - $tax;
 		$body = [
 			'metadatas' => [
-				'entry' => 'e-Commerce',
+				'entry' => get_bloginfo('name') . ' - Plugin Woocommerce v' . CBOConstants::PLUGIN_VERSION,
 				'platform' => 'Woocommerce',
 				'version' => CBOConstants::PLUGIN_VERSION,
 				'order_id' => $order->get_id(),
@@ -344,7 +344,7 @@ class CBOClient {
 		$totalWithoutTax = $total - $tax;
 
         $finalMetadatas = [
-            'entry' => 'e-Commerce',
+            'entry' => get_bloginfo('name') . ' - Plugin Woocommerce v' . CBOConstants::PLUGIN_VERSION,
             'platform' => 'Woocommerce',
             'version' => CBOConstants::PLUGIN_VERSION,
             'order_id' => $order->get_id(),
