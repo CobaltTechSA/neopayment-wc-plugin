@@ -237,7 +237,6 @@ class CBOClient {
         $parseId = (int) $transactionId;
         $id = $parseId - 130000000;
         if ($id <= 0) {
-            \CBOLog::error("ID de transacción inválido: $transactionId");
             throw new CBOException('ID de transacción inválido');
         }
 
@@ -284,6 +283,7 @@ class CBOClient {
 		if ($response['code'] == 200) {
 			return $response['body']['data'];
 		} else {
+            // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new CBOException('Error processing payment', $response);
 		}
 	}
@@ -331,6 +331,7 @@ class CBOClient {
 		if ($response['code'] == 200) {
 			return $response['body']['data'];
 		} else {
+            // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new CBOException('Error processing payment', $response);
 		}
 	}
@@ -376,6 +377,7 @@ class CBOClient {
 		if ($response['code'] == 200) {
 			return $response['body']['data'];
 		} else {
+            // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new CBOException('Error processing payment', $response);
 		}
 	}

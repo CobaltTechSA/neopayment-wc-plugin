@@ -59,8 +59,18 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 	public function get_icon() {
 		$path = plugin_dir_url( __FILE__ );
 		$icons = array(
-			'<img src="' . WC_HTTPS::force_https_url( $path. 'assets/images/visa.svg' ) . '" alt="Visa" />',
-			'<img src="' . WC_HTTPS::force_https_url( $path . 'assets/images/mastercard.svg' ) . '" alt="Mastercard" />',
+			sprintf(
+				'<img class="%s" src="%s" alt="%s" />',
+				esc_attr( 'cbo-gateway-icon' ),
+				esc_url( WC_HTTPS::force_https_url( $path . 'assets/images/visa.svg' ) ),
+				esc_attr__( 'Visa', 'cbo-payment-gateway' )
+			),
+			sprintf(
+				'<img class="%s" src="%s" alt="%s" />',
+				esc_attr( 'cbo-gateway-icon' ),
+				esc_url( WC_HTTPS::force_https_url( $path . 'assets/images/mastercard.svg' ) ),
+				esc_attr__( 'Mastercard', 'cbo-payment-gateway' )
+			),
 		);
 
 		$payIcons = '<div style="vertical-align: middle; display: inline-block; margin-left: 22px">';
@@ -145,7 +155,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
     public function register_plugin_scripts()
     {
         CBOLog::debug("plugin path: " . plugin_dir_url(__FILE__));
-        wp_enqueue_script( 'cbo-standard-payment', plugin_dir_url(__FILE__) . 'assets/js/cbo-payment-script.js', array('jquery'), null, true);
+        wp_enqueue_script( 'cbo-standard-payment', plugin_dir_url(__FILE__) . 'assets/js/cbo-payment-script.js', array('jquery'), CBOConstants::PLUGIN_VERSION, true);
     }
 
     /**
@@ -174,7 +184,7 @@ class WC_CBO_Standard_Gateway extends WC_Payment_Gateway {
 				$this->description  = trim( $this->description );
 			}
 			// display the description with <p> tags etc.
-			echo wpautop( wp_kses_post( $this->description ) );
+			echo wp_kses_post( wpautop( $this->description ) );
 		}
         $this->credit_card_form();
 	}
