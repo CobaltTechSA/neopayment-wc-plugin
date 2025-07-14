@@ -1,3 +1,9 @@
+2025.07.14 - version 2.4.0
+* Show 3DS Challenge on Popup
+* Added support for refunds
+* Deleted support for API v1
+* Added metadata for identify origin
+
 2025.07.3 - version 2.3.1
 * Added support for WordPress block mode
 
