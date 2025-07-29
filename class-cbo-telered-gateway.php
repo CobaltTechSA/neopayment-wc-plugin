@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 include_once 'cbo-constants.php';
-class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
+class CBOPAGA_Telered_Gateway extends WC_Payment_Gateway {
 
 	protected static $instance;
 
@@ -10,7 +10,7 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 
-		$this->id = CBOConstants::TELERED_GATEWAY_ID; // payment gateway plugin ID
+		$this->id = CBOPAGA_Constants::TELERED_GATEWAY_ID; // payment gateway plugin ID
 		$this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
 		$this->has_fields = false; // in case you need a custom credit card form
 		$this->method_title = 'CBO Clave Gateway';
@@ -196,11 +196,11 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 		// we need it to get any order detailes
 		$order = wc_get_order( $order_id );
 
-        CBOLog::debug("api_client_id=$this->api_client_id, api_client_secret=$this->api_client_secret");
-        $cboClient = new CBOClient($this->api_url, $this->api_client_id, $this->api_client_secret);
+        CBOPAGA_Log::debug("api_client_id=$this->api_client_id, api_client_secret=$this->api_client_secret");
+        $cboClient = new CBOPAGA_Client($this->api_url, $this->api_client_id, $this->api_client_secret);
 		try {
-			$checkout = $cboClient->checkout($order, CBOConstants::PAYMENT_TYPE_TELERED);
-			CBOLog::debug("Checkout data: " . json_encode($checkout));
+			$checkout = $cboClient->checkout($order, CBOPAGA_Constants::PAYMENT_TYPE_TELERED);
+			CBOPAGA_Log::debug("Checkout data: " . json_encode($checkout));
 
 			// Mark as on-hold (we're awaiting the cheque)
 			//$order->update_status('on-hold', __( 'Awaiting cheque payment', 'woocommerce' ));
@@ -209,9 +209,9 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 				'result' => 'success',
 				'redirect' => $this->api_url . '/checkout/' . $checkout['slug']
 			);
-		} catch (\CBOException $e) {
+		} catch (\CBOPAGA_Exception $e) {
 			if (!$e->isSuccessResponse()) {
-				CBOLog::debug($e->getMessage() . " - " . json_encode($e->getResponse()));
+				CBOPAGA_Log::debug($e->getMessage() . " - " . json_encode($e->getResponse()));
 				wc_add_notice(  'No se ha podido generar el pago. Por favor contacte con el comercio.', 'error' );
 			} else {
 				wc_add_notice(  'No se ha podido procesar el pago. Por favor contacte con el comercio.', 'error' );
@@ -222,7 +222,7 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 	public function callback_url() {
 		$order_id = isset($_GET['oid']) ? absint($_GET['oid']) : 0;
 
-		// CBOLog::debug("callback_url: " . $order_id);
+		// CBOPAGA_Log::debug("callback_url: " . $order_id);
 
 		$order = wc_get_order( $order_id );
 		
@@ -250,9 +250,9 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 
 		$data = json_decode(file_get_contents('php://input'), true);
     	$data = is_array($data) ? array_map('sanitize_text_field', $data) : [];
-		CBOLog::debug("Webhook: Tx #" . $data['identifier'] . ": " . json_encode($data));
+		CBOPAGA_Log::debug("Webhook: Tx #" . $data['identifier'] . ": " . json_encode($data));
 
-		//$client = new CBOClient($this->api_url);
+		//$client = new CBOPAGA_Client($this->api_url);
 
 		try {
         $transaction = $data;
@@ -264,9 +264,9 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
         $successStatus = ['authorized', 'notified'];
 
         if ($order) {
-            $order->add_meta_data('cbo_bank_code', $transaction['response_code'] ?? '');
-            $order->add_meta_data('cbo_transaction_id', $transaction['identifier'] ?? '');
-            $order->add_meta_data('cbo_bank_authorization', $transaction['authorization_number'] ?? '');
+            $order->add_meta_data('cbopg_bank_code', $transaction['response_code'] ?? '');
+            $order->add_meta_data('cbopg_transaction_id', $transaction['identifier'] ?? '');
+            $order->add_meta_data('cbopg_bank_authorization', $transaction['authorization_number'] ?? '');
 
             if (in_array($status, $successStatus)) {
                 $order->update_status('completed', __('Pago completado', 'cbo-payment-gateway'));
@@ -279,8 +279,8 @@ class WC_CBO_Telered_Gateway extends WC_Payment_Gateway {
 
         header('HTTP/1.1 204 OK');
 
-    } catch (\CBOException $e) {
-        CBOLog::debug("Error getting transaction " . ($data['tid'] ?? '') . ' - ' . $e->getMessage());
+    } catch (\CBOPAGA_Exception $e) {
+        CBOPAGA_Log::debug("Error getting transaction " . ($data['tid'] ?? '') . ' - ' . $e->getMessage());
         header('HTTP/1.1 400 Bad Request');
     }
 
