@@ -65,7 +65,7 @@ class CBOPAGA_Standard_Gateway extends WC_Payment_Gateway {
 	public function process_admin_options() {
 		if ( ! isset( $_POST['cbopaga_standard_nonce'] ) || 
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['cbopaga_standard_nonce'] ) ), 'cbopaga_standard_save_settings' ) ) {
-			wp_die(esc_html__( 'Acción no autorizada.', 'cbo-payment-gateway' ), esc_html__( 'Error de seguridad', 'cbo-payment-gateway' ), 403);
+			wp_die(esc_html__( 'Unauthorized action.', 'cbo-payment-gateway' ), esc_html__( 'Security Error', 'cbo-payment-gateway' ), 403);
 		}
 		parent::process_admin_options();
 	}
@@ -342,7 +342,7 @@ class CBOPAGA_Standard_Gateway extends WC_Payment_Gateway {
 	{
 		if ( ! isset( $_REQUEST['security'] ) || ! check_ajax_referer( 'order-item', 'security', false ) ) {
 			CBOPAGA_Log::debug("Refund rechazado: nonce inválido o ausente");
-			return new WP_Error('invalid_nonce', __('Acción no autorizada.', 'cbo-payment-gateway'));
+			return new WP_Error('invalid_nonce', __('Acción no autorizada.', 'woocommerce'));
 		}
 
 		//CBOPAGA_Log::debug("api_client_id={$this->api_client_id}, api_client_secret={$this->api_client_secret}");

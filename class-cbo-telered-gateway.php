@@ -57,7 +57,7 @@ class CBOPAGA_Telered_Gateway extends WC_Payment_Gateway {
 	public function process_admin_options() {
 		if ( ! isset( $_POST['cbopaga_telered_nonce'] ) || 
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['cbopaga_telered_nonce'] ) ), 'cbopaga_telered_save_settings' ) ) {
-			wp_die(esc_html__( 'Acción no autorizada.', 'cbo-payment-gateway' ), esc_html__( 'Error de seguridad', 'cbo-payment-gateway' ), 403);
+			wp_die(esc_html__( 'Unauthorized action.', 'cbo-payment-gateway' ), esc_html__( 'Security Error', 'cbo-payment-gateway' ), 403);
 		}
 		parent::process_admin_options();
 	}
