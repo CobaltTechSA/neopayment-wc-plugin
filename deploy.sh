@@ -12,7 +12,7 @@ if [ ! -d "$DEPLOY_DIR" ]; then
   mkdir -p $DEPLOY_DIR
 fi
 
-rsync -av --exclude='deploy' --exclude='.git' --exclude='.idea' --exclude='localfiles' --exclude='deploy.sh' ./ $DEPLOY_DIR
+rsync -av --exclude='.gitignore' --exclude='deploy' --exclude='.git' --exclude='.idea' --exclude='localfiles' --exclude='node_modules' --exclude='deploy.sh' ./ $DEPLOY_DIR
 
 cd $DEPLOY_DIR/..
 
