@@ -12,7 +12,7 @@ import {
 
 const Label = ({ label }) => (
   <div className="cbo-payment-label">
-    <span>{ __( 'Card (Visa/Mastercard)', 'cbo-payment-gateway' ) }</span>
+    <span>{ __( 'Card (Visa/Mastercard)', 'class-cbopaga-payment-gateway' ) }</span>
     <div className="cbo-payment-label__icons">
       <img
         src={ visaUrl }
@@ -50,49 +50,49 @@ function PaymentMethod({
   shippingAddress = {},
 }) {
   const [cardData, setCardData] = useState({
-    cardNumber: '', cardExpiry: '', cardCvc: '', cardHolder: ''
+    card_number: '', card_expiry: '', card_cvc: '', card_holder: ''
   });
 
   useEffect(() => {
     const unsubscribe = eventRegistration.onPaymentSetup(() => {
 
-      const rawNumber = cardData.cardNumber;
+      const rawNumber = cardData.card_number;
       const cleanNumber = rawNumber.replace(/\s+/g, '');
-      const { cardNumber, cardExpiry, cardCvc, cardHolder } = cardData;
+      const { card_number, card_expiry, card_cvc, card_holder } = cardData;
 
       // validate card data
-      if (!validateLuhn(cardNumber)) {
+      if (!validateLuhn(card_number)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid card number', 'cbo-payment-gateway'),
+          message: __('Invalid card number', 'class-cbopaga-payment-gateway'),
         };
       }
-      if (!validateExpiry(cardExpiry)) {
+      if (!validateExpiry(card_expiry)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid date', 'cbo-payment-gateway'),
+          message: __('Invalid date', 'class-cbopaga-payment-gateway'),
         };
       }
-      if (!validateCvc(cardCvc)) {
+      if (!validateCvc(card_cvc)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid CVC', 'cbo-payment-gateway'),
+          message: __('Invalid CVC', 'class-cbopaga-payment-gateway'),
         };
       }
-      if (!cardHolder) {
+      if (!card_holder) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Holder name is required', 'cbo-payment-gateway'),
+          message: __('Holder name is required', 'class-cbopaga-payment-gateway'),
         };
       }
       return {
         type: emitResponse.responseTypes.SUCCESS,
         meta: {
           paymentMethodData: {
-            cardNumber: cleanNumber,
-            cardExpiry,
-            cardCvc,
-            cardHolder,
+            card_number: cleanNumber,
+            card_expiry,
+            card_cvc,
+            card_holder,
             ...getBrowserData(),
           },
         },
@@ -106,7 +106,7 @@ function PaymentMethod({
 registerPaymentMethod({
   name: 'cbopaga_standard_gateway',
   label: <Label />,
-  ariaLabel: __('CBO Standard Gateway', 'cbo-payment-gateway'),
+  ariaLabel: __('CBO Standard Gateway', 'class-cbopaga-payment-gateway'),
   canMakePayment: () => true,
   content: <PaymentMethod />,
   edit: <PaymentMethod />,

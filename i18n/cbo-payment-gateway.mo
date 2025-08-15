@@ -1,15 +1,0 @@
-Þ•          ä   %   ¬      @  -   A  ;   o  :   «     æ     ò     þ          *     9     H     \  %   p     –  (   ¨  ;   Ñ     
-           3     E     R  	   _  B   i  <   ¬     é  m  ï  -   ]  ;   ‹  :   Ç                    5     F     U     d     x  %   Œ     ²  (   Ä  ;   í     )     <     O     a     n  	   {  B   …  <   È     	                                     
-                        
-   	                                                              Acceptance of payments with Visa / Mastercard Cannot generate the payment. Please, contact with commerce. Cannot process the payment. Please, contact with commerce. Card holder Description Enable CBO Payment Gateway Enable Test Mode Enable/Disable Failed payment Invalid card number Invalid expiry date Pay with your VISA or Mastercard card Payment completed Payments with VISA, MasterCard and Clave Place the payment gateway in test mode using test API keys. Production API Key Production API URL TEST MODE ENABLED Test API Key Test API URL Test mode This controls the description which the user sees during checkout. This controls the title which the user sees during checkout. Title Project-Id-Version: CBO Payment Gateway 1.1.0
-Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cobalt-plugin-woocommerce
-PO-Revision-Date: 2024-10-09 14:59-0500
-Last-Translator: 
-Language-Team: 
-Language: en_US
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-Generator: Poedit 3.5
-X-Domain: cbo-payment-gateway
- Acceptance of payments with Visa / Mastercard Cannot generate the payment. Please, contact with commerce. Cannot process the payment. Please, contact with commerce. Card holder Description Enable CBO Payment Gateway Enable Test Mode Enable/Disable Failed payment Invalid card number Invalid expiry date Pay with your VISA or Mastercard card Payment completed Payments with VISA, MasterCard and Clave Place the payment gateway in test mode using test API keys. Production API Key Production API URL TEST MODE ENABLED Test API Key Test API URL Test mode This controls the description which the user sees during checkout. This controls the title which the user sees during checkout. Title 

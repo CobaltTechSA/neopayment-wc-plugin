@@ -1,149 +1,146 @@
-jQuery(($) => {
+const __ = (window.wp && window.wp.i18n && window.wp.i18n.__)
+  ? window.wp.i18n.__
+  : (s) => s;
 
-  const POPUP_WIDTH  = 400;
+jQuery(($) => {
+  const POPUP_WIDTH = 400;
   const POPUP_HEIGHT = 600;
+  const openedOrders = new Set();
 
   function testPopupEnabled() {
     const w = window.open('', '_blank', 'width=100,height=100');
     if (!w) {
-      alert('Por favor, habilita las ventanas emergentes en tu navegador e inténtalo de nuevo.');
+      alert(__('Habilite las ventanas emergentes en su navegador y vuelva a intentarlo.', 'class-cbopaga-payment-gateway'));
       return false;
     }
     w.close();
     return true;
   }
 
-  $(document).on('click', 'button[name="woocommerce_checkout_place_order"]', function (e) {
-    $('.woocommerce-notices-wrapper').empty();
-    if (!testPopupEnabled()) {
-      e.preventDefault();
-      return false;
-    }
-  });
+  function handlePopupEvents() {
+    $(document).on('click', 'button[name="woocommerce_checkout_place_order"], .wc-block-components-checkout__button button', function (e) {
+      if (!testPopupEnabled()) {
+        e.preventDefault();
+        return false;
+      }
+    });
 
-  $(document).on('click', 'button[name="woocommerce_checkout_place_order"]', function (e) {
-    if (!testPopupEnabled()) {
-      e.preventDefault();
-      return false;
-    }
-  });
-
-  $(document).on('click', '.wc-block-components-checkout__button button', function (e) {
-    if (!testPopupEnabled()) {
-      e.preventDefault();
-      return false;
-    }
-  });
-
-  let popup;
-  let popupMonitor;
-
-  // checkout classic
-  $(document).ajaxComplete((e, xhr, settings) => {
-    if (settings.url.includes('wc-ajax=checkout')) {
-      _handleResponse(_parseJSON(xhr.responseText));
-    }
-  });
-
-  // checkout block
-  if (window.fetch) {
-    const _origFetch = window.fetch;
-    window.fetch = function (input, init) {
-      return _origFetch(input, init).then(response => {
-        const url = typeof input === 'string' ? input : input.url;
-        const isStoreCheckout = url.includes('/wc/store/v1/checkout');
-        const contentType = response.headers.get('content-type') || '';
-        if (isStoreCheckout && contentType.includes('application/json')) {
-          response.clone().json()
-            .then(json => _handleResponse(json))
-            .catch(() => { });
+    // AJAX for classic checkout.
+    $(document).ajaxComplete((e, xhr, settings) => {
+      if (settings.url.includes('wc-ajax=checkout')) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          handleCheckoutResponse(response);
+        } catch (error) {
+          console.error('[CBO-3DS] Error parsing AJAX response:', error);
         }
-        return response;
-      });
-    };
-  }
+      }
+    });
 
-  function _parseJSON(text) {
-    try {
-      return JSON.parse(text);
-    } catch {
-      return {};
+    // Intercept fetch (checkout by blocks).
+    if (window.fetch) {
+      const originalFetch = window.fetch;
+      window.fetch = async function (input, init) {
+        const response = await originalFetch(input, init);
+        const url = typeof input === 'string' ? input : input.url;
+
+        if (url.includes('/wc/store/v1/checkout')) {
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            try {
+              const json = await response.clone().json();
+              handleCheckoutResponse(json);
+            } catch (error) {
+              console.error('[CBO-3DS] Error parsing fetch response:', error);
+            }
+          }
+        }
+
+        return response;
+      };
     }
   }
 
-  function _handleResponse(res) {
-    // classic checkout
-    if (res.requires_challenge && res.challenge_url) {
-      _openPopup(res.challenge_url);
+  function handleCheckoutResponse(response) {
+    const orderId = response.order_id ?? response.payment_result?.order_id ?? null;
+    if (orderId && openedOrders.has(orderId)) {
+      console.warn('[CBO-3DS] This order_id has already been processed:', orderId);
+      return;
+    }
+    if (orderId) {
+      openedOrders.add(orderId);
+    }
+
+    // Classic checkout.
+    if (response.requires_challenge && response.challenge_url) {
+      open3DSPopup(response.challenge_url);
       return;
     }
 
-    // checkout block
-    if (res.payment_result && Array.isArray(res.payment_result.payment_details)) {
-      const details = res.payment_result.payment_details.reduce((acc, { key, value }) => {
+    // Checkout blocks.
+    if (response.payment_result?.payment_details) {
+      const details = response.payment_result.payment_details.reduce((acc, { key, value }) => {
         acc[key] = value;
         return acc;
       }, {});
+
       if (details.requires_challenge === '1' && details.challenge_url) {
-        _openPopup(details.challenge_url);
+        open3DSPopup(details.challenge_url);
         return;
       }
-      if (details.redirect && details.redirect) {
+
+      if (details.redirect) {
         window.location.href = details.redirect;
         return;
       }
     }
 
-    // fallback if no challenge 
-    if (res.result === 'success' && res.redirect) {
-      window.location.href = res.redirect;
+    if (response.result === 'success' && response.redirect) {
+      window.location.href = response.redirect;
     }
   }
 
-  function _openPopup(url) {
-    popup = window.open('', '_blank', `width=${POPUP_WIDTH},height=${POPUP_HEIGHT}`);
-    popup.location = url;
-    let popupClosed = false;
+  function open3DSPopup(url) {
+    const popup = window.open(url, '_blank', `width=${POPUP_WIDTH},height=${POPUP_HEIGHT}`);
+    if (!popup) {
+      console.warn('[CBO-3DS] The browser blocked the popup.');
+       showPopupWarning(
+        __( 'Error', 'class-cbopaga-payment-gateway' ),
+        __( 'No se pudo abrir la ventana emergente. Active las ventanas emergentes en su navegador y vuelva a intentarlo.', 'class-cbopaga-payment-gateway' )
+      );
+    }
+  }
 
-  popupMonitor = setInterval(function () {
-  if (popup && popup.closed && !popupClosed) {
-    popupClosed = true;
-    clearInterval(popupMonitor);
-    
-    swal({
-      title: 'Autenticación Cancelada',
-      text: 'Cerraste la ventana emergente antes de completar la autenticación. Por favor inténtalo de nuevo.',
-      icon: 'warning',
-      button: 'Entendido'
-    }).then(() => {
+  function showPopupWarning(title, text) {
+    console.warn(`[CBO-3DS] ${title}: ${text}`);
+    if (typeof swal === 'function') {
+        window.swal({ title, text, icon: 'warning', button: __( 'Entendido', 'class-cbopaga-payment-gateway' ) }).then(() => {
+        location.reload();
+      });
+    } else {
+      alert(`${title}\n\n${text}`);
       location.reload();
+    }
+  }
+
+  function initMessageHandler() {
+    window.addEventListener('message', (event) => {
+      if (!event.data?.cbo3ds) return;
+
+      if (event.data.cbo3ds === 'success') {
+        window.location.href = event.data.redirect_to || window.location.href;
+      } else {
+        console.warn('[CBO-3DS] Authentication failed.');
+        showPopupWarning(
+          __( 'Error de autenticación', 'class-cbopaga-payment-gateway' ),
+          __( 'Inténtelo nuevamente y mantenga la ventana emergente activa.', 'class-cbopaga-payment-gateway' )
+        );
+      }
     });
   }
-}, 500);
-  }
 
-window.addEventListener('message', function(event) {
-  if (event.origin !== window.location.origin) return;
-  
-  if (!event.data || !event.data.cbo3ds) return;
-
-   if (popupMonitor) {
-    clearInterval(popupMonitor);
-    popupMonitor = undefined;
-  }
-
-  if (event.data.cbo3ds === 'success') {
-    window.location.href = event.data.redirect_to || window.location.href;
-  } else {
-    swal({
-      title: 'Autenticación Fallida',
-      text: 'Por favor inténtalo de nuevo. Mantén la ventana emergente activa.',
-      icon: 'warning',
-      button: 'Entendido'
-    }).then(() => {
-      location.reload();
-    });
-  }
+  $(document).ready(() => {
+    handlePopupEvents();
+    initMessageHandler();
+  });
 });
-});
-

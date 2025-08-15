@@ -8,10 +8,10 @@ import {
 } from '../../includes/validators';
 
 const CardFields = ({ onChange }) => {
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [cardHolder, setCardHolder] = useState('');
+  const [card_number, setcard_number] = useState('');
+  const [card_expiry, setcard_expiry] = useState('');
+  const [card_cvc, setcard_cvc] = useState('');
+  const [card_holder, setcard_holder] = useState('');
 
   const [errors, setErrors] = useState({
     number: false,
@@ -29,10 +29,10 @@ const CardFields = ({ onChange }) => {
 
   useEffect(() => {
     const result = validateCard({
-      number: cardNumber,
-      expiry: cardExpiry,
-      cvc: cardCvc,
-      holder: cardHolder,
+      number: card_number,
+      expiry: card_expiry,
+      cvc: card_cvc,
+      holder: card_holder,
     });
 
     setErrors({
@@ -43,59 +43,59 @@ const CardFields = ({ onChange }) => {
     });
 
     onChange({
-      cardNumber,
-      cardExpiry,
-      cardCvc,
-      cardHolder,
+      card_number,
+      card_expiry,
+      card_cvc,
+      card_holder,
       isValid: Object.values(result).every(v => v),
     });
-  }, [cardNumber, cardExpiry, cardCvc, cardHolder, onChange]);
+  }, [card_number, card_expiry, card_cvc, card_holder, onChange]);
 
   return (
     <div className="cbo-card-fields">
-      {/* Titular */}
+      {/* Holde Name */}
       <div className="cbo-card-fields__group">
         <label>
-          {__('Card holder', 'cbo-payment-gateway')}<span class="required">*</span>
+          {__('Card holder', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
         </label>
         <input
-          id="cardHolder"
+          id="card_holder"
           type="text"
-          placeholder={__('Full name', 'cbo-payment-gateway')}
+          placeholder={__('Full name', 'class-cbopaga-payment-gateway')}
           maxLength="50"
-          value={cardHolder}
-          onChange={e => setCardHolder(e.target.value)}
+          value={card_holder}
+          onChange={e => setcard_holder(e.target.value)}
           aria-invalid={errors.holder}
           required
         />
         {errors.holder && (
           <small className="cbo-card-fields__error">
-            {__('You must enter the holder name', 'cbo-payment-gateway')}
+            {__('You must enter the holder name', 'class-cbopaga-payment-gateway')}
           </small>
         )}
       </div>
-      {/* Número de tarjeta */}
+      {/* Card Number */}
       <div className="cbo-card-fields__group">
         <label>
-          {__('Card number', 'cbo-payment-gateway')}<span class="required">*</span>
+          {__('Card number', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
         </label>
         <input
-          id="cardNumber"
+          id="card_number"
           type="text"
           placeholder="1234 1234 1234 1234"
           maxLength="19"
-          value={cardNumber}
+          value={card_number}
           onBlur={() => setTouched(t => ({ ...t, number: true }))}
           onChange={e => {
             const digits = e.target.value.replace(/\D/g, '').slice(0, 16);
-            setCardNumber(digits.match(/.{1,4}/g)?.join(' ') || digits);
+            setcard_number(digits.match(/.{1,4}/g)?.join(' ') || digits);
           }}
           aria-invalid={errors.number}
           required
         />
         {errors.number && touched.number && (
           <small className="cbo-card-fields__error">
-            {__('Invalid card number', 'cbo-payment-gateway')}
+            {__('Invalid card number', 'class-cbopaga-payment-gateway')}
           </small>
         )}
       </div>
@@ -104,17 +104,17 @@ const CardFields = ({ onChange }) => {
       <div className="cbo-card-fields__row">
         <div className="cbo-card-fields__group">
           <label>
-            {__('Expiration date', 'cbo-payment-gateway')}<span class="required">*</span>
+            {__('Expiration date', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
           </label>
           <input
-            id="cardExpiry"
+            id="card_expiry"
             type="text"
-            placeholder={__('MM/YY', 'cbo-payment-gateway')}
-            value={cardExpiry}
+            placeholder={__('MM/YY', 'class-cbopaga-payment-gateway')}
+            value={card_expiry}
             onBlur={() => setTouched(t => ({ ...t, expiry: true }))}
             onChange={e => {
               const formatted = formatExpiry(e.target.value);
-              setCardExpiry(formatted);
+              setcard_expiry(formatted);
               if (formatted.length === 5) {
                 setTouched(t => ({ ...t, expiry: true }));
               }
@@ -124,28 +124,28 @@ const CardFields = ({ onChange }) => {
           />
           {errors.expiry && touched.expiry && (
             <small className="cbo-card-fields__error">
-              {__('Invalid date', 'cbo-payment-gateway')}
+              {__('Invalid date', 'class-cbopaga-payment-gateway')}
             </small>
           )}
         </div>
 
         <div className="cbo-card-fields__group">
           <label>
-            {__('CVC', 'cbo-payment-gateway')}<span class="required">*</span>
+            {__('CVC', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
           </label>
           <input
-            id="cardCvc"
+            id="card_cvc"
             type="password"
             placeholder="123"
-            value={cardCvc}
+            value={card_cvc}
             onBlur={() => setTouched(t => ({ ...t, cvc: true }))}
-            onChange={e => setCardCvc(formatCvc(e.target.value))}
+            onChange={e => setcard_cvc(formatCvc(e.target.value))}
             aria-invalid={errors.cvc}
             required
           />
           {errors.cvc && touched.cvc && (
             <small className="cbo-card-fields__error">
-              {__('Invalid CVC', 'cbo-payment-gateway')}
+              {__('Invalid CVC', 'class-cbopaga-payment-gateway')}
             </small>
           )}
         </div>

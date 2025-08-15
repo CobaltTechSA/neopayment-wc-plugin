@@ -1,6 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
-/*
+/**
  * Plugin Name: CBO Payment Gateway
  * Plugin URI: https://cobalt.tech/plugins/wc
  * Description: Payments with VISA, MasterCard and Clave
@@ -8,23 +7,34 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Author URI: https://cobalt.tech
  * Version: 2.4.1
  * License:     GPL-2.0
- * Text Domain: cbo-payment-gateway
+ * Text Domain: class-cbopaga-payment-gateway
  * Domain Path: /i18n
+ *
+ * @package CBO_Payment_Gateway
  */
 
-include_once 'cbo-logger.php';
-include_once 'cbo-constants.php';
-include_once 'cbo-client.php';
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
+require_once 'class-cbopaga-log.php';
+require_once 'class-cbopaga-constants.php';
+require_once 'class-cbopaga-client.php';
+
+
+// Constants.
 define( 'CBOPAGA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CBOPAGA_URL', plugin_dir_url( __FILE__ ) );
 
-class CBOPAGA_Loader {
+/**
+ * Handles WooCommerce plugin for the payment gateway.
+ */
+class CBOPAGA_Payment_Gateway {
 
 	/**
 	 * This class instance.
 	 *
-	 * @var \CBOPAGA_Loader single instance of this class.
+	 * @var \CBOPAGA_Payment_Gateway single instance of this class.
 	 */
 	private static $instance;
 
@@ -35,6 +45,9 @@ class CBOPAGA_Loader {
 	 */
 	private $notices = array();
 
+	/**
+	 * Class constructor.
+	 */
 	protected function __construct() {
 
 		register_activation_hook( __FILE__, array( $this, 'activation_check' ) );
@@ -47,23 +60,28 @@ class CBOPAGA_Loader {
 		// If the environment check fails, initialize the plugin.
 		if ( $this->is_environment_compatible() ) {
 			add_action( 'plugins_loaded', array( $this, 'init_plugin' ) );
-        }
+		}
 	}
 
+	/**
+	 * Clone function.
+	 */
 	public function __clone() {
 
-		_doing_it_wrong( __FUNCTION__, sprintf( 'No se puede clonar instancias de %s.', esc_html( get_class( $this ) )), '1.10.0' );
+		_doing_it_wrong( __FUNCTION__, sprintf( 'No se puede clonar instancias de %s.', esc_html( get_class( $this ) ) ), '1.10.0' );
 	}
 
+	/**
+	 * Wakeup function.
+	 */
 	public function __wakeup() {
 
-		_doing_it_wrong( __FUNCTION__, sprintf( 'No se pueden deserializar instancias de %s.', esc_html( get_class( $this ) )), '1.10.0' );
+		_doing_it_wrong( __FUNCTION__, sprintf( 'No se pueden deserializar instancias de %s.', esc_html( get_class( $this ) ) ), '1.10.0' );
 	}
 
 
 	/**
 	 * Initializes the plugin.
-	 *
 	 */
 	public function init_plugin() {
 
@@ -71,13 +89,99 @@ class CBOPAGA_Loader {
 			return;
 		}
 
-		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-standard-gateway.php';
-		require_once plugin_dir_path( __FILE__ ) . 'class-cbo-telered-gateway.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-cbo-blocks-support.php';
+		require_once plugin_dir_path( __FILE__ ) . 'class-cbopaga-standard-gateway.php';
+		require_once plugin_dir_path( __FILE__ ) . 'class-cbopaga-telered-gateway.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-cbopaga-blocks-support.php';
 		\CBO\Blocks\CBOPAGA_Blocks_Support::init();
-		
+
 		// fire it up!
-        cbopaga_payment_gateway();
+		add_action( 'plugins_loaded', array( $this, 'cbopaga_payment_gateway' ), 11 );
+	}
+
+	/**
+	 * Register payment methods, declare block compatibility, and support Store API filters.
+	 */
+	public function cbopaga_payment_gateway() {
+		if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+			return; // WooCommerce is not ready.
+		}
+
+		// Gateway Class.
+		require_once plugin_dir_path( __FILE__ ) . 'class-cbopaga-standard-gateway.php';
+		require_once plugin_dir_path( __FILE__ ) . 'class-cbopaga-telered-gateway.php';
+
+		// Add gateways to Woo.
+		add_filter(
+			'woocommerce_payment_gateways',
+			function ( $methods ) {
+				$methods[] = 'CBOPAGA_Standard_Gateway';
+				$methods[] = 'CBOPAGA_Telered_Gateway';
+				return $methods;
+			}
+		);
+
+		// Block compatibility.
+		add_action(
+			'before_woocommerce_init',
+			function () {
+				if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+					\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+						'cart_checkout_blocks',
+						__FILE__,
+						true
+					);
+				}
+			}
+		);
+
+		// Add gateway to block.
+		add_filter(
+			'woocommerce_blocks_supported_payment_methods',
+			function ( $methods ) {
+				$methods[] = array(
+					'name'     => 'cbopaga_standard_gateway',
+					'label'    => __( 'Card (Visa/Mastercard)', 'class-cbopaga-payment-gateway' ),
+					'supports' => array( 'products', 'refunds' ),
+				);
+				return $methods;
+			}
+		);
+
+		add_filter(
+			'woocommerce_blocks_payment_method_id_to_gateway_mapping',
+			function ( $mapping ) {
+				$mapping['cbopaga_standard_gateway'] = 'cbopaga_standard_gateway';
+				return $mapping;
+			}
+		);
+
+		add_filter(
+			'woocommerce_store_api_payment_methods',
+			function ( $gateways ) {
+				$gateways[] = 'CBOPAGA_Standard_Gateway';
+				return $gateways;
+			}
+		);
+
+		add_filter(
+			'woocommerce_store_api_payment_method_ids',
+			function ( $ids ) {
+				$ids[] = 'cbopaga_standard_gateway';
+				return $ids;
+			}
+		);
+
+		add_filter(
+			'woocommerce_store_api_payment_method_schema',
+			function ( $schema, $method_id ) {
+				if ( 'cbopaga_standard_gateway' === $method_id ) {
+					$schema['supports']['payment_method_options'] = true;
+				}
+				return $schema;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -91,7 +195,7 @@ class CBOPAGA_Loader {
 
 			$this->deactivate_plugin();
 
-			wp_die(  esc_html( CBOPAGA_Constants::PLUGIN_NAME ). ' no se puede activar. ' . esc_html( $this->get_environment_message() ) );
+			wp_die( esc_html( CBOPAGA_Constants::PLUGIN_NAME ) . ' no se puede activar. ' . esc_html( $this->get_environment_message() ) );
 		}
 	}
 
@@ -126,7 +230,7 @@ class CBOPAGA_Loader {
 					'error',
 					sprintf(
 					/* translators: %1$s - plugin name, %2$s - minimum WordPress version required, %3$s - update WordPress link open, %4$s - update WordPress link close */
-						esc_html__( '%1$s requiere WordPress %2$s or higher. Porfavor %3$sactualiza WordPress &raquo;%4$s', 'cbo-payment-gateway' ),
+						esc_html__( '%1$s requiere WordPress %2$s or higher. Porfavor %3$sactualiza WordPress &raquo;%4$s', 'class-cbopaga-payment-gateway' ),
 						'<strong>' . CBOPAGA_Constants::PLUGIN_NAME . '</strong>',
 						CBOPAGA_Constants::MINIMUM_WP_VERSION,
 						'<a href="' . esc_url( admin_url( 'update-core.php' ) ) . '">',
@@ -152,7 +256,7 @@ class CBOPAGA_Loader {
 					$activation_url = wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . $plugin . '&amp;plugin_status=all&amp;paged=1&amp;s', 'activate-plugin_' . $plugin );
 					$message        = sprintf(
 					/* translators: %1$s - Plugin Name, %2$s - activate WooCommerce link open, %3$s - activate WooCommerce link close. */
-						esc_html__( '%1$s requiere que WooCommerce esté activado. Por favor %2$sactiva WooCommerce%3$s.', 'cbo-payment-gateway' ),
+						esc_html__( '%1$s requiere que WooCommerce esté activado. Por favor %2$sactiva WooCommerce%3$s.', 'class-cbopaga-payment-gateway' ),
 						'<strong>' . CBOPAGA_Constants::PLUGIN_NAME . '</strong>',
 						'<a href="' . esc_url( $activation_url ) . '">',
 						'</a>'
@@ -163,23 +267,21 @@ class CBOPAGA_Loader {
 						$message
 					);
 				}
-			} else {
-				// WooCommerce is not installed. Ask the user to install WooCommerce.
-				if ( current_user_can( 'install_plugins' ) ) {
-					$install_url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=woocommerce' ), 'install-plugin_woocommerce' );
-					$message     = sprintf(
+			} elseif ( current_user_can( 'install_plugins' ) ) {
+				// WooCommerce is not installed. Request installation.
+				$install_url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=woocommerce' ), 'install-plugin_woocommerce' );
+				$message     = sprintf(
 					/* translators: %1$s - Plugin Name, %2$s - install WooCommerce link open, %3$s - install WooCommerce link close. */
-						esc_html__( '%1$s requiere que WooCommerce esté instalado y activado. por favor, %2$sinstala WooCommerce%3$s.', 'cbo-payment-gateway' ),
-						'<strong>' . CBOPAGA_Constants::PLUGIN_NAME . '</strong>',
-						'<a href="' . esc_url( $install_url ) . '">',
-						'</a>'
-					);
-					$this->add_admin_notice(
-						'install_woocommerce',
-						'error',
-						$message
-					);
-				}
+					esc_html__( '%1$s requiere que WooCommerce esté instalado y activado. por favor, %2$sinstala WooCommerce%3$s.', 'class-cbopaga-payment-gateway' ),
+					'<strong>' . CBOPAGA_Constants::PLUGIN_NAME . '</strong>',
+					'<a href="' . esc_url( $install_url ) . '">',
+					'</a>'
+				);
+				$this->add_admin_notice(
+					'install_woocommerce',
+					'error',
+					$message
+				);
 			}
 		} elseif ( ! $this->is_wc_compatible() ) { // If WooCommerce is activated, check for the version.
 			if ( current_user_can( 'update_plugins' ) ) {
@@ -189,7 +291,7 @@ class CBOPAGA_Loader {
 					'error',
 					sprintf(
 					/* translators: %1$s - Plugin Name, %2$s - minimum WooCommerce version, %3$s - update WooCommerce link open, %4$s - update WooCommerce link close, %5$s - download minimum WooCommerce link open, %6$s - download minimum WooCommerce link close. */
-						esc_html__( '%1$s requiere WooCommerce %2$s o superior. Por favor, %3$sactualiza WooCommerce%4$s a la última versión, o %5$sdescarga la versión mínima requerida &raquo;%6$s', 'cbo-payment-gateway' ),
+						esc_html__( '%1$s requiere WooCommerce %2$s o superior. Por favor, %3$sactualiza WooCommerce%4$s a la última versión, o %5$sdescarga la versión mínima requerida &raquo;%6$s', 'class-cbopaga-payment-gateway' ),
 						'<strong>' . CBOPAGA_Constants::PLUGIN_NAME . '</strong>',
 						CBOPAGA_Constants::MINIMUM_WC_VERSION,
 						'<a href="' . esc_url( $update_url ) . '">',
@@ -199,17 +301,17 @@ class CBOPAGA_Loader {
 					)
 				);
 			}
-		} else if ( !$this->is_shop_in_country('PA')) {
+		} elseif ( ! $this->is_shop_in_country( 'PA' ) ) {
 			$this->add_admin_notice(
 				'woocommerce_country',
 				'error',
 				sprintf(
 				/* translators: %1$s - Plugin Name, %2$s - minimum WooCommerce version, %3$s - update WooCommerce link open, %4$s - update WooCommerce link close, %5$s - download minimum WooCommerce link open, %6$s - download minimum WooCommerce link close. */
-					esc_html__( '%1$s solo está disponible para tiendas localizadas en Panamá.', 'cbo-payment-gateway' ),
+					esc_html__( '%1$s solo está disponible para tiendas localizadas en Panamá.', 'class-cbopaga-payment-gateway' ),
 					'<strong>' . CBOPAGA_Constants::PLUGIN_NAME . '</strong>'
 				)
 			);
-        }
+		}
 	}
 
 
@@ -239,6 +341,7 @@ class CBOPAGA_Loader {
 
 	/**
 	 * Query WooCommerce activation.
+	 *
 	 * @return bool
 	 */
 	private function is_wc_activated() {
@@ -247,6 +350,7 @@ class CBOPAGA_Loader {
 
 	/**
 	 * Determines if WooCommerce is installed.
+	 *
 	 * @return bool
 	 */
 	private function is_wc_installed() {
@@ -270,10 +374,16 @@ class CBOPAGA_Loader {
 		return defined( 'WC_VERSION' ) && version_compare( WC_VERSION, CBOPAGA_Constants::MINIMUM_WC_VERSION, '>=' );
 	}
 
-    private function is_shop_in_country($country) {
-	    $shop_country = wc_get_base_location()['country'];
-	    return $shop_country === $country;
-    }
+	/**
+	 * Check country
+	 *
+	 * @param string $country country.
+	 * @return string $shop_country.
+	 */
+	private function is_shop_in_country( $country ) {
+		$shop_country = wc_get_base_location()['country'];
+		return $shop_country === $country;
+	}
 
 
 	/**
@@ -287,8 +397,8 @@ class CBOPAGA_Loader {
 
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 
-		if (isset( $_GET['activate'], $_GET['_wpnonce'] ) &&
-			wp_verify_nonce(sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ),'cbo_activate_action')) {
+		if ( isset( $_GET['activate'], $_GET['_wpnonce'] ) &&
+			wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'cbo_activate_action' ) ) {
 			$activate = sanitize_text_field( wp_unslash( $_GET['activate'] ) );
 		}
 	}
@@ -300,20 +410,20 @@ class CBOPAGA_Loader {
 	 * @since 1.10.0
 	 *
 	 * @param string $slug    The slug for the notice.
-	 * @param string $class   The css class for the notice.
+	 * @param string $classes   The css class for the notice.
 	 * @param string $message The notice message.
 	 */
-	private function add_admin_notice( $slug, $class, $message ) {
+	private function add_admin_notice( $slug, $classes, $message ) {
 
 		$this->notices[ $slug ] = array(
-			'class'   => $class,
+			'class'   => $classes,
 			'message' => $message,
 		);
 	}
 
 
 	/**
-	 * Displays any admin notices added with \CBOPAGA_Loader::add_admin_notice()
+	 * Displays any admin notices added with \CBOPAGA_Payment_Gateway::add_admin_notice()
 	 *
 	 * @internal
 	 */
@@ -366,11 +476,11 @@ class CBOPAGA_Loader {
 
 
 	/**
-	 * Gets the main \CBOPAGA_Loader instance.
+	 * Gets the main \CBOPAGA_Payment_Gateway instance.
 	 *
 	 * Ensures only one instance can be loaded.
 	 *
-	 * @return \CBOPAGA_Loader
+	 * @return \CBOPAGA_Payment_Gateway
 	 */
 	public static function instance() {
 
@@ -380,79 +490,7 @@ class CBOPAGA_Loader {
 
 		return self::$instance;
 	}
-
-
-}
-
-/*
- * This action hook registers our PHP class as a WooCommerce payment gateway
- */
-function cbopaga_add_payment_gateway_class( $gateways ) {
-    $gateways[] = 'CBOPAGA_Telered_Gateway'; // your class name is here
-    $gateways[] = 'CBOPAGA_Standard_Gateway'; // your class name is here
-    return $gateways;
-}
-
-/**
- * @return CBOPAGA_Telered_Gateway
- */
-function cbopaga_payment_gateway() {
-    add_filter('woocommerce_payment_gateways', 'cbopaga_add_payment_gateway_class');
-	add_action('before_woocommerce_init', function () {
-
-		if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
-				'cart_checkout_blocks',
-				__FILE__,
-				true
-			);
-		}
-	});
-	/**
-	 * Makes the gateway appear as “supported” in Checkout Blocks.
-	 */
-	add_filter(
-		'woocommerce_blocks_supported_payment_methods',
-		function ($methods) {
-			$methods[] = array(
-				'name'     => 'cbopaga_standard_gateway',                      
-				'label'    => __('Card (Visa/Mastercard)', 'cbo-payment-gateway'),
-				'supports' => array('products', 'refunds'),                             
-			);
-			return $methods;
-		}
-	);
-
-	/**
-	 * Maps the JS payment method ID to the WC_Payment_Gateway.
-	 */
-	add_filter(
-		'woocommerce_blocks_payment_method_id_to_gateway_mapping',
-		function ($mapping) {
-			$mapping['cbopaga_standard_gateway'] = 'cbopaga_standard_gateway';
-			return $mapping;
-		}
-	);
-	/**
-	 * Add the payment method to the list of available payment methods in the Store API.
-	 *   This is required for Checkout Blocks to display the payment method.
-	 */
-	add_filter('woocommerce_store_api_payment_methods', 'cbopaga_add_payment_gateway_class');
-
-	// Add the gateway ID to the list of payment method IDs
-	add_filter('woocommerce_store_api_payment_method_ids', function ($ids) {
-		$ids[] = 'cbopaga_standard_gateway';
-		return $ids;
-	});
-
-	add_filter('woocommerce_store_api_payment_method_schema', function ($schema, $method_id) {
-		if ('cbopaga_standard_gateway' === $method_id) {
-			$schema['supports']['payment_method_options'] = true;
-		}
-		return $schema;
-	}, 10, 2);
-	//return \CBOPAGA_Telered_Gateway::instance();
 }
 
 // fire it up!
-CBOPAGA_Loader::instance();
+CBOPAGA_Payment_Gateway::instance();

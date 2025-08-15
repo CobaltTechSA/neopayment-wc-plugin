@@ -2,6 +2,9 @@
 localfiles
 deploy
 node_modules
-build/
 dist/
 wp-cli.cache/
+/vendor/
+composer.json
+composer.lock
+phpcs.xml.dist
