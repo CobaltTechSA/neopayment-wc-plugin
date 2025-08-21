@@ -4,8 +4,8 @@ const DependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extra
 module.exports = {
     mode: process.env.NODE_ENV || 'development',
     entry: {
-        'cbo-standard': './assets/js/blocks/cbo-standard.js',
-        'cbo-telered': './assets/js/blocks/cbo-telered.js',
+        'cbowcp-standard': './assets/js/blocks/cbowcp-standard.js',
+        'cbowcp-telered': './assets/js/blocks/cbowcp-telered.js',
     },
     output: {
         path: path.resolve(__dirname, 'build'),

@@ -52,16 +52,16 @@ const CardFields = ({ onChange }) => {
   }, [card_number, card_expiry, card_cvc, card_holder, onChange]);
 
   return (
-    <div className="cbo-card-fields">
+    <div className="cbowcp-card-fields">
       {/* Holde Name */}
-      <div className="cbo-card-fields__group">
+      <div className="cbowcp-card-fields__group">
         <label>
-          {__('Card holder', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
+          {__('Card holder', 'class-cbowcp-payment-gateway')}<span class="required">*</span>
         </label>
         <input
           id="card_holder"
           type="text"
-          placeholder={__('Full name', 'class-cbopaga-payment-gateway')}
+          placeholder={__('Full name', 'class-cbowcp-payment-gateway')}
           maxLength="50"
           value={card_holder}
           onChange={e => setcard_holder(e.target.value)}
@@ -69,15 +69,15 @@ const CardFields = ({ onChange }) => {
           required
         />
         {errors.holder && (
-          <small className="cbo-card-fields__error">
-            {__('You must enter the holder name', 'class-cbopaga-payment-gateway')}
+          <small className="cbowcp-card-fields__error">
+            {__('You must enter the holder name', 'class-cbowcp-payment-gateway')}
           </small>
         )}
       </div>
       {/* Card Number */}
-      <div className="cbo-card-fields__group">
+      <div className="cbowcp-card-fields__group">
         <label>
-          {__('Card number', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
+          {__('Card number', 'class-cbowcp-payment-gateway')}<span class="required">*</span>
         </label>
         <input
           id="card_number"
@@ -94,22 +94,22 @@ const CardFields = ({ onChange }) => {
           required
         />
         {errors.number && touched.number && (
-          <small className="cbo-card-fields__error">
-            {__('Invalid card number', 'class-cbopaga-payment-gateway')}
+          <small className="cbowcp-card-fields__error">
+            {__('Invalid card number', 'class-cbowcp-payment-gateway')}
           </small>
         )}
       </div>
 
       { }
-      <div className="cbo-card-fields__row">
-        <div className="cbo-card-fields__group">
+      <div className="cbowcp-card-fields__row">
+        <div className="cbowcp-card-fields__group">
           <label>
-            {__('Expiration date', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
+            {__('Expiration date', 'class-cbowcp-payment-gateway')}<span class="required">*</span>
           </label>
           <input
             id="card_expiry"
             type="text"
-            placeholder={__('MM/YY', 'class-cbopaga-payment-gateway')}
+            placeholder={__('MM/YY', 'class-cbowcp-payment-gateway')}
             value={card_expiry}
             onBlur={() => setTouched(t => ({ ...t, expiry: true }))}
             onChange={e => {
@@ -123,15 +123,15 @@ const CardFields = ({ onChange }) => {
             required
           />
           {errors.expiry && touched.expiry && (
-            <small className="cbo-card-fields__error">
-              {__('Invalid date', 'class-cbopaga-payment-gateway')}
+            <small className="cbowcp-card-fields__error">
+              {__('Invalid date', 'class-cbowcp-payment-gateway')}
             </small>
           )}
         </div>
 
-        <div className="cbo-card-fields__group">
+        <div className="cbowcp-card-fields__group">
           <label>
-            {__('CVC', 'class-cbopaga-payment-gateway')}<span class="required">*</span>
+            {__('CVC', 'class-cbowcp-payment-gateway')}<span class="required">*</span>
           </label>
           <input
             id="card_cvc"
@@ -144,8 +144,8 @@ const CardFields = ({ onChange }) => {
             required
           />
           {errors.cvc && touched.cvc && (
-            <small className="cbo-card-fields__error">
-              {__('Invalid CVC', 'class-cbopaga-payment-gateway')}
+            <small className="cbowcp-card-fields__error">
+              {__('Invalid CVC', 'class-cbowcp-payment-gateway')}
             </small>
           )}
         </div>

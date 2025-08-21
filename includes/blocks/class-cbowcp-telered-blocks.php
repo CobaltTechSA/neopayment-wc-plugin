@@ -2,7 +2,7 @@
 /**
  * Blocks Telered class for CBO Payment Gateway plugin.
  *
- * @package CBO_Payment_Gateway
+ * @package CBOWPC_Payment_Gateway
  */
 
 namespace CBO\Blocks;
@@ -16,14 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Integration for the CBO Telered Blocks payment method.
  */
-final class CBOPAGA_Telered_Blocks extends AbstractPaymentMethodType {
+final class CBOWCP_Telered_Blocks extends AbstractPaymentMethodType {
 
 	/**
 	 * Payment method name for the CBO Telered gateway.
 	 *
 	 * @var string
 	 */
-	protected $name = 'cbopaga_telered_gateway';
+	protected $name = 'cbowcp_telered_gateway';
 
 	/**
 	 * Initializes the blocks telered hooks.
@@ -38,7 +38,7 @@ final class CBOPAGA_Telered_Blocks extends AbstractPaymentMethodType {
 	 * @return array Block Telered JS.
 	 */
 	public function get_payment_method_script_handles() {
-		return array( 'cbo-telered-blocks-js' );
+		return array( 'cbowcp-telered-blocks-js' );
 	}
 
 	/**
@@ -48,8 +48,8 @@ final class CBOPAGA_Telered_Blocks extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_data() {
 		return array(
-			'title'       => __( 'Clave Card', 'class-cbopaga-payment-gateway' ),
-			'description' => __( 'Pay securely with your card', 'class-cbopaga-payment-gateway' ),
+			'title'       => __( 'Clave Card', 'class-cbowcp-payment-gateway' ),
+			'description' => __( 'Pay securely with your card', 'class-cbowcp-payment-gateway' ),
 			'supports'    => array( 'products' ),
 		);
 	}

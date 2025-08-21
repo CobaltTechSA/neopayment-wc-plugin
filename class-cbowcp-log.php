@@ -2,7 +2,7 @@
 /**
  * Logger helper for CBO Payment Gateway plugin.
  *
- * @package CBO_Payment_Gateway
+ * @package CBOWPC_Payment_Gateway
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles WooCommerce logs for the payment gateway.
  */
-class CBOPAGA_Log {
+class CBOWCP_Log {
 
 	/**
 	 * Logger instance.
@@ -43,7 +43,7 @@ class CBOPAGA_Log {
 	 */
 	public static function log( $level, $message ) {
 		$logger  = self::get_instance();
-		$context = array( 'source' => 'class-cbopaga-payment-gateway' );
+		$context = array( 'source' => 'class-cbowcp-payment-gateway' );
 		$logger->{$level}( $message, $context );
 	}
 

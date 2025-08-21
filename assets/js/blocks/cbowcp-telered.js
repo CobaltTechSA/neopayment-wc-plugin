@@ -4,23 +4,23 @@ import claveUrl from '../../images/clave.svg';
 import ProcessPaymentHandler from './components/ProcessPaymentHandler';
 
 const Label         = ({ label }) => (
-	< div className = "cbo-payment-label" >
-	< span > {__( 'Clave Card', 'class-cbopaga-payment-gateway' )} < / span >
-	< div className = "cbo-payment-label__icons" >
-		< img src   = {claveUrl} alt = "Visa" className = "cbo-payment-label__icon" / >
+	< div className = "cbowcp-payment-label" >
+	< span > {__( 'Clave Card', 'class-cbowcp-payment-gateway' )} < / span >
+	< div className = "cbowcp-payment-label__icons" >
+		< img src   = {claveUrl} alt = "Visa" className = "cbowcp-payment-label__icon" / >
 	< / div >
 	< / div >
 );
 
 const settings = {
-	name: 'cbopaga_telered_gateway',
-	ariaLabel: __( 'CBO Telered Gateway', 'class-cbopaga-payment-gateway' ),
+	name: 'cbowcp_telered_gateway',
+	ariaLabel: __( 'CBO Telered Gateway', 'class-cbowcp-payment-gateway' ),
 	label: < Label / > ,
 	canMakePayment: () => true,
 	content: < ProcessPaymentHandler / > ,
 	edit: < ProcessPaymentHandler / > ,
-	paymentMethodId: 'cbopaga_telered_gateway',
+	paymentMethodId: 'cbowcp_telered_gateway',
 	supports: { features: ['products'] },
-	placeOrderButtonLabel: __( 'Pay with Clave', 'class-cbopaga-payment-gateway' ),
+	placeOrderButtonLabel: __( 'Pay with Clave', 'class-cbowcp-payment-gateway' ),
 }
 registerPaymentMethod( settings );

@@ -2,7 +2,7 @@
 /**
  * Blocks Support class for CBO Payment Gateway plugin.
  *
- * @package CBO_Payment_Gateway
+ * @package CBOWPC_Payment_Gateway
  */
 
 namespace CBO\Blocks;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles WooCommerce Blocks integration for the payment gateway.
  */
-final class CBOPAGA_Blocks_Support {
+final class CBOWCP_Blocks_Support {
 
 	/**
 	 * Initializes the blocks support hooks.
@@ -25,8 +25,8 @@ final class CBOPAGA_Blocks_Support {
 	 */
 	public static function init() {
 		// Integrations for the CBO Standard and Telered Blocks payment methods.
-		require_once CBOPAGA_PATH . 'includes/blocks/class-cbopaga-standard-blocks.php';
-		require_once CBOPAGA_PATH . 'includes/blocks/class-cbopaga-telered-blocks.php';
+		require_once CBOWCP_PATH . 'includes/blocks/class-cbowcp-standard-blocks.php';
+		require_once CBOWCP_PATH . 'includes/blocks/class-cbowcp-telered-blocks.php';
 
 		// Integrations registration.
 		add_action(
@@ -45,11 +45,11 @@ final class CBOPAGA_Blocks_Support {
 	 * @return void
 	 */
 	public static function register_blocks( PaymentMethodRegistry $registry ) {
-		if ( class_exists( '\CBO\Blocks\CBOPAGA_Standard_Blocks' ) ) {
-			$registry->register( new \CBO\Blocks\CBOPAGA_Standard_Blocks() );
+		if ( class_exists( '\CBO\Blocks\CBOWCP_Standard_Blocks' ) ) {
+			$registry->register( new \CBO\Blocks\CBOWCP_Standard_Blocks() );
 		}
-		if ( class_exists( '\CBO\Blocks\CBOPAGA_Telered_Blocks' ) ) {
-			$registry->register( new \CBO\Blocks\CBOPAGA_Telered_Blocks() );
+		if ( class_exists( '\CBO\Blocks\CBOWCP_Telered_Blocks' ) ) {
+			$registry->register( new \CBO\Blocks\CBOWCP_Telered_Blocks() );
 		}
 	}
 
@@ -60,10 +60,10 @@ final class CBOPAGA_Blocks_Support {
 	 */
 	public static function register_scripts() {
 		// Standard Payments.
-		$standard_asset = include CBOPAGA_PATH . 'build/cbo-standard.asset.php';
+		$standard_asset = include CBOWCP_PATH . 'build/cbowcp-standard.asset.php';
 		wp_register_script(
-			'cbo-standard-blocks-js',
-			CBOPAGA_URL . 'build/cbo-standard.js',
+			'cbowcp-standard-blocks-js',
+			CBOWCP_URL . 'build/cbowcp-standard.js',
 			$standard_asset['dependencies'] ?? array(
 				'react',
 				'react-dom',
@@ -72,40 +72,40 @@ final class CBOPAGA_Blocks_Support {
 				'wp-element',
 				'wp-i18n',
 			),
-			$standard_asset['version'] ?? CBOPAGA_Constants::PLUGIN_VERSION,
+			$standard_asset['version'] ?? CBOWCP_Constants::PLUGIN_VERSION,
 			true
 		);
 
 		wp_set_script_translations(
-			'cbo-standard-blocks-js',
-			'class-cbopaga-payment-gateway',
-			CBOPAGA_PATH . 'i18n'
+			'cbowcp-standard-blocks-js',
+			'class-cbowcp-payment-gateway',
+			CBOWCP_PATH . 'i18n'
 		);
 
 		wp_register_script(
-			'cbo-3ds-popup',
-			CBOPAGA_URL . 'assets/js/cbo-3ds-popup.js',
-			array( 'jquery', 'cbo-standard-blocks-js' ),
+			'cbowcp-3ds-popup',
+			CBOWCP_URL . 'assets/js/cbowcp-3ds-popup.js',
+			array( 'jquery', 'cbowcp-standard-blocks-js' ),
 			'2.4.0',
 			true
 		);
 
 		wp_localize_script(
-			'cbo-standard-blocks-js',
-			'CBOPAGA3DS',
+			'cbowcp-standard-blocks-js',
+			'CBOWCP3DS',
 			array(
-				'url_ok'   => esc_url_raw( home_url( '/wc-api/cbopaga_standard_gateway_status' ) ),
-				'url_ko'   => esc_url_raw( home_url( '/wc-api/cbopaga_standard_gateway_status' ) ),
+				'url_ok'   => esc_url_raw( home_url( '/wc-api/cbowcp_standard_gateway_status' ) ),
+				'url_ko'   => esc_url_raw( home_url( '/wc-api/cbowcp_standard_gateway_status' ) ),
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'cbopaga_3ds_nonce' ),
+				'nonce'    => wp_create_nonce( 'cbowcp_3ds_nonce' ),
 			)
 		);
 
 		// Telered Payments.
-		$telered_asset = include CBOPAGA_PATH . 'build/cbo-telered.asset.php';
+		$telered_asset = include CBOWCP_PATH . 'build/cbowcp-telered.asset.php';
 		wp_register_script(
-			'cbo-telered-blocks-js',
-			CBOPAGA_URL . 'build/cbo-telered.js',
+			'cbowcp-telered-blocks-js',
+			CBOWCP_URL . 'build/cbowcp-telered.js',
 			$telered_asset['dependencies'] ?? array(
 				'react',
 				'react-dom',
@@ -114,14 +114,14 @@ final class CBOPAGA_Blocks_Support {
 				'wp-element',
 				'wp-i18n',
 			),
-			$telered_asset['version'] ?? CBOPAGA_Constants::PLUGIN_VERSION,
+			$telered_asset['version'] ?? CBOWCP_Constants::PLUGIN_VERSION,
 			true
 		);
 
 		wp_set_script_translations(
-			'cbo-telered-blocks-js',
-			'class-cbopaga-payment-gateway',
-			CBOPAGA_PATH . 'i18n'
+			'cbowcp-telered-blocks-js',
+			'class-cbowcp-payment-gateway',
+			CBOWCP_PATH . 'i18n'
 		);
 
 	}
@@ -133,12 +133,12 @@ final class CBOPAGA_Blocks_Support {
 	 */
 	public static function register_styles() {
 		wp_enqueue_style(
-			'cbo-card-fields-style',
-			CBOPAGA_URL . 'assets/css/cbo-card-fields.css',
+			'cbowcp-card-fields-style',
+			CBOWCP_URL . 'assets/css/cbowcp-card-fields.css',
 			array(),
 			'1.0.0'
 		);
 	}
 }
 
-CBOPAGA_Blocks_Support::init();
+CBOWCP_Blocks_Support::init();

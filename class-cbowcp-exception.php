@@ -2,7 +2,7 @@
 /**
  * Exceptions for CBO Payment Gateway plugin.
  *
- * @package CBO_Payment_Gateway
+ * @package CBOWPC_Payment_Gateway
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * CBO Exception helper for the payment gateway.
  */
-class CBOPAGA_Exception extends Exception {
+class CBOWCP_Exception extends Exception {
 
 	/**
 	 * Stores the response data associated with the exception.

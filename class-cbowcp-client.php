@@ -2,19 +2,19 @@
 /**
  * Client for CBO Payment Gateway plugin.
  *
- * @package CBO_Payment_Gateway
+ * @package CBOWPC_Payment_Gateway
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-require_once 'class-cbopaga-constants.php';
-require_once 'class-cbopaga-exception.php';
+require_once 'class-cbowcp-constants.php';
+require_once 'class-cbowcp-exception.php';
 
 /**
  * Handles WooCommerce client for the payment gateway.
  */
-class CBOPAGA_Client {
+class CBOWCP_Client {
 
 	const API_V2_ROUTES = array(
 		'sale'        => '/api/v2/transactions/sale',
@@ -57,11 +57,11 @@ class CBOPAGA_Client {
 	 * @param string      $base_url      Base URL for API connection.
 	 * @param string|null $client_id     Client identifier from the merchant.
 	 * @param string|null $client_secret Client secret from the merchant.
-	 * @throws CBOPAGA_Exception When API credentials are not configured.
+	 * @throws CBOWCP_Exception When API credentials are not configured.
 	 */
 	public function __construct( string $base_url, ?string $client_id, ?string $client_secret ) {
 		if ( empty( $base_url ) || empty( $client_id ) || empty( $client_secret ) ) {
-			throw new CBOPAGA_Exception( 'Credenciales API no configuradas.' );
+			throw new CBOWCP_Exception( 'Credenciales API no configuradas.' );
 		}
 
 		$this->base_url      = $base_url;
@@ -76,18 +76,18 @@ class CBOPAGA_Client {
 	 * @param array  $data     Request payload.
 	 * @param bool   $login    Whether to include auth header (default true).
 	 * @return array Decoded response as associative array.
-	 * @throws CBOPAGA_Exception When the HTTP request fails or API returns an error.
+	 * @throws CBOWCP_Exception When the HTTP request fails or API returns an error.
 	 */
 	private function post( string $endpoint, array $data = array(), $login = true ): array {
 		if ( $login ) {
 			if ( ! $this->login() ) {
-				throw new CBOPAGA_Exception( 'Could not authenticate.' );
+				throw new CBOWCP_Exception( 'Could not authenticate.' );
 			}
 		}
 
 		$headers = array(
 			'Accept: application/json',
-			'User-Agent: Cobalt-WC-Plugin ' . CBOPAGA_Constants::PLUGIN_VERSION,
+			'User-Agent: Cobalt-WC-Plugin ' . CBOWCP_Constants::PLUGIN_VERSION,
 		);
 
 		// When requesting an OAuth token, the content type must be.
@@ -136,18 +136,18 @@ class CBOPAGA_Client {
 	 * @param string $endpoint to use.
 	 * @param bool   $login if is authenticate.
 	 * @return array
-	 * @throws CBOPAGA_Exception If an authentication error occurs.
+	 * @throws CBOWCP_Exception If an authentication error occurs.
 	 */
 	private function get( string $endpoint, bool $login = true ): array {
 		if ( $login ) {
 			if ( ! $this->login() ) {
-				throw new CBOPAGA_Exception( 'Could not authenticate.' );
+				throw new CBOWCP_Exception( 'Could not authenticate.' );
 			}
 		}
 
 		$headers = array(
 			'Accept: application/json',
-			'User-Agent: Cobalt-WC-Plugin ' . CBOPAGA_Constants::PLUGIN_VERSION,
+			'User-Agent: Cobalt-WC-Plugin ' . CBOWCP_Constants::PLUGIN_VERSION,
 		);
 
 		if ( $this->authorization ) {
@@ -192,7 +192,7 @@ class CBOPAGA_Client {
 	 * @return bool
 	 */
 	public function is_access_token_expired(): bool {
-		$expires_at = intval( get_option( 'cbopaga_expires_at', 0 ) );
+		$expires_at = intval( get_option( 'cbowcp_expires_at', 0 ) );
 		$now        = time();
 
 		return $expires_at <= $now;
@@ -202,13 +202,13 @@ class CBOPAGA_Client {
 	 * Client login function.
 	 *
 	 * @return bool
-	 * @throws CBOPAGA_Exception If an authentication error occurs.
+	 * @throws CBOWCP_Exception If an authentication error occurs.
 	 */
 	public function login() {
 		$this->authorization = null;
 		$access_token        = $this->get_access_token();
 		if ( ! $access_token ) {
-			throw new CBOPAGA_Exception( 'Could not authenticate via OAuth2' );
+			throw new CBOWCP_Exception( 'Could not authenticate via OAuth2' );
 		}
 
 		$this->authorization = 'Authorization: Bearer ' . $access_token;
@@ -219,10 +219,10 @@ class CBOPAGA_Client {
 	 * Get client access token.
 	 *
 	 * @return false|mixed|null
-	 * @throws CBOPAGA_Exception If an authentication error occurs.
+	 * @throws CBOWCP_Exception If an authentication error occurs.
 	 */
 	public function get_access_token() {
-		$access_token = get_option( 'cbopaga_access_token' );
+		$access_token = get_option( 'cbowcp_access_token' );
 		if ( $this->is_access_token_expired() ) {
 			$response = $this->post(
 				'/oauth/token',
@@ -242,12 +242,12 @@ class CBOPAGA_Client {
 				$expires_in -= ( 60 * 5 ); // For prevention, subtract 5 minutes.
 				$expires_at  = time() + $expires_in;
 
-				update_option( 'cbopaga_access_token', $access_token );
-				update_option( 'cbopaga_expires_at', $expires_at );
-				CBOPAGA_Log::debug( "Authentication completed: expires_in=$expires_in, access_token=$access_token" );
+				update_option( 'cbowcp_access_token', $access_token );
+				update_option( 'cbowcp_expires_at', $expires_at );
+				CBOWCP_Log::debug( "Authentication completed: expires_in=$expires_in, access_token=$access_token" );
 			} else {
 				// Failed.
-				CBOPAGA_Log::error( 'Error getting access token: ' . wp_json_encode( $response ) );
+				CBOWCP_Log::error( 'Error getting access token: ' . wp_json_encode( $response ) );
 				return null;
 			}
 		}
@@ -261,18 +261,18 @@ class CBOPAGA_Client {
 	 * @param string $transaction_id to find.
 	 * @param int    $amount on cents.
 	 * @return array
-	 * @throws CBOPAGA_Exception If an authentication error occurs.
+	 * @throws CBOWCP_Exception If an authentication error occurs.
 	 */
 	public function refund( string $transaction_id, int $amount = 0 ): array {
 		$parse_id = (int) $transaction_id;
 		$id       = $parse_id - 130000000;
 		if ( $id <= 0 ) {
-			throw new CBOPAGA_Exception( esc_html__( 'Invalid transaction ID', 'class-cbopaga-payment-gateway' ) );
+			throw new CBOWCP_Exception( esc_html__( 'Invalid transaction ID', 'class-cbowcp-payment-gateway' ) );
 		}
 
 		$route = $this->get_route( 'refund' );
 		if ( empty( $route ) ) {
-			throw new CBOPAGA_Exception( esc_html__( 'Refund route not defined', 'class-cbopaga-payment-gateway' ) );
+			throw new CBOWCP_Exception( esc_html__( 'Refund route not defined', 'class-cbowcp-payment-gateway' ) );
 		}
 
 		$endpoint = sprintf(
@@ -283,18 +283,18 @@ class CBOPAGA_Client {
 		);
 
 		$response = $this->get( $endpoint );
-		\CBOPAGA_Log::debug( 'Respuesta de reembolso: ' . esc_html( wp_json_encode( $response ) ) );
+		\CBOWCP_Log::debug( 'Respuesta de reembolso: ' . esc_html( wp_json_encode( $response ) ) );
 
 		if ( 200 !== $response['code'] ) {
-			\CBOPAGA_Log::error( 'Error al solicitar reembolso: ' . esc_html( wp_json_encode( $response ) ) );
-			throw new CBOPAGA_Exception( esc_html__( 'Error requesting refund', 'class-cbopaga-payment-gateway' ), esc_html( wp_json_encode( $response ) ) );
+			\CBOWCP_Log::error( 'Error al solicitar reembolso: ' . esc_html( wp_json_encode( $response ) ) );
+			throw new CBOWCP_Exception( esc_html__( 'Error requesting refund', 'class-cbowcp-payment-gateway' ), esc_html( wp_json_encode( $response ) ) );
 		}
 
 		$body = $response['body'];
 
 		if ( empty( $body['status'] ) || 'ok' !== $body['status'] ) {
-			$msg = ! empty( $body['message'] ) ? $body['message'] : __( 'Refund failed', 'class-cbopaga-payment-gateway' );
-			throw new CBOPAGA_Exception( esc_html( $msg ), esc_html( wp_json_encode( $response ) ) );
+			$msg = ! empty( $body['message'] ) ? $body['message'] : __( 'Refund failed', 'class-cbowcp-payment-gateway' );
+			throw new CBOWCP_Exception( esc_html( $msg ), esc_html( wp_json_encode( $response ) ) );
 		}
 
 		return $body['data'];
@@ -305,7 +305,7 @@ class CBOPAGA_Client {
 	 *
 	 * @param string $id parameter.
 	 * @return array
-	 * @throws CBOPAGA_Exception If an authentication error occurs.
+	 * @throws CBOWCP_Exception If an authentication error occurs.
 	 */
 	public function transaction( string $id ): array {
 		$response = $this->get( $this->get_route( 'transaction' ) . $id );
@@ -314,7 +314,7 @@ class CBOPAGA_Client {
 			return $response['body']['data'];
 		} else {
             // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new CBOPAGA_Exception( 'Error processing payment', wp_json_encode( $response ) );
+			throw new CBOWCP_Exception( 'Error processing payment', wp_json_encode( $response ) );
 		}
 	}
 
@@ -325,20 +325,20 @@ class CBOPAGA_Client {
 	 * @param WC_Order $order parameter.
 	 * @param string   $payment_type parameter.
 	 * @return mixed
-	 * @throws CBOPAGA_Exception If an authentication error occurs.
+	 * @throws CBOWCP_Exception If an authentication error occurs.
 	 */
 	public function checkout( WC_Order $order, $payment_type ) {
 
-		\CBOPAGA_Log::debug( 'Order ID: ' . $order->get_id() );
+		\CBOWCP_Log::debug( 'Order ID: ' . $order->get_id() );
 
 		$tax               = $order->get_total_tax() * 100;
 		$total             = $order->get_total() * 100;
 		$total_without_tax = $total - $tax;
 		$body              = array(
 			'metadatas'     => array(
-				'entry'        => get_bloginfo( 'name' ) . ' - Plugin Woocommerce v' . CBOPAGA_Constants::PLUGIN_VERSION,
+				'entry'        => get_bloginfo( 'name' ) . ' - Plugin Woocommerce v' . CBOWCP_Constants::PLUGIN_VERSION,
 				'platform'     => 'Woocommerce',
-				'version'      => CBOPAGA_Constants::PLUGIN_VERSION,
+				'version'      => CBOWCP_Constants::PLUGIN_VERSION,
 				'order_id'     => $order->get_id(),
 				'payment_type' => $payment_type,
 			),
@@ -346,21 +346,21 @@ class CBOPAGA_Client {
 			'tax'           => $tax,
 			'amount'        => $total_without_tax,
 			'currency_code' => $order->get_currency(),
-			'webhook'       => get_bloginfo( 'url' ) . '/wc-api/' . CBOPAGA_Constants::TELERED_GATEWAY_ID,
+			'webhook'       => get_bloginfo( 'url' ) . '/wc-api/' . CBOWCP_Constants::TELERED_GATEWAY_ID,
 			'source'        => get_bloginfo( 'url' ),
 			'return_url'    => wc_get_cart_url(),
-			'url_ok'        => get_bloginfo( 'url' ) . '/wc-api/' . CBOPAGA_Constants::TELERED_GATEWAY_ID . '_status?oid=' . $order->get_id(),
-			'url_ko'        => get_bloginfo( 'url' ) . '/wc-api/' . CBOPAGA_Constants::TELERED_GATEWAY_ID . '_status?oid=' . $order->get_id(),
+			'url_ok'        => get_bloginfo( 'url' ) . '/wc-api/' . CBOWCP_Constants::TELERED_GATEWAY_ID . '_status?oid=' . $order->get_id(),
+			'url_ko'        => get_bloginfo( 'url' ) . '/wc-api/' . CBOWCP_Constants::TELERED_GATEWAY_ID . '_status?oid=' . $order->get_id(),
 
 		);
 
 		$response = $this->post( $this->get_route( 'checkout' ), $body );
-		\CBOPAGA_Log::debug( 'Response: ' . wp_json_encode( $response ) );
+		\CBOWCP_Log::debug( 'Response: ' . wp_json_encode( $response ) );
 		if ( 200 === $response['code'] ) {
 			return $response['body']['data'];
 		} else {
             // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new CBOPAGA_Exception( 'Error processing payment', wp_json_encode( $response ) );
+			throw new CBOWCP_Exception( 'Error processing payment', wp_json_encode( $response ) );
 		}
 	}
 
@@ -377,20 +377,20 @@ class CBOPAGA_Client {
 	 *
 	 * @return array $response        Response data from the transaction.
 	 *
-	 * @throws CBOPAGA_Exception If the transaction fails or is invalid.
+	 * @throws CBOWCP_Exception If the transaction fails or is invalid.
 	 */
 	public function sale( WC_Order $order, $card_number, $expiry_date, $cvv, $card_holder, $three_ds_params = array(), $metadatas = array() ) {
 
-		\CBOPAGA_Log::debug( 'Order ID: ' . $order->get_id() );
+		\CBOWCP_Log::debug( 'Order ID: ' . $order->get_id() );
 
 		$tax               = $order->get_total_tax() * 100;
 		$total             = $order->get_total() * 100;
 		$total_without_tax = $total - $tax;
 
 		$final_metadatas = array(
-			'entry'             => get_bloginfo( 'name' ) . ' - Plugin Woocommerce v' . CBOPAGA_Constants::PLUGIN_VERSION,
+			'entry'             => get_bloginfo( 'name' ) . ' - Plugin Woocommerce v' . CBOWCP_Constants::PLUGIN_VERSION,
 			'platform'          => 'Woocommerce',
-			'version'           => CBOPAGA_Constants::PLUGIN_VERSION,
+			'version'           => CBOWCP_Constants::PLUGIN_VERSION,
 			'order_id'          => $order->get_id(),
 			'payment_reference' => $order->get_id(),
 			'source'            => get_bloginfo( 'url' ),
@@ -400,7 +400,7 @@ class CBOPAGA_Client {
 
 		$callback = home_url(
 			'/wc-api/'
-			. CBOPAGA_Constants::STANDARD_GATEWAY_ID
+			. CBOWCP_Constants::STANDARD_GATEWAY_ID
 			. '_status?oid='
 			. $order->get_id()
 		);
@@ -418,16 +418,16 @@ class CBOPAGA_Client {
 			'3ds_params'    => $three_ds_params,
 			'url_ok'        => $callback,
 			'url_ko'        => $callback,
-			'webhook'       => get_bloginfo( 'url' ) . '/wc-api/' . CBOPAGA_Constants::STANDARD_GATEWAY_ID,
+			'webhook'       => get_bloginfo( 'url' ) . '/wc-api/' . CBOWCP_Constants::STANDARD_GATEWAY_ID,
 		);
 
 		$response = $this->post( $this->get_route( 'sale' ), $body );
-		\CBOPAGA_Log::debug( 'Response: ' . wp_json_encode( $response ) );
+		\CBOWCP_Log::debug( 'Response: ' . wp_json_encode( $response ) );
 		if ( 200 === $response['code'] ) {
 			return $response['body']['data'];
 		} else {
             // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new CBOPAGA_Exception( 'Error processing payment', wp_json_encode( $response ) );
+			throw new CBOWCP_Exception( 'Error processing payment', wp_json_encode( $response ) );
 		}
 	}
 
@@ -435,7 +435,7 @@ class CBOPAGA_Client {
 	 * Commerce function.
 	 *
 	 * @return mixed
-	 * @throws CBOPAGA_Exception If an authentication error occurs.
+	 * @throws CBOWCP_Exception If an authentication error occurs.
 	 */
 	public function commerce() {
 		$response = $this->get( '/checkout' );
@@ -443,7 +443,7 @@ class CBOPAGA_Client {
 		if ( 200 === $response['code'] ) {
 			return $response['body']['data'];
 		} else {
-			throw new CBOPAGA_Exception( esc_html__( 'Error getting commerce', 'class-cbopaga-payment-gateway' ), esc_html( wp_json_encode( $response ) ) );
+			throw new CBOWCP_Exception( esc_html__( 'Error getting commerce', 'class-cbowcp-payment-gateway' ), esc_html( wp_json_encode( $response ) ) );
 		}
 	}
 }

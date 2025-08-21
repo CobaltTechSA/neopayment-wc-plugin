@@ -11,18 +11,18 @@ import {
 } from '../includes/validators';
 
 const Label = ({ label }) => (
-  <div className="cbo-payment-label">
-    <span>{ __( 'Card (Visa/Mastercard)', 'class-cbopaga-payment-gateway' ) }</span>
-    <div className="cbo-payment-label__icons">
+  <div className="cbowcp-payment-label">
+    <span>{ __( 'Card (Visa/Mastercard)', 'class-cbowcp-payment-gateway' ) }</span>
+    <div className="cbowcp-payment-label__icons">
       <img
         src={ visaUrl }
         alt="Visa"
-        className="cbo-payment-label__icon"
+        className="cbowcp-payment-label__icon"
       />
       <img
         src={ mcUrl }
         alt="Mastercard"
-        className="cbo-payment-label__icon"
+        className="cbowcp-payment-label__icon"
       />
     </div>
   </div>
@@ -64,25 +64,25 @@ function PaymentMethod({
       if (!validateLuhn(card_number)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid card number', 'class-cbopaga-payment-gateway'),
+          message: __('Invalid card number', 'class-cbowcp-payment-gateway'),
         };
       }
       if (!validateExpiry(card_expiry)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid date', 'class-cbopaga-payment-gateway'),
+          message: __('Invalid date', 'class-cbowcp-payment-gateway'),
         };
       }
       if (!validateCvc(card_cvc)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid CVC', 'class-cbopaga-payment-gateway'),
+          message: __('Invalid CVC', 'class-cbowcp-payment-gateway'),
         };
       }
       if (!card_holder) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Holder name is required', 'class-cbopaga-payment-gateway'),
+          message: __('Holder name is required', 'class-cbowcp-payment-gateway'),
         };
       }
       return {
@@ -104,9 +104,9 @@ function PaymentMethod({
 };
 
 registerPaymentMethod({
-  name: 'cbopaga_standard_gateway',
+  name: 'cbowcp_standard_gateway',
   label: <Label />,
-  ariaLabel: __('CBO Standard Gateway', 'class-cbopaga-payment-gateway'),
+  ariaLabel: __('CBO Standard Gateway', 'class-cbowcp-payment-gateway'),
   canMakePayment: () => true,
   content: <PaymentMethod />,
   edit: <PaymentMethod />,
