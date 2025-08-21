@@ -2,7 +2,7 @@
 /**
  * Blocks Support class for CBO Payment Gateway plugin.
  *
- * @package CBOWPC_Payment_Gateway
+ * @package CBOWCP_Payment_Gateway
  */
 
 namespace CBO\Blocks;

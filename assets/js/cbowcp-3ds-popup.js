@@ -18,7 +18,22 @@ jQuery(($) => {
   }
 
   function handlePopupEvents() {
-    $(document).on('click', 'button[name="woocommerce_checkout_place_order"], .wc-block-components-checkout__button button', function (e) {
+        $(document).on('click', 'button[name="woocommerce_checkout_place_order"]', function (e) {
+      $('.woocommerce-notices-wrapper').empty();
+      if (!testPopupEnabled()) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    $(document).on('click', 'button[name="woocommerce_checkout_place_order"]', function (e) {
+      if (!testPopupEnabled()) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    $(document).on('click', '.wc-block-components-checkout__button button', function (e) {
       if (!testPopupEnabled()) {
         e.preventDefault();
         return false;

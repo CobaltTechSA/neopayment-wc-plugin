@@ -10,7 +10,7 @@
  * Text Domain: class-cbowcp-payment-gateway
  * Domain Path: /i18n
  *
- * @package CBOWPC_Payment_Gateway
+ * @package CBOWCP_Payment_Gateway
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

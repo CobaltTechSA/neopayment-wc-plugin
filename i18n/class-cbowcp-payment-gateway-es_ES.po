@@ -10,13 +10,12 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-08-20T13:33:07+00:00\n"
-"PO-Revision-Date: 2025-08-20T13:33:07+00:00\n"
+"POT-Creation-Date: 2025-08-21T15:12:18+00:00\n"
+"PO-Revision-Date: 2025-08-21T15:12:18+00:00\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: class-cbowcp-payment-gateway\n"
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
 
 #. Plugin Name of the plugin
 #: class-cbowcp-payment-gateway.php
@@ -24,8 +23,9 @@ msgid "CBO Payment Gateway"
 msgstr ""
 
 #. Plugin URI of the plugin
+#. Author URI of the plugin
 #: class-cbowcp-payment-gateway.php
-msgid "https://cobalt.tech/plugins/wc"
+msgid "https://neopayment.com"
 msgstr ""
 
 #. Description of the plugin
@@ -36,11 +36,6 @@ msgstr "Pagos con VISA, MasterCard y Clave"
 #. Author of the plugin
 #: class-cbowcp-payment-gateway.php
 msgid "Cobalt Tech"
-msgstr ""
-
-#. Author URI of the plugin
-#: class-cbowcp-payment-gateway.php
-msgid "https://cobalt.tech"
 msgstr ""
 
 #: class-cbowcp-client.php:270
@@ -68,18 +63,18 @@ msgid "Card code"
 msgstr "CVC"
 
 #: class-cbowcp-payment-gateway-cc.php:117
-#: assets/js/blocks/components/CardFields.js:134
+#: assets/js/blocks/components/CardFields.js:134 build/cbowcp-standard.js:1
 msgid "CVC"
 msgstr ""
 
 #: class-cbowcp-payment-gateway-cc.php:121
 #: class-cbowcp-payment-gateway-cc.php:122
-#: assets/js/blocks/components/CardFields.js:59
+#: assets/js/blocks/components/CardFields.js:59 build/cbowcp-standard.js:1
 msgid "Card holder"
 msgstr "Titular de la tarjeta"
 
 #: class-cbowcp-payment-gateway-cc.php:127
-#: assets/js/blocks/components/CardFields.js:80
+#: assets/js/blocks/components/CardFields.js:80 build/cbowcp-standard.js:1
 msgid "Card number"
 msgstr "Número de tarjeta"
 
@@ -92,6 +87,7 @@ msgid "MM / YY"
 msgstr "MM/AA"
 
 #: class-cbowcp-payment-gateway.php:143 assets/js/blocks/cbowcp-standard.js:15
+#: build/cbowcp-standard.js:1
 msgid "Card (Visa/Mastercard)"
 msgstr "Tarjeta (Visa/Mastercard)"
 
@@ -225,13 +221,12 @@ msgstr "API ClientSecret de producción"
 msgid "TEST MODE ENABLED"
 msgstr "MODO DE PRUEBAS HABILITADO"
 
-#: class-cbowcp-standard-gateway.php:310
-#: class-cbowcp-standard-gateway.php:431
+#: class-cbowcp-standard-gateway.php:310 class-cbowcp-standard-gateway.php:431
 msgid "Security check failed. Please try again."
 msgstr "Error en la comprobación de seguridad. Inténtalo de nuevo."
 
 #: class-cbowcp-standard-gateway.php:344 assets/js/blocks/cbowcp-standard.js:67
-#: assets/js/blocks/components/CardFields.js:98
+#: assets/js/blocks/components/CardFields.js:98 build/cbowcp-standard.js:1
 msgid "Invalid card number"
 msgstr "Número de tarjeta no válido"
 
@@ -248,17 +243,15 @@ msgid "Invalid card code (CVV)"
 msgstr "CVV no válido"
 
 #: class-cbowcp-standard-gateway.php:544
+#: class-cbowcp-standard-gateway.php:552
 msgid "We were unable to complete the payment. Please contact with commerce."
 msgstr "No pudimos completar el pago. Por favor, contacte con el departamento de comercio."
 
 #: class-cbowcp-standard-gateway.php:546
-msgid "We were unable to complete the payment. Please check your card details or contact your bank."
+msgid ""
+"We were unable to complete the payment. Please check your card details or "
+"contact your bank."
 msgstr "No pudimos completar el pago. Por favor, revise los datos de su tarjeta o contacte con su banco."
-
-#: class-cbowcp-standard-gateway.php:552
-#: class-cbowcp-standard-gateway.php:554
-msgid "Cannot generate the payment. Please, contact with commerce."
-msgstr "No se puede generar el pago. Por favor, contacte con el comercio."
 
 #: class-cbowcp-standard-gateway.php:666
 msgid "Payment completed"
@@ -273,7 +266,9 @@ msgid "Processing 3DS…"
 msgstr "Procesando 3DS"
 
 #: class-cbowcp-standard-gateway.php:733
-msgid "Please enable JavaScript to complete your payment. You will be automatically redirected..."
+msgid ""
+"Please enable JavaScript to complete your payment. You will be automatically "
+"redirected..."
 msgstr "Habilite JavaScript para completar su pago. Será redirigido automáticamente..."
 
 #: class-cbowcp-telered-gateway.php:34
@@ -286,14 +281,14 @@ msgstr ""
 
 #: class-cbowcp-telered-gateway.php:309
 msgid "Pago completado"
-msgstr "Pago completado"
+msgstr ""
 
 #: class-cbowcp-telered-gateway.php:315
 msgid "Pago fallido"
-msgstr "Pago fallido"
+msgstr ""
 
 #: includes/blocks/class-cbowcp-telered-blocks.php:51
-#: assets/js/blocks/cbowcp-telered.js:8
+#: assets/js/blocks/cbowcp-telered.js:8 build/cbowcp-telered.js:1
 msgid "Clave Card"
 msgstr "Tarjeta Clave"
 
@@ -302,67 +297,69 @@ msgid "Pay securely with your card"
 msgstr "Paga de forma segura con tu tarjeta."
 
 #: assets/js/blocks/cbowcp-standard.js:73
-#: assets/js/blocks/components/CardFields.js:127
+#: assets/js/blocks/components/CardFields.js:127 build/cbowcp-standard.js:1
 msgid "Invalid date"
 msgstr "Fecha no válida"
 
 #: assets/js/blocks/cbowcp-standard.js:79
-#: assets/js/blocks/components/CardFields.js:148
+#: assets/js/blocks/components/CardFields.js:148 build/cbowcp-standard.js:1
 msgid "Invalid CVC"
 msgstr "CVC no válido"
 
-#: assets/js/blocks/cbowcp-standard.js:85
+#: assets/js/blocks/cbowcp-standard.js:85 build/cbowcp-standard.js:1
 msgid "Holder name is required"
 msgstr "El nombre del titular es obligatorio."
 
-#: assets/js/blocks/cbowcp-standard.js:109
+#: assets/js/blocks/cbowcp-standard.js:109 build/cbowcp-standard.js:1
 msgid "CBO Standard Gateway"
 msgstr ""
 
-#: assets/js/blocks/cbowcp-telered.js:17
+#: assets/js/blocks/cbowcp-telered.js:17 build/cbowcp-telered.js:1
 msgid "CBO Telered Gateway"
 msgstr ""
 
-#: assets/js/blocks/cbowcp-telered.js:24
+#: assets/js/blocks/cbowcp-telered.js:24 build/cbowcp-telered.js:1
 msgid "Pay with Clave"
 msgstr "Pagar con Clave"
 
-#: assets/js/blocks/components/CardFields.js:64
+#: assets/js/blocks/components/CardFields.js:64 build/cbowcp-standard.js:1
 msgid "Full name"
 msgstr "Nombre completo"
 
-#: assets/js/blocks/components/CardFields.js:73
+#: assets/js/blocks/components/CardFields.js:73 build/cbowcp-standard.js:1
 msgid "You must enter the holder name"
 msgstr "Debe ingresar el nombre del titular"
 
-#: assets/js/blocks/components/CardFields.js:107
+#: assets/js/blocks/components/CardFields.js:107 build/cbowcp-standard.js:1
 msgid "Expiration date"
 msgstr "Fecha de expiración"
 
-#: assets/js/blocks/components/CardFields.js:112
+#: assets/js/blocks/components/CardFields.js:112 build/cbowcp-standard.js:1
 msgid "MM/YY"
 msgstr "MM/AA"
 
-#: assets/js/cbowcp-3ds-popup.js:11
-msgid "Please enable pop-ups in your browser and try again."
-msgstr "Habilite las ventanas emergentes en su navegador y vuelva a intentarlo."
+#: assets/js/cbowcp-3ds-popup.js:13
+msgid "Habilite las ventanas emergentes en su navegador y vuelva a intentarlo."
+msgstr ""
 
-#: assets/js/cbowcp-3ds-popup.js:106
+#: assets/js/cbowcp-3ds-popup.js:108
 msgid "Error"
 msgstr ""
 
-#: assets/js/cbowcp-3ds-popup.js:107
-msgid "The pop-up window could not be opened. Please enable pop-ups in your browser and try again."
-msgstr "No se pudo abrir la ventana emergente. Active las ventanas emergentes en su navegador y vuelva a intentarlo."
+#: assets/js/cbowcp-3ds-popup.js:109
+msgid ""
+"No se pudo abrir la ventana emergente. Active las ventanas emergentes en su "
+"navegador y vuelva a intentarlo."
+msgstr ""
 
-#: assets/js/cbowcp-3ds-popup.js:115
-msgid "Got it"
-msgstr "Entendido"
+#: assets/js/cbowcp-3ds-popup.js:117
+msgid "Entendido"
+msgstr ""
 
-#: assets/js/cbowcp-3ds-popup.js:133
-msgid "Authentication failed"
-msgstr "Error de autenticación"
+#: assets/js/cbowcp-3ds-popup.js:135
+msgid "Error de autenticación"
+msgstr ""
 
-#: assets/js/cbowcp-3ds-popup.js:134
-msgid "Please try again and keep the pop-up window active."
-msgstr "Inténtelo nuevamente y mantenga la ventana emergente activa."
+#: assets/js/cbowcp-3ds-popup.js:136
+msgid "Inténtelo nuevamente y mantenga la ventana emergente activa."
+msgstr ""
