@@ -2,10 +2,10 @@
 /**
  * Blocks Telered class for CBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_Payment_Gateway
+ * @package COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY
  */
 
-namespace CBO\Blocks;
+namespace CobaltBankOperationsPaymentGateway\Blocks;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
@@ -16,14 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Integration for the CBO Telered Blocks payment method.
  */
-final class COBALT_BANK_OPERATIONS_Telered_Blocks extends AbstractPaymentMethodType {
+final class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Telered_Blocks extends AbstractPaymentMethodType {
 
 	/**
 	 * Payment method name for the CBO Telered gateway.
 	 *
 	 * @var string
 	 */
-	protected $name = 'cobalt_bank_operations_telered_gateway';
+	protected $name = 'cobalt_bank_operations_payment_gateway_telered_gateway';
 
 	/**
 	 * Initializes the blocks telered hooks.
@@ -38,7 +38,7 @@ final class COBALT_BANK_OPERATIONS_Telered_Blocks extends AbstractPaymentMethodT
 	 * @return array Block Telered JS.
 	 */
 	public function get_payment_method_script_handles() {
-		return array( 'cobalt-bank-operations-telered-blocks-js' );
+		return array( 'cobalt-bank-operations-payment-gateway-telered-blocks-js' );
 	}
 
 	/**

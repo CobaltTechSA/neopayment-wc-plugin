@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import CardFields from './components/CardFields';
+import CardFields from './components/cobalt-bank-operations-payment-gateway-card-fields';
 import visaUrl from '../../images/visa.svg';
 import mcUrl from '../../images/mastercard.svg';
 import {
   validateLuhn,
   validateExpiry,
   validateCvc
-} from '../includes/validators';
+} from '../includes/cobalt-bank-operations-payment-gateway-validators';
 
 const Label = ({ label }) => (
   <div className="cobalt-bank-operations-payment-label">
@@ -61,7 +61,7 @@ function PaymentMethod({
       const { card_number, card_expiry, card_cvc, card_holder } = cardData;
 
       // validate card data
-      if (!validateLuhn(card_number)) {
+      if (!validateLuhn(cleanNumber)) {
         return {
           type: emitResponse.responseTypes.ERROR,
           message: __('Invalid card number', 'cobalt-bank-operations-payment-gateway'),
@@ -104,7 +104,7 @@ function PaymentMethod({
 };
 
 registerPaymentMethod({
-  name: 'cobalt_bank_operations_standard_gateway',
+  name: 'cobalt_bank_operations_payment_gateway_standard_gateway',
   label: <Label />,
   ariaLabel: __('CBO Standard Gateway', 'cobalt-bank-operations-payment-gateway'),
   canMakePayment: () => true,

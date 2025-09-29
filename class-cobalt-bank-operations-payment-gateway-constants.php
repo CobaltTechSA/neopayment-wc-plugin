@@ -1,36 +1,37 @@
 <?php
+
 /**
  * Constants helper for CBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_Payment_Gateway
+ * @package COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY
  */
 
 /**
  * Handles WooCommerce constants for the payment gateway.
  */
-class COBALT_BANK_OPERATIONS_Constants {
+class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Constants {
 
-	const STANDARD_GATEWAY_ID = 'cobalt_bank_operations_standard_gateway';
-	const TELERED_GATEWAY_ID  = 'cobalt_bank_operations_telered_gateway';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_STANDARD_GATEWAY_ID = 'cobalt_bank_operations_payment_gateway_standard_gateway';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_TELERED_GATEWAY_ID  = 'cobalt_bank_operations_payment_gateway_telered_gateway';
 
-	const PLUGIN_VERSION = '2.4.2';
-	const PLUGIN_NAME    = 'CBO Payment Gateway';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_PLUGIN_VERSION = '2.4.2';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_PLUGIN_NAME    = 'Cobalt Bank Operations Payment Gateway';
 
 	// Minimum PHP version required by this plugin.
-	const MINIMUM_PHP_VERSION = '7.2.0';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_MINIMUM_PHP_VERSION = '7.2.0';
 
 	// Minimum WordPress version required by this plugin.
-	const MINIMUM_WP_VERSION = '4.4';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_MINIMUM_WP_VERSION = '4.4';
 
 	// Minimum WooCommerce version required by this plugin.
-	const MINIMUM_WC_VERSION = '5.3';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_MINIMUM_WC_VERSION = '5.3';
 
 
-	const PAYMENT_TYPE_TELERED    = 'TELERED';
-	const PAYMENT_TYPE_VISA       = 'VISA';
-	const PAYMENT_TYPE_MASTERCARD = 'MASTERCARD';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_PAYMENT_TYPE_TELERED    = 'TELERED';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_PAYMENT_TYPE_VISA       = 'VISA';
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_PAYMENT_TYPE_MASTERCARD = 'MASTERCARD';
 
-	const COUNTRIES = array(
+	const COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_PAYMENT_COUNTRIES = array(
 		'AF' => 'AFG', // Afghanistan.
 		'AX' => 'ALA', // &#197;land Islands.
 		'AL' => 'ALB', // Albania.
