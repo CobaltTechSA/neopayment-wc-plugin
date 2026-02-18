@@ -2,7 +2,7 @@
 /**
  * Logger helper for CBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_Payment_Gateway
+ * @package COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles WooCommerce logs for the payment gateway.
  */
-class COBALT_BANK_OPERATIONS_Log {
+class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log {
 
 	/**
 	 * Logger instance.

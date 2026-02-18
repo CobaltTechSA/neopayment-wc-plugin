@@ -2,18 +2,18 @@
 /**
  * Telered class for CBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_Payment_Gateway
+ * @package COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-require_once 'class-cobalt-bank-operations-constants.php';
+require_once 'class-cobalt-bank-operations-payment-gateway-constants.php';
 
 /**
  * Handles WooCommerce Telered integration for the payment gateway.
  */
-class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
+class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Telered_Gateway extends WC_Payment_Gateway {
 
 	/**
 	 * Instance for the CBO Telered gateway.
@@ -27,7 +27,7 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 
-		$this->id                 = COBALT_BANK_OPERATIONS_Constants::TELERED_GATEWAY_ID; // payment gateway plugin ID.
+		$this->id                 = COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Constants::COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_TELERED_GATEWAY_ID; // payment gateway plugin ID.
 		$this->icon               = ''; // URL of the icon that will be displayed on checkout page near your gateway name.
 		$this->has_fields         = false; // in case you need a custom credit card form.
 		$this->method_title       = 'CBO Clave Gateway';
@@ -58,16 +58,16 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 		add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
 
 		// You can also register a webhook here.
-		add_action( 'woocommerce_api_' . $this->id, array( $this, 'webhook' ) );
+		add_action( 'woocommerce_api_' . $this->id, array( $this, 'cobalt_bank_operations_payment_gateway_webhook' ) );
 
 		// URL OK y KO.
-		add_action( 'woocommerce_api_' . $this->id . '_status', array( $this, 'callback_url' ) );
+		add_action( 'woocommerce_api_' . $this->id . '_status', array( $this, 'cobalt_bank_operations_payment_gateway_callback_url' ) );
 
 		// Add nonce field for security.
 		add_action(
-			'woocommerce_admin_field_cobalt_bank_operations_nonce',
+			'woocommerce_admin_field_cobalt_bank_operations_payment_gateway_nonce',
 			function () {
-				wp_nonce_field( 'cobalt_bank_operations_telered_save_settings', 'cobalt_bank_operations_telered_nonce' );
+				wp_nonce_field( 'cobalt_bank_operations_payment_gateway_telered_save_settings', 'cobalt_bank_operations_payment_gateway_telered_nonce' );
 			}
 		);
 	}
@@ -76,8 +76,8 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 	 * Process Admin Validate.
 	 */
 	public function process_admin_options() {
-		if ( ! isset( $_POST['cobalt_bank_operations_telered_nonce'] ) ||
-			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['cobalt_bank_operations_telered_nonce'] ) ), 'cobalt_bank_operations_telered_save_settings' ) ) {
+		if ( ! isset( $_POST['cobalt_bank_operations_payment_gateway_telered_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['cobalt_bank_operations_payment_gateway_telered_nonce'] ) ), 'cobalt_bank_operations_payment_gateway_telered_save_settings' ) ) {
 			wp_die( esc_html__( 'Unauthorized action.', 'cobalt-bank-operations-payment-gateway' ), esc_html__( 'Security Error', 'cobalt-bank-operations-payment-gateway' ), 403 );
 		}
 		parent::process_admin_options();
@@ -91,7 +91,7 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 		$icons = array(
 			sprintf(
 				'<img class="%s" src="%s" alt="%s" />',
-				esc_attr( 'cobalt-bank-operations-gateway-icon' ),
+				esc_attr( 'cobalt-bank-operations-payment-gateway-icon' ),
 				esc_url( WC_HTTPS::force_https_url( $path . 'assets/images/clave.svg' ) ),
 				esc_attr__( 'Telered', 'cobalt-bank-operations-payment-gateway' )
 			),
@@ -177,7 +177,7 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 		<table class="form-table">
 			<?php
 			// Nonce field for security.
-			wp_nonce_field( 'cobalt_bank_operations_telered_save_settings', 'cobalt_bank_operations_telered_nonce' );
+			wp_nonce_field( 'cobalt_bank_operations_payment_gateway_telered_save_settings', 'cobalt_bank_operations_payment_gateway_telered_nonce' );
 
 			$this->generate_settings_html();
 			?>
@@ -226,12 +226,12 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 		// we need it to get any order detailes.
 		$order = wc_get_order( $order_id );
 
-		COBALT_BANK_OPERATIONS_Log::debug( "api_client_id=$this->api_client_id, api_client_secret=$this->api_client_secret" );
-		$cobalt_bank_operations_client = new COBALT_BANK_OPERATIONS_Client( $this->api_url, $this->api_client_id, $this->api_client_secret );
+		COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log::debug( "api_client_id=$this->api_client_id, api_client_secret=$this->api_client_secret" );
+		$cobalt_bank_operations_payment_gateway_client = new COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Client( $this->api_url, $this->api_client_id, $this->api_client_secret );
 		try {
-			$checkout = $cobalt_bank_operations_client->checkout( $order, COBALT_BANK_OPERATIONS_Constants::PAYMENT_TYPE_TELERED );
+			$checkout = $cobalt_bank_operations_payment_gateway_client->checkout( $order, COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Constants::COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_PAYMENT_TYPE_TELERED );
 
-			COBALT_BANK_OPERATIONS_Log::debug( 'Checkout data: ' . wp_json_encode( $checkout ) );
+			COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log::debug( 'Checkout data: ' . wp_json_encode( $checkout ) );
 
 			// Mark as on-hold (we're awaiting the cheque).
 			// $order->update_status('on-hold', __( 'Awaiting cheque payment', 'woocommerce' ));.
@@ -240,9 +240,9 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 				'result'   => 'success',
 				'redirect' => $this->api_url . '/checkout/' . $checkout['slug'],
 			);
-		} catch ( \COBALT_BANK_OPERATIONS_Exception $e ) {
+		} catch ( \COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Exception $e ) {
 			if ( ! $e->isSuccessResponse() ) {
-				COBALT_BANK_OPERATIONS_Log::debug( $e->getMessage() . ' - ' . wp_json_encode( $e->getResponse() ) );
+				COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log::debug( $e->getMessage() . ' - ' . wp_json_encode( $e->getResponse() ) );
 				wc_add_notice( 'No se ha podido generar el pago. Por favor contacte con el comercio.', 'error' );
 			} else {
 				wc_add_notice( 'No se ha podido procesar el pago. Por favor contacte con el comercio.', 'error' );
@@ -253,7 +253,7 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Callback function for show payment status
 	 */
-	public function callback_url() {
+	public function cobalt_bank_operations_payment_gateway_callback_url() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$order_id = isset( $_GET['oid'] ) ? absint( $_GET['oid'] ) : 0;
 
@@ -279,17 +279,17 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	public function webhook() {
+	public function cobalt_bank_operations_payment_gateway_webhook() {
 
 		$data_raw = json_decode( file_get_contents( 'php://input' ), true );
 		if ( ! is_array( $data_raw ) ) {
-			COBALT_BANK_OPERATIONS_Log::debug( 'Webhook error: payload no es JSON' );
+			COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log::debug( 'Webhook error: payload no es JSON' );
 			status_header( 400 );
 			exit;
 		}
 
-		$data = $this->cobalt_bank_operations_recursive_sanitize( $data_raw );
-		COBALT_BANK_OPERATIONS_Log::debug( 'Checkout data: ' . wp_json_encode( $checkout ) );
+		$data = $this->cobalt_bank_operations_payment_gateway_recursive_sanitize( $data_raw );
+		COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log::debug( 'Checkout data: ' . wp_json_encode( $checkout ) );
 
 		try {
 			$transaction = $data;
@@ -301,9 +301,9 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 			$success_status = array( 'authorized', 'notified' );
 
 			if ( $order ) {
-				$order->add_meta_data( 'cobalt_bank_operations_bank_code', $transaction['response_code'] ?? '' );
-				$order->add_meta_data( 'cobalt_bank_operations_transaction_id', $transaction['identifier'] ?? '' );
-				$order->add_meta_data( 'cobalt_bank_operations_bank_authorization', $transaction['authorization_number'] ?? '' );
+				$order->add_meta_data( 'cobalt_bank_operations_payment_gateway_bank_code', $transaction['response_code'] ?? '' );
+				$order->add_meta_data( 'cobalt_bank_operations_payment_gateway_transaction_id', $transaction['identifier'] ?? '' );
+				$order->add_meta_data( 'cobalt_bank_operations_payment_gateway_bank_authorization', $transaction['authorization_number'] ?? '' );
 
 				if ( in_array( $status, $success_status, true ) ) {
 					$order->update_status( 'completed', __( 'Pago completado', 'cobalt-bank-operations-payment-gateway' ) );
@@ -318,8 +318,8 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 
 			status_header( 204 );
 
-		} catch ( \COBALT_BANK_OPERATIONS_Exception $e ) {
-			COBALT_BANK_OPERATIONS_Log::debug( 'Error getting transaction ' . ( $data['tid'] ?? '' ) . ' - ' . $e->getMessage() );
+		} catch ( \COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Exception $e ) {
+			COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log::debug( 'Error getting transaction ' . ( $data['tid'] ?? '' ) . ' - ' . $e->getMessage() );
 			status_header( 400 );
 		}
 	}
@@ -330,10 +330,10 @@ class COBALT_BANK_OPERATIONS_Telered_Gateway extends WC_Payment_Gateway {
 	 * @param mixed $value Value to sanitize (array|string|scalar).
 	 * @return mixed Sanitized value.
 	 */
-	private function cobalt_bank_operations_recursive_sanitize( $value ) {
+	private function cobalt_bank_operations_payment_gateway_recursive_sanitize( $value ) {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $k => $v ) {
-				$value[ $k ] = $this->cobalt_bank_operations_recursive_sanitize( $v );
+				$value[ $k ] = $this->cobalt_bank_operations_payment_gateway_recursive_sanitize( $v );
 			}
 			return $value;
 		}

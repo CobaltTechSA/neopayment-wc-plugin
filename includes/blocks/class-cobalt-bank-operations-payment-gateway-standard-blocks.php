@@ -2,10 +2,10 @@
 /**
  * Blocks Standard class for CBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_Payment_Gateway
+ * @package COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY
  */
 
-namespace CBO\Blocks;
+namespace CobaltBankOperationsPaymentGateway\Blocks;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
@@ -16,14 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Integration for the CBO Standard Blocks payment method.
  */
-final class COBALT_BANK_OPERATIONS_Standard_Blocks extends AbstractPaymentMethodType {
+final class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Standard_Blocks extends AbstractPaymentMethodType {
 
 	/**
 	 * Payment method name for the CBO Standard gateway.
 	 *
 	 * @var string
 	 */
-	protected $name = 'cobalt_bank_operations_standard_gateway';
+	protected $name = 'cobalt_bank_operations_payment_gateway_standard_gateway';
 
 
 	/**
@@ -39,7 +39,7 @@ final class COBALT_BANK_OPERATIONS_Standard_Blocks extends AbstractPaymentMethod
 	 * @return array
 	 */
 	public function get_payment_method_script_handles() {
-		return array( 'cobalt-bank-operations-standard-blocks-js' );
+		return array( 'cobalt-bank-operations-payment-gateway-standard-blocks-js' );
 	}
 
 	/**
@@ -54,7 +54,7 @@ final class COBALT_BANK_OPERATIONS_Standard_Blocks extends AbstractPaymentMethod
 			'title'       => $gateway->title,
 			'description' => $gateway->description,
 			'supports'    => $gateway->supports,
-			'icons'       => $this->get_icons(),
+			'icons'       => $this->cobalt_bank_operations_payment_gateway_get_icons(),
 			'testmode'    => $gateway->testmode,
 		);
 	}
@@ -62,16 +62,16 @@ final class COBALT_BANK_OPERATIONS_Standard_Blocks extends AbstractPaymentMethod
 	/**
 	 * Card icons.
 	 */
-	protected function get_icons() {
+	protected function cobalt_bank_operations_payment_gateway_get_icons() {
 		return array(
 			array(
 				'id'  => 'visa',
-				'src' => COBALT_BANK_OPERATIONS_URL . 'assets/images/visa.svg',
+				'src' => COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_URL . 'assets/images/visa.svg',
 				'alt' => __( 'Visa', 'cobalt-bank-operations-payment-gateway' ),
 			),
 			array(
 				'id'  => 'mastercard',
-				'src' => COBALT_BANK_OPERATIONS_URL . 'assets/images/mastercard.svg',
+				'src' => COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_URL . 'assets/images/mastercard.svg',
 				'alt' => __( 'Mastercard', 'cobalt-bank-operations-payment-gateway' ),
 			),
 		);
