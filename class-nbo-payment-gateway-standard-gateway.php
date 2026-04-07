@@ -448,6 +448,7 @@ class NBO_PAYMENT_GATEWAY_Standard_Gateway extends WC_Payment_Gateway
 			return new WP_Error(
 				'refund_denied',
 				sprintf(
+					/* translators: %s is the refund status returned by the API */
 					__('Reembolso denegado (estado: %s).', 'nbo-payment-gateway'),
 					$status
 				)
