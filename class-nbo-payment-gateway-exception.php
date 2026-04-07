@@ -1,8 +1,8 @@
 <?php
 /**
- * Exceptions for CBO Payment Gateway plugin.
+ * Exceptions for NBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY
+ * @package NBO_PAYMENT_GATEWAY
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * CBO Exception helper for the payment gateway.
+ * NBO Exception helper for the payment gateway.
  */
-class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Exception extends Exception {
+class NBO_PAYMENT_GATEWAY_Exception extends Exception {
 
 	/**
 	 * Stores the response data associated with the exception.

@@ -1,24 +1,24 @@
 <?php
 /**
- * Standard class for CBO Payment Gateway plugin.
+ * Standard class for NBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_Payment_Gateway
+ * @package NBO_Payment_Gateway
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-require_once 'class-cobalt-bank-operations-constants.php';
-require_once 'cobalt-bank-operations-helpers.php';
-require_once 'class-cobalt-bank-operations-payment-gateway-cc.php';
+require_once 'class-nbo-constants.php';
+require_once 'nbo-helpers.php';
+require_once 'class-nbo-payment-gateway-cc.php';
 
 /**
  * Handles WooCommerce Standard integration for the payment gateway.
  */
-class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
+class NBO_Standard_Gateway extends WC_Payment_Gateway {
 
 	/**
-	 * Instance for the CBO Standard gateway.
+	 * Instance for the NBO Standard gateway.
 	 *
 	 * @var string
 	 */
@@ -29,11 +29,11 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 
-		$this->id                 = COBALT_BANK_OPERATIONS_Constants::STANDARD_GATEWAY_ID; // payment gateway plugin ID.
+		$this->id                 = NBO_Constants::STANDARD_GATEWAY_ID; // payment gateway plugin ID.
 		$this->icon               = ''; // URL of the icon that will be displayed on checkout page near your gateway name.
 		$this->has_fields         = true; // in case you need a custom credit card form.
-		$this->method_title       = 'CBO Standard Gateway';
-		$this->method_description = __( 'Acceptance of payments with Visa / Mastercard', 'cobalt-bank-operations-payment-gateway' ); // will be displayed on the options page.
+		$this->method_title       = 'NBO Standard Gateway';
+		$this->method_description = __( 'Acceptance of payments with Visa / Mastercard', 'nbo-payment-gateway' ); // will be displayed on the options page.
 
 		// gateways can support subscriptions, refunds, saved payment methods, but in this tutorial we begin with simple payments.
 		$this->supports = array(
@@ -71,9 +71,9 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 
 		// Add nonce field for security.
 		add_action(
-			'woocommerce_admin_field_cobalt_bank_operations_nonce',
+			'woocommerce_admin_field_nbo_nonce',
 			function () {
-				wp_nonce_field( 'cobalt_bank_operations_standard_save_settings', 'cobalt_bank_operations_standard_nonce' );
+				wp_nonce_field( 'nbo_standard_save_settings', 'nbo_standard_nonce' );
 			}
 		);
 	}
@@ -82,9 +82,9 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 	 * Process Admin Validate.
 	 */
 	public function process_admin_options() {
-		if ( ! isset( $_POST['cobalt_bank_operations_standard_nonce'] ) ||
-			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['cobalt_bank_operations_standard_nonce'] ) ), 'cobalt_bank_operations_standard_save_settings' ) ) {
-			wp_die( esc_html__( 'Unauthorized action.', 'cobalt-bank-operations-payment-gateway' ), esc_html__( 'Security Error', 'cobalt-bank-operations-payment-gateway' ), 403 );
+		if ( ! isset( $_POST['nbo_standard_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nbo_standard_nonce'] ) ), 'nbo_standard_save_settings' ) ) {
+			wp_die( esc_html__( 'Unauthorized action.', 'nbo-payment-gateway' ), esc_html__( 'Security Error', 'nbo-payment-gateway' ), 403 );
 		}
 		parent::process_admin_options();
 	}
@@ -98,15 +98,15 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		$icons = array(
 			sprintf(
 				'<img class="%s" src="%s" alt="%s" />',
-				esc_attr( 'cobalt-bank-operations-gateway-icon' ),
+				esc_attr( 'nbo-gateway-icon' ),
 				esc_url( WC_HTTPS::force_https_url( $path . 'assets/images/visa.svg' ) ),
-				esc_attr__( 'Visa', 'cobalt-bank-operations-payment-gateway' )
+				esc_attr__( 'Visa', 'nbo-payment-gateway' )
 			),
 			sprintf(
 				'<img class="%s" src="%s" alt="%s" />',
-				esc_attr( 'cobalt-bank-operations-gateway-icon' ),
+				esc_attr( 'nbo-gateway-icon' ),
 				esc_url( WC_HTTPS::force_https_url( $path . 'assets/images/mastercard.svg' ) ),
-				esc_attr__( 'Mastercard', 'cobalt-bank-operations-payment-gateway' )
+				esc_attr__( 'Mastercard', 'nbo-payment-gateway' )
 			),
 		);
 
@@ -126,57 +126,57 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 
 		$this->form_fields = array(
 			'enabled'                => array(
-				'title'       => __( 'Enable/Disable', 'cobalt-bank-operations-payment-gateway' ),
-				'label'       => __( 'Enable CBO Payment Gateway', 'cobalt-bank-operations-payment-gateway' ),
+				'title'       => __( 'Enable/Disable', 'nbo-payment-gateway' ),
+				'label'       => __( 'Enable NBO Payment Gateway', 'nbo-payment-gateway' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no',
 			),
 			'title'                  => array(
-				'title'       => __( 'Title', 'cobalt-bank-operations-payment-gateway' ),
+				'title'       => __( 'Title', 'nbo-payment-gateway' ),
 				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'cobalt-bank-operations-payment-gateway' ),
+				'description' => __( 'This controls the title which the user sees during checkout.', 'nbo-payment-gateway' ),
 				'default'     => 'VISA, Mastercard',
 				'desc_tip'    => true,
 			),
 			'description'            => array(
-				'title'       => __( 'Description', 'cobalt-bank-operations-payment-gateway' ),
+				'title'       => __( 'Description', 'nbo-payment-gateway' ),
 				'type'        => 'textarea',
-				'description' => __( 'This controls the description which the user sees during checkout.', 'cobalt-bank-operations-payment-gateway' ),
-				'default'     => __( 'Pay with your VISA or Mastercard card', 'cobalt-bank-operations-payment-gateway' ),
+				'description' => __( 'This controls the description which the user sees during checkout.', 'nbo-payment-gateway' ),
+				'default'     => __( 'Pay with your VISA or Mastercard card', 'nbo-payment-gateway' ),
 			),
 			'testmode'               => array(
-				'title'       => __( 'Test mode', 'cobalt-bank-operations-payment-gateway' ),
-				'label'       => __( 'Enable Test Mode', 'cobalt-bank-operations-payment-gateway' ),
+				'title'       => __( 'Test mode', 'nbo-payment-gateway' ),
+				'label'       => __( 'Enable Test Mode', 'nbo-payment-gateway' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Place the payment gateway in test mode using test API keys.', 'cobalt-bank-operations-payment-gateway' ),
+				'description' => __( 'Place the payment gateway in test mode using test API keys.', 'nbo-payment-gateway' ),
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
 			'test_api_url'           => array(
-				'title' => __( 'Test API URL', 'cobalt-bank-operations-payment-gateway' ),
+				'title' => __( 'Test API URL', 'nbo-payment-gateway' ),
 				'type'  => 'text',
 			),
 
 			'test_api_client_id'     => array(
-				'title' => __( 'Test API Client Id', 'cobalt-bank-operations-payment-gateway' ),
+				'title' => __( 'Test API Client Id', 'nbo-payment-gateway' ),
 				'type'  => 'text',
 			),
 			'test_api_client_secret' => array(
-				'title' => __( 'Test API Client Secret', 'cobalt-bank-operations-payment-gateway' ),
+				'title' => __( 'Test API Client Secret', 'nbo-payment-gateway' ),
 				'type'  => 'password',
 			),
 			'api_url'                => array(
-				'title' => __( 'Production API URL', 'cobalt-bank-operations-payment-gateway' ),
+				'title' => __( 'Production API URL', 'nbo-payment-gateway' ),
 				'type'  => 'text',
 			),
 
 			'api_client_id'          => array(
-				'title' => __( 'Production API Client Id', 'cobalt-bank-operations-payment-gateway' ),
+				'title' => __( 'Production API Client Id', 'nbo-payment-gateway' ),
 				'type'  => 'text',
 			),
 			'api_client_secret'      => array(
-				'title' => __( 'Production API Client Secret', 'cobalt-bank-operations-payment-gateway' ),
+				'title' => __( 'Production API Client Secret', 'nbo-payment-gateway' ),
 				'type'  => 'password',
 			),
 		);
@@ -192,7 +192,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		<table class="form-table">
 			<?php
 			// Nonce field for security.
-			wp_nonce_field( 'cobalt_bank_operations_standard_save_settings', 'cobalt_bank_operations_standard_nonce' );
+			wp_nonce_field( 'nbo_standard_save_settings', 'nbo_standard_nonce' );
 
 			$this->generate_settings_html();
 			?>
@@ -211,22 +211,22 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		}
 
 		$base = plugin_dir_url( __FILE__ ) . 'assets/js/';
-		$ver  = COBALT_BANK_OPERATIONS_Constants::PLUGIN_VERSION;
+		$ver  = NBO_Constants::PLUGIN_VERSION;
 
 		wp_register_script(
-			'cobalt-bank-operations-sweetalert',
+			'nbo-sweetalert',
 			plugins_url( 'assets/js/sweetAlert/sweetalert.min.js', __FILE__ ),
 			array(),
 			'2.1.2',
 			true
 		);
 
-		wp_enqueue_script( 'cobalt-bank-operations-sweetalert' );
+		wp_enqueue_script( 'nbo-sweetalert' );
 
 		// Script for the standard payment method.
 		wp_enqueue_script(
-			'cobalt-bank-operations-standard-payment',
-			$base . 'cobalt-bank-operations-payment-script.js',
+			'nbo-standard-payment',
+			$base . 'nbo-payment-script.js',
 			array( 'jquery' ),
 			$ver,
 			true
@@ -234,9 +234,9 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 
 		// Script for the 3DS popup + classic checkout.
 		wp_enqueue_script(
-			'cobalt-bank-operations-3ds-popup',
-			$base . 'cobalt-bank-operations-3ds-popup.js',
-			array( 'jquery', 'wc-checkout', 'cobalt-bank-operations-sweetalert' ),
+			'nbo-3ds-popup',
+			$base . 'nbo-3ds-popup.js',
+			array( 'jquery', 'wc-checkout', 'nbo-sweetalert' ),
 			$ver,
 			true
 		);
@@ -245,8 +245,8 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		$callback = esc_url_raw( home_url( "/wc-api/{$this->id}_status" ) );
 
 		wp_localize_script(
-			'cobalt-bank-operations-3ds-popup',
-			'CBO3DS',
+			'nbo-3ds-popup',
+			'NBO3DS',
 			array(
 				'url_ok' => $callback,
 				'url_ko' => $callback,
@@ -262,7 +262,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
-		$cc_form           = new COBALT_BANK_OPERATIONS_Payment_Gateway_CC();
+		$cc_form           = new NBO_Payment_Gateway_CC();
 		$cc_form->id       = $this->id;
 		$cc_form->supports = $this->supports;
 		$cc_form->form();
@@ -277,7 +277,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		if ( $this->description ) {
 			// you can instructions for test mode, I mean test card numbers etc.
 			if ( $this->testmode ) {
-				$this->description .= ' ' . __( 'TEST MODE ENABLED', 'cobalt-bank-operations-payment-gateway' ) . '.';
+				$this->description .= ' ' . __( 'TEST MODE ENABLED', 'nbo-payment-gateway' ) . '.';
 				$this->description  = trim( $this->description );
 			}
 			// display the description with <p> tags etc.
@@ -307,7 +307,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		// check if the nonce is set and valid.
 		if ( isset( $_POST[ $this->id . '_nonce' ] ) &&
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $this->id . '_nonce' ] ) ), $this->id . '_process_payment' ) ) {
-			wc_add_notice( __( 'Security check failed. Please try again.', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+			wc_add_notice( __( 'Security check failed. Please try again.', 'nbo-payment-gateway' ), 'error' );
 			return false;
 		}
 
@@ -340,24 +340,24 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		$valid = true;
 
 		$card_number = str_replace( ' ', '', $card_number );
-		if ( ! cobalt_bank_operations_is_valid_luhn( $card_number ) ) {
-			wc_add_notice( __( 'Invalid card number', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+		if ( ! nbo_is_valid_luhn( $card_number ) ) {
+			wc_add_notice( __( 'Invalid card number', 'nbo-payment-gateway' ), 'error' );
 			$valid = false;
 		}
 
 		$card_expiry = str_replace( ' ', '', $card_expiry );
-		if ( ! cobalt_bank_operations_is_valid_expiry_date( $card_expiry ) ) {
-			wc_add_notice( __( 'Invalid expiry date', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+		if ( ! nbo_is_valid_expiry_date( $card_expiry ) ) {
+			wc_add_notice( __( 'Invalid expiry date', 'nbo-payment-gateway' ), 'error' );
 			$valid = false;
 		}
 
-		if ( ! cobalt_bank_operations_is_valid_card_holder( $card_holder ) ) {
-			wc_add_notice( __( 'Invalid card holder', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+		if ( ! nbo_is_valid_card_holder( $card_holder ) ) {
+			wc_add_notice( __( 'Invalid card holder', 'nbo-payment-gateway' ), 'error' );
 			$valid = false;
 		}
 
-		if ( ! cobalt_bank_operations_is_valid_cvv( $card_cvv ) ) {
-			wc_add_notice( __( 'Invalid card code (CVV)', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+		if ( ! nbo_is_valid_cvv( $card_cvv ) ) {
+			wc_add_notice( __( 'Invalid card code (CVV)', 'nbo-payment-gateway' ), 'error' );
 			$valid = false;
 		}
 
@@ -374,11 +374,11 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_refund( $order_id, $amount = 0, $reason = '' ) {
 		if ( ! isset( $_REQUEST['security'] ) || ! check_ajax_referer( 'order-item', 'security', false ) ) {
-			COBALT_BANK_OPERATIONS_Log::debug( 'Refund rechazado: nonce inválido o ausente' );
-			return new WP_Error( 'invalid_nonce', __( 'Unauthorized action.', 'cobalt-bank-operations-payment-gateway' ) );
+			NBO_Log::debug( 'Refund rechazado: nonce inválido o ausente' );
+			return new WP_Error( 'invalid_nonce', __( 'Unauthorized action.', 'nbo-payment-gateway' ) );
 		}
 
-		$cobalt_bank_operations_client = new COBALT_BANK_OPERATIONS_Client(
+		$nbo_client = new NBO_Client(
 			$this->api_url,
 			$this->api_client_id,
 			$this->api_client_secret
@@ -387,27 +387,27 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		if ( ! $order_id || ! $amount ) {
 			return new WP_Error( 'invalid_order', 'Invalid order ID or amount' );
 		}
-		COBALT_BANK_OPERATIONS_Log::debug( "process_refund: order_id={$order_id}, amount={$amount}, reason={$reason}" );
+		NBO_Log::debug( "process_refund: order_id={$order_id}, amount={$amount}, reason={$reason}" );
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order ) {
 			return new WP_Error( 'invalid_order', 'Invalid order ID' );
 		}
-		$txn = $order->get_meta( 'cobalt_bank_operations_transaction_id' );
+		$txn = $order->get_meta( 'nbo_transaction_id' );
 		if ( ! $txn ) {
 			return new WP_Error( 'no_transaction_id', 'No transaction ID found for this order' );
 		}
 
 		try {
-			$data = $cobalt_bank_operations_client->refund( $txn, intval( $amount * 100 ) );
-		} catch ( COBALT_BANK_OPERATIONS_Exception $e ) {
-			COBALT_BANK_OPERATIONS_Log::debug( 'Error processing refund: ' . $e->getMessage() );
-			return new WP_Error( 'cobalt_bank_operations_refund_error', $e->getMessage() );
+			$data = $nbo_client->refund( $txn, intval( $amount * 100 ) );
+		} catch ( NBO_Exception $e ) {
+			NBO_Log::debug( 'Error processing refund: ' . $e->getMessage() );
+			return new WP_Error( 'nbo_refund_error', $e->getMessage() );
 		}
 
 		$order->add_order_note(
 			sprintf(
-				'Reembolso de %s realizado vía CBO (refund_id %s). Motivo: %s',
+				'Reembolso de %s realizado vía NBO (refund_id %s). Motivo: %s',
 				wc_price( $amount ),
 				$data['identifier'] ?? $data['id'] ?? '',
 				$reason
@@ -424,7 +424,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 	 * @return array Result data with 'result' and 'redirect' keys.
 	 */
 	public function process_payment( $order_id ) {
-		   COBALT_BANK_OPERATIONS_Log::debug( 'process_payment: ' . $order_id );
+		   NBO_Log::debug( 'process_payment: ' . $order_id );
 
 			$order = wc_get_order( $order_id );
 
@@ -436,10 +436,10 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 
 
 		// we need it to get any order details.
-		COBALT_BANK_OPERATIONS_Log::debug( 'process_payment: ' . $order_id );
+		NBO_Log::debug( 'process_payment: ' . $order_id );
 		$order = wc_get_order( $order_id );
 
-		$cobalt_bank_operations_client = new COBALT_BANK_OPERATIONS_Client( $this->api_url, $this->api_client_id, $this->api_client_secret );
+		$nbo_client = new NBO_Client( $this->api_url, $this->api_client_id, $this->api_client_secret );
 		try {
 			// detect if the request is from a block-based checkout or classic checkout.
 			$raw_input = file_get_contents( 'php://input' );
@@ -459,11 +459,11 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 					}
 				}
 			}
-			$cobalt_bank_operations_is_block = ! empty( $body['payment_data'] );
+			$nbo_is_block = ! empty( $body['payment_data'] );
 
 			// if the request is from a block-based checkout, we need to handle it differently.
-			if ( $cobalt_bank_operations_is_block ) {
-				COBALT_BANK_OPERATIONS_Log::debug( 'Origin: Checkout Based Blocks' );
+			if ( $nbo_is_block ) {
+				NBO_Log::debug( 'Origin: Checkout Based Blocks' );
 				$pdata    = $body['payment_data'];
 				$billing  = $body['billing_address'] ?? array();
 				$shipping = $body['shipping_address'] ?? array();
@@ -474,7 +474,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 						$data[ $field['key'] ] = wc_clean( $field['value'] );
 					}
 				}
-				COBALT_BANK_OPERATIONS_Log::debug( ' data: ' . wp_json_encode( $data ) );
+				NBO_Log::debug( ' data: ' . wp_json_encode( $data ) );
 
 				// card details.
 				$card_number = $data['card_number'] ?? '';
@@ -499,20 +499,20 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 					'email'                    => $billing['email'] ?? $order->get_billing_email(),
 					'billAddrCountry'          => $this->get_iso_alpha3_cc( $billing['country'] ?? $order->get_billing_country() ),
 					'billAddrCity'             => $billing['city'] ?? $order->get_billing_city(),
-					'billAddrState'            => cobalt_bank_operations_parse_state( $billing['state'] ?? $order->get_billing_state() ),
+					'billAddrState'            => nbo_parse_state( $billing['state'] ?? $order->get_billing_state() ),
 					'billAddrLine1'            => $billing['address_1'] ?? $order->get_billing_address_1(),
 					'billAddrLine2'            => 'none',
 					'billAddrPostCode'         => $billing['postcode'] ?? $order->get_billing_postcode(),
 					'shipAddrCountry'          => $this->get_iso_alpha3_cc( $shipping['country'] ?? $order->get_shipping_country() ),
 					'shipAddrCity'             => $shipping['city'] ?? $order->get_shipping_city(),
-					'shipAddrState'            => cobalt_bank_operations_parse_state( $shipping['state'] ?? $order->get_shipping_state() ),
+					'shipAddrState'            => nbo_parse_state( $shipping['state'] ?? $order->get_shipping_state() ),
 					'shipAddrLine1'            => $shipping['address_1'] ?? $order->get_shipping_address_1(),
 					'shipAddrLine2'            => 'none',
 					'shipAddrPostCode'         => $shipping['postcode'] ?? $order->get_shipping_postcode(),
 				);
 
 			} else {
-				COBALT_BANK_OPERATIONS_Log::debug( 'Origin: Classic Checkout' );
+				NBO_Log::debug( 'Origin: Classic Checkout' );
 				$card_number = sanitize_text_field( wp_unslash( $_POST[ $this->id . '-card-number' ] ?? '' ) );
 				$card_expiry = sanitize_text_field( wp_unslash( $_POST[ $this->id . '-card-expiry' ] ?? '' ) );
 				$card_cvc    = sanitize_text_field( wp_unslash( $_POST[ $this->id . '-card-cvc' ] ?? '' ) );
@@ -523,10 +523,10 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 
 				$three_ds_params = $this->get3DSParams();
 			}
-			COBALT_BANK_OPERATIONS_Log::debug( 'three_ds_params=' . wp_json_encode( $three_ds_params ) );
+			NBO_Log::debug( 'three_ds_params=' . wp_json_encode( $three_ds_params ) );
 
-			$transaction = $cobalt_bank_operations_client->sale( $order, $card_number, $card_expiry, $card_cvc, $card_holder, $three_ds_params );
-			COBALT_BANK_OPERATIONS_Log::debug( 'Checkout data: ' . wp_json_encode( $transaction ) );
+			$transaction = $nbo_client->sale( $order, $card_number, $card_expiry, $card_cvc, $card_holder, $three_ds_params );
+			NBO_Log::debug( 'Checkout data: ' . wp_json_encode( $transaction ) );
 
 			if ( 'authenticating' === ( $transaction['status'] ?? '' ) ) {
 				return array(
@@ -544,17 +544,17 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 				);
 
 			} elseif ( 'refused' === ( $transaction['status'] ?? '' ) ) {
-				wc_add_notice( __( 'We were unable to complete the payment. Please contact with commerce.', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'We were unable to complete the payment. Please contact with commerce.', 'nbo-payment-gateway' ), 'error' );
 			} else {
-				wc_add_notice( __( 'We were unable to complete the payment. Please check your card details or contact your bank.', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'We were unable to complete the payment. Please check your card details or contact your bank.', 'nbo-payment-gateway' ), 'error' );
 
 			}
-		} catch ( \COBALT_BANK_OPERATIONS_Exception $e ) {
+		} catch ( \NBO_Exception $e ) {
 			if ( ! $e->isSuccessResponse() ) {
-				COBALT_BANK_OPERATIONS_Log::debug( $e->getMessage() . ' - ' . wp_json_encode( $e->getResponse() ) );
-				wc_add_notice( __( 'Cannot generate the payment. Please, contact with commerce.', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+				NBO_Log::debug( $e->getMessage() . ' - ' . wp_json_encode( $e->getResponse() ) );
+				wc_add_notice( __( 'Cannot generate the payment. Please, contact with commerce.', 'nbo-payment-gateway' ), 'error' );
 			} else {
-				wc_add_notice( __( 'Cannot process the payment. Please, contact with commerce.', 'cobalt-bank-operations-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'Cannot process the payment. Please, contact with commerce.', 'nbo-payment-gateway' ), 'error' );
 			}
 		}
 	}
@@ -607,7 +607,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		$three_ds_params['billAddrCity'] = ( '' !== $billing_city ) ? $billing_city : 'digital';
 
 		$billing_state                    = isset( $_POST['billing_state'] ) ? sanitize_text_field( wp_unslash( $_POST['billing_state'] ) ) : '';
-		$three_ds_params['billAddrState'] = ( '' !== $billing_state ) ? cobalt_bank_operations_parse_state( $billing_state ) : 'DIG';
+		$three_ds_params['billAddrState'] = ( '' !== $billing_state ) ? nbo_parse_state( $billing_state ) : 'DIG';
 
 		$billing_line1                    = isset( $_POST['billing_address_1'] ) ? sanitize_text_field( wp_unslash( $_POST['billing_address_1'] ) ) : '';
 		$three_ds_params['billAddrLine1'] = ( '' !== $billing_line1 ) ? $billing_line1 : 'digital';
@@ -633,7 +633,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		$three_ds_params['shipAddrCity'] = $shipping_city;
 
 		$shipping_state                   = isset( $_POST['shipping_state'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_state'] ) ) : '';
-		$three_ds_params['shipAddrState'] = ( '' !== $shipping_state ) ? cobalt_bank_operations_parse_state( $shipping_state ) : 'DIG';
+		$three_ds_params['shipAddrState'] = ( '' !== $shipping_state ) ? nbo_parse_state( $shipping_state ) : 'DIG';
 
 		$shipping_line1 = isset( $_POST['shipping_address_1'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_address_1'] ) ) : '';
 		if ( '' === $shipping_line1 ) {
@@ -667,19 +667,19 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 
 		$status         = $transaction['status'];
 		$success_status = array( 'authorized', 'notified' );
-		$order->add_meta_data( 'cobalt_bank_operations_bank_code', $transaction['response_code'] );
-		$order->add_meta_data( 'cobalt_bank_operations_transaction_id', $transaction['identifier'] );
-		$order->add_meta_data( 'cobalt_bank_operations_bank_authorization', $transaction['authorization_number'] );
+		$order->add_meta_data( 'nbo_bank_code', $transaction['response_code'] );
+		$order->add_meta_data( 'nbo_transaction_id', $transaction['identifier'] );
+		$order->add_meta_data( 'nbo_bank_authorization', $transaction['authorization_number'] );
 
 		if ( in_array( $status, $success_status, true ) ) {
-			$order->update_status( 'completed', __( 'Payment completed', 'cobalt-bank-operations-payment-gateway' ) );
+			$order->update_status( 'completed', __( 'Payment completed', 'nbo-payment-gateway' ) );
 			$order->payment_complete( $transaction['identifier'] );
 			if ( function_exists( 'WC' ) && WC()->cart ) {
 				WC()->cart->empty_cart();
 			}
 			return true;
 		} else {
-			$order->update_status( 'failed', __( 'Failed payment', 'cobalt-bank-operations-payment-gateway' ) );
+			$order->update_status( 'failed', __( 'Failed payment', 'nbo-payment-gateway' ) );
 		}
 
 		return false;
@@ -699,47 +699,47 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 
 		$success = (bool) ( $order && $order->is_paid() );
 
-		COBALT_BANK_OPERATIONS_Log::debug( "callback_url: order_id=$order_id, target=$target" );
+		NBO_Log::debug( "callback_url: order_id=$order_id, target=$target" );
 
-		wp_register_script( 'cobalt-bank-operations-3ds-handler', '', array(), '1.0', true );
-		wp_enqueue_script( 'cobalt-bank-operations-3ds-handler' );
+		wp_register_script( 'nbo-3ds-handler', '', array(), '1.0', true );
+		wp_enqueue_script( 'nbo-3ds-handler' );
 
 		$script_data = sprintf(
-			'var cbo3dsData = { target: %s, success: %s };',
+			'var nbo3dsData = { target: %s, success: %s };',
 			wp_json_encode( $target ),
 			$success ? 'true' : 'false'
 		);
-		wp_add_inline_script( 'cobalt-bank-operations-3ds-handler', $script_data, 'before' );
+		wp_add_inline_script( 'nbo-3ds-handler', $script_data, 'before' );
 
 		$main_script = '
 			document.addEventListener("DOMContentLoaded", function() {
 				if (window.opener && !window.opener.closed) {
 					window.opener.postMessage({
-						cbo3ds: cbo3dsData.success ? "success" : "fail",
-						redirect_to: cbo3dsData.target,
-						source: "cobalt_bank_operations_3ds_handler"
+						nbo3ds: nbo3dsData.success ? "success" : "fail",
+						redirect_to: nbo3dsData.target,
+						source: "nbo_3ds_handler"
 					}, "' . esc_url( home_url( '/' ) ) . '");
 					setTimeout(function() { window.close(); }, 300);
 				} else {
-					window.location.href = cbo3dsData.target;
+					window.location.href = nbo3dsData.target;
 				}
 			});
 		';
-		wp_add_inline_script( 'cobalt-bank-operations-3ds-handler', $main_script );
+		wp_add_inline_script( 'nbo-3ds-handler', $main_script );
 
 		?>
 		<!DOCTYPE html>
 		<html <?php language_attributes(); ?>>
 		<head>
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
-			<title><?php esc_html_e( 'Processing 3DS…', 'cobalt-bank-operations-payment-gateway' ); ?></title>
+			<title><?php esc_html_e( 'Processing 3DS…', 'nbo-payment-gateway' ); ?></title>
 			<?php wp_head(); ?>
 		</head>
 		<body>
-			<div class="cobalt-bank-operations-3ds-loading">
-				<div class="cobalt-bank-operations-3ds-spinner"></div>
+			<div class="nbo-3ds-loading">
+				<div class="nbo-3ds-spinner"></div>
 				<noscript>
-					<p><?php esc_html_e( 'Please enable JavaScript to complete your payment. You will be automatically redirected...', 'cobalt-bank-operations-payment-gateway' ); ?></p>
+					<p><?php esc_html_e( 'Please enable JavaScript to complete your payment. You will be automatically redirected...', 'nbo-payment-gateway' ); ?></p>
 					<meta http-equiv="refresh" content="3;url=<?php echo esc_url( $target ); ?>">
 				</noscript>
 			</div>
@@ -758,7 +758,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 		$data      = json_decode( $raw_input, true );
 
 		if ( ! is_array( $data ) ) {
-			COBALT_BANK_OPERATIONS_Log::debug( 'Webhook error: input no es array válido' );
+			NBO_Log::debug( 'Webhook error: input no es array válido' );
 			status_header( 400 );
 			exit;
 		}
@@ -769,14 +769,14 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 			}
 		}
 
-		COBALT_BANK_OPERATIONS_Log::debug( 'Webhook recibido: ' . wp_json_encode( $data ) );
+		NBO_Log::debug( 'Webhook recibido: ' . wp_json_encode( $data ) );
 
 		try {
 			$valid_transaction = $this->validate_payment( $data );
 			status_header( 204 );
-		} catch ( \COBALT_BANK_OPERATIONS_Exception $e ) {
+		} catch ( \NBO_Exception $e ) {
 			$tid = isset( $data['tid'] ) ? $data['tid'] : 'N/A';
-			COBALT_BANK_OPERATIONS_Log::debug( "Error en webhook. TID: $tid - " . $e->getMessage() );
+			NBO_Log::debug( "Error en webhook. TID: $tid - " . $e->getMessage() );
 			status_header( 400 );
 		}
 		exit;
@@ -789,7 +789,7 @@ class COBALT_BANK_OPERATIONS_Standard_Gateway extends WC_Payment_Gateway {
 	 * @return string ISO 3166-1 alpha-3 code (e.g. 'USA'). Returns the input if not mapped.
 	 */
 	public function get_iso_alpha3_cc( $country ) {
-		return COBALT_BANK_OPERATIONS_Constants::COUNTRIES[ $country ] ?? $country;
+		return NBO_Constants::COUNTRIES[ $country ] ?? $country;
 	}
 
 	/**

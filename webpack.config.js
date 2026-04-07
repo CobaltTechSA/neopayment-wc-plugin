@@ -4,8 +4,8 @@ const DependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extra
 module.exports = {
     mode: process.env.NODE_ENV || 'development',
     entry: {
-        'cobalt-bank-operations-payment-gateway-standard': './assets/js/blocks/cobalt-bank-operations-payment-gateway-standard.js',
-        'cobalt-bank-operations-payment-gateway-telered': './assets/js/blocks/cobalt-bank-operations-payment-gateway-telered.js',
+        'nbo-payment-gateway-standard': './assets/js/blocks/nbo-payment-gateway-standard.js',
+        'nbo-payment-gateway-telered': './assets/js/blocks/nbo-payment-gateway-telered.js',
     },
     output: {
         path: path.resolve(__dirname, 'build'),

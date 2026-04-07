@@ -1,4 +1,4 @@
-.cobalt-bank-operations-payment-gateway-card-fields {
+.nbo-payment-gateway-card-fields {
 	padding: 10px;
 	display: flex;
 	flex-direction: column;
@@ -6,26 +6,26 @@
 	max-width: 100%;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields__row {
+.nbo-payment-gateway-card-fields__row {
 	display: flex;
 	gap: 15px;
 	flex-wrap: wrap;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields__group {
+.nbo-payment-gateway-card-fields__group {
 	flex: 1 1 1px;
 	display: flex;
 	flex-direction: column;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields input {
+.nbo-payment-gateway-card-fields input {
 	padding: 8px;
 	font-size: 14px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields__error {
+.nbo-payment-gateway-card-fields__error {
 	color: #e74c3c;
 	font-size: 0.875rem;
 	margin-top: 0.25rem;
@@ -41,7 +41,7 @@
 	font-size: 1rem;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields {
+.nbo-payment-gateway-card-fields {
 	padding: 10px;
 	display: flex;
 	flex-direction: column;
@@ -49,26 +49,26 @@
 	max-width: 100%;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields__row {
+.nbo-payment-gateway-card-fields__row {
 	display: flex;
 	gap: 15px;
 	flex-wrap: wrap;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields__group {
+.nbo-payment-gateway-card-fields__group {
 	flex: 1 1 1px;
 	display: flex;
 	flex-direction: column;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields input {
+.nbo-payment-gateway-card-fields input {
 	padding: 8px;
 	font-size: 14px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
-.cobalt-bank-operations-payment-gateway-card-fields__error {
+.nbo-payment-gateway-card-fields__error {
 	color: #e74c3c;
 	font-size: 0.875rem;
 	margin-top: 0.25rem;
@@ -83,20 +83,20 @@
 	font-size: 1rem;
 }
 
-.cobalt-bank-operations-payment-label {
+.nbo-payment-label {
 	display: flex;
 	align-items: center;
 	width: 100%;
 	padding-right: 1rem;
 }
 
-.cobalt-bank-operations-payment-label__icons {
+.nbo-payment-label__icons {
 	display: flex;
 	gap: 8px;
 	margin-left: auto;
 }
 
-.cobalt-bank-operations-payment-label__icon {
+.nbo-payment-label__icon {
 	width: 24px;
 	height: auto;
 }

@@ -1,28 +1,28 @@
 import { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import CardFields from './components/cobalt-bank-operations-payment-gateway-card-fields';
+import CardFields from './components/nbo-payment-gateway-card-fields';
 import visaUrl from '../../images/visa.svg';
 import mcUrl from '../../images/mastercard.svg';
 import {
   validateLuhn,
   validateExpiry,
   validateCvc
-} from '../includes/cobalt-bank-operations-payment-gateway-validators';
+} from '../includes/nbo-payment-gateway-validators';
 
 const Label = ({ label }) => (
-  <div className="cobalt-bank-operations-payment-label">
-    <span>{ __( 'Card (Visa/Mastercard)', 'cobalt-bank-operations-payment-gateway' ) }</span>
-    <div className="cobalt-bank-operations-payment-label__icons">
+  <div className="nbo-payment-label">
+    <span>{ __( 'Card (Visa/Mastercard)', 'nbo-payment-gateway' ) }</span>
+    <div className="nbo-payment-label__icons">
       <img
         src={ visaUrl }
         alt="Visa"
-        className="cobalt-bank-operations-payment-label__icon"
+        className="nbo-payment-label__icon"
       />
       <img
         src={ mcUrl }
         alt="Mastercard"
-        className="cobalt-bank-operations-payment-label__icon"
+        className="nbo-payment-label__icon"
       />
     </div>
   </div>
@@ -64,25 +64,25 @@ function PaymentMethod({
       if (!validateLuhn(cleanNumber)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid card number', 'cobalt-bank-operations-payment-gateway'),
+          message: __('Invalid card number', 'nbo-payment-gateway'),
         };
       }
       if (!validateExpiry(card_expiry)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid date', 'cobalt-bank-operations-payment-gateway'),
+          message: __('Invalid date', 'nbo-payment-gateway'),
         };
       }
       if (!validateCvc(card_cvc)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid CVC', 'cobalt-bank-operations-payment-gateway'),
+          message: __('Invalid CVC', 'nbo-payment-gateway'),
         };
       }
       if (!card_holder) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Holder name is required', 'cobalt-bank-operations-payment-gateway'),
+          message: __('Holder name is required', 'nbo-payment-gateway'),
         };
       }
       return {
@@ -104,9 +104,9 @@ function PaymentMethod({
 };
 
 registerPaymentMethod({
-  name: 'cobalt_bank_operations_payment_gateway_standard_gateway',
+  name: 'nbo_payment_gateway_standard_gateway',
   label: <Label />,
-  ariaLabel: __('CBO Standard Gateway', 'cobalt-bank-operations-payment-gateway'),
+  ariaLabel: __('NBO Standard Gateway', 'nbo-payment-gateway'),
   canMakePayment: () => true,
   content: <PaymentMethod />,
   edit: <PaymentMethod />,

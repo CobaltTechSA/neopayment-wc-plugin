@@ -1,8 +1,8 @@
 <?php
 /**
- * Logger helper for CBO Payment Gateway plugin.
+ * Logger helper for NBO Payment Gateway plugin.
  *
- * @package COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY
+ * @package NBO_PAYMENT_GATEWAY
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles WooCommerce logs for the payment gateway.
  */
-class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log {
+class NBO_PAYMENT_GATEWAY_Log {
 
 	/**
 	 * Logger instance.
@@ -43,7 +43,7 @@ class COBALT_BANK_OPERATIONS_PAYMENT_GATEWAY_Log {
 	 */
 	public static function log( $level, $message ) {
 		$logger  = self::get_instance();
-		$context = array( 'source' => 'cobalt-bank-operations-payment-gateway' );
+		$context = array( 'source' => 'nbo-payment-gateway' );
 		$logger->{$level}( $message, $context );
 	}
 
