@@ -104,6 +104,8 @@ class NBO_PAYMENT_GATEWAY_Telered_Gateway extends WC_Payment_Gateway {
 
 		$pay_icons .= '</div>';
 
+		// WooCommerce core filter name; cannot be prefixed.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 		return apply_filters( 'woocommerce_gateway_icon', $pay_icons, $this->id );
 	}
 	/**

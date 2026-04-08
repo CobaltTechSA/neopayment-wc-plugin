@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Credic Card class for NBO Payment Gateway plugin.
  *
@@ -139,16 +143,23 @@ class NBO_PAYMENT_GATEWAY_CC extends WC_Payment_Gateway_CC {
 
 		$default_fields['card-holder-field'] = $card_holder_field;
 
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core filter.
 		$fields = wp_parse_args( array(), apply_filters( 'woocommerce_credit_card_form_fields', $default_fields, $this->id ) );
 		?>
 
 		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class="wc-credit-card-form wc-payment-form">
-			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
+			<?php
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core action.
+			do_action( 'woocommerce_credit_card_form_start', $this->id );
+			?>
 			<?php foreach ( $fields as $field ) : ?>
 				<?php echo wp_kses( $field, $allowed_fields_html ); ?>
 			<?php endforeach; ?>
 
-			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
+			<?php
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core action.
+			do_action( 'woocommerce_credit_card_form_end', $this->id );
+			?>
 			<div class="clear"></div>
 		</fieldset>
 

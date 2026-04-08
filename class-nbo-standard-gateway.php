@@ -14,8 +14,10 @@ require_once 'class-nbo-payment-gateway-cc.php';
 
 /**
  * Handles WooCommerce Standard integration for the payment gateway.
+ *
+ * Suffix avoids clashing with {@see NBO_PAYMENT_GATEWAY_Standard_Gateway} if both files were ever loaded.
  */
-class NBO_Standard_Gateway extends WC_Payment_Gateway {
+class NBO_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gateway {
 
 	/**
 	 * Instance for the NBO Standard gateway.
@@ -117,6 +119,8 @@ class NBO_Standard_Gateway extends WC_Payment_Gateway {
 
 		$pay_icons .= '</div>';
 
+		// WooCommerce core filter name; cannot be prefixed.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 		return apply_filters( 'woocommerce_gateway_icon', $pay_icons, $this->id );
 	}
 	/**
@@ -424,16 +428,25 @@ class NBO_Standard_Gateway extends WC_Payment_Gateway {
 	 * @return array Result data with 'result' and 'redirect' keys.
 	 */
 	public function process_payment( $order_id ) {
-		   NBO_Log::debug( 'process_payment: ' . $order_id );
+		NBO_Log::debug( 'process_payment: ' . $order_id );
 
-			$order = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
-			if ( ! $order ) {
-				return [
+		if ( ! $order ) {
+			return array(
+				'result' => 'failure',
+			);
+		}
+
+		// Verify gateway payment nonce before reading POST (classic checkout).
+		if ( isset( $_POST[ $this->id . '_nonce' ] ) ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $this->id . '_nonce' ] ) ), $this->id . '_process_payment' ) ) {
+				wc_add_notice( __( 'Security check failed. Please try again.', 'nbo-payment-gateway' ), 'error' );
+				return array(
 					'result' => 'failure',
-				];
+				);
 			}
-
+		}
 
 		// we need it to get any order details.
 		NBO_Log::debug( 'process_payment: ' . $order_id );

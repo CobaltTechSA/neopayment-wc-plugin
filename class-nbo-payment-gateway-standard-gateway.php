@@ -124,6 +124,8 @@ class NBO_PAYMENT_GATEWAY_Standard_Gateway extends WC_Payment_Gateway
 
 		$pay_icons .= '</div>';
 
+		// WooCommerce core filter name; cannot be prefixed.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 		return apply_filters('woocommerce_gateway_icon', $pay_icons, $this->id);
 	}
 	/**
@@ -354,23 +356,23 @@ class NBO_PAYMENT_GATEWAY_Standard_Gateway extends WC_Payment_Gateway
 		$valid = true;
 
 		$card_number = str_replace(' ', '', $card_number);
-		if (! nbo_payment_gateway_is_valid_luhn($card_number)) {
+		if (! NBO_PAYMENT_GATEWAY_Helpers::is_valid_luhn($card_number)) {
 			wc_add_notice(__('Invalid card number', 'nbo-payment-gateway'), 'error');
 			$valid = false;
 		}
 
 		$card_expiry = str_replace(' ', '', $card_expiry);
-		if (! nbo_payment_gateway_is_valid_expiry_date($card_expiry)) {
+		if (! NBO_PAYMENT_GATEWAY_Helpers::is_valid_expiry_date($card_expiry)) {
 			wc_add_notice(__('Invalid expiry date', 'nbo-payment-gateway'), 'error');
 			$valid = false;
 		}
 
-		if (! nbo_payment_gateway_is_valid_card_holder($card_holder)) {
+		if (! NBO_PAYMENT_GATEWAY_Helpers::is_valid_card_holder($card_holder)) {
 			wc_add_notice(__('Invalid card holder', 'nbo-payment-gateway'), 'error');
 			$valid = false;
 		}
 
-		if (! nbo_payment_gateway_is_valid_cvv($card_cvv)) {
+		if (! NBO_PAYMENT_GATEWAY_Helpers::is_valid_cvv($card_cvv)) {
 			wc_add_notice(__('Invalid card code (CVV)', 'nbo-payment-gateway'), 'error');
 			$valid = false;
 		}
@@ -536,13 +538,13 @@ class NBO_PAYMENT_GATEWAY_Standard_Gateway extends WC_Payment_Gateway
 					'email'                    => $billing['email'] ?? $order->get_billing_email(),
 					'billAddrCountry'          => $this->nbo_payment_gateway_get_iso_alpha3_cc($billing['country'] ?? $order->get_billing_country()),
 					'billAddrCity'             => $billing['city'] ?? $order->get_billing_city(),
-					'billAddrState'            => nbo_payment_gateway_parse_state($billing['state'] ?? $order->get_billing_state()),
+					'billAddrState'            => NBO_PAYMENT_GATEWAY_Helpers::parse_state($billing['state'] ?? $order->get_billing_state()),
 					'billAddrLine1'            => $billing['address_1'] ?? $order->get_billing_address_1(),
 					'billAddrLine2'            => 'none',
 					'billAddrPostCode'         => $billing['postcode'] ?? $order->get_billing_postcode(),
 					'shipAddrCountry'          => $this->nbo_payment_gateway_get_iso_alpha3_cc($shipping['country'] ?? $order->get_shipping_country()),
 					'shipAddrCity'             => $shipping['city'] ?? $order->get_shipping_city(),
-					'shipAddrState'            => nbo_payment_gateway_parse_state($shipping['state'] ?? $order->get_shipping_state()),
+					'shipAddrState'            => NBO_PAYMENT_GATEWAY_Helpers::parse_state($shipping['state'] ?? $order->get_shipping_state()),
 					'shipAddrLine1'            => $shipping['address_1'] ?? $order->get_shipping_address_1(),
 					'shipAddrLine2'            => 'none',
 					'shipAddrPostCode'         => $shipping['postcode'] ?? $order->get_shipping_postcode(),
@@ -636,7 +638,7 @@ class NBO_PAYMENT_GATEWAY_Standard_Gateway extends WC_Payment_Gateway
 		$three_ds_params['billAddrCity'] = ('' !== $billing_city) ? $billing_city : 'digital';
 
 		$billing_state                    = isset($_POST['billing_state']) ? sanitize_text_field(wp_unslash($_POST['billing_state'])) : '';
-		$three_ds_params['billAddrState'] = ('' !== $billing_state) ? nbo_payment_gateway_parse_state($billing_state) : 'DIG';
+		$three_ds_params['billAddrState'] = ('' !== $billing_state) ? NBO_PAYMENT_GATEWAY_Helpers::parse_state($billing_state) : 'DIG';
 
 		$billing_line1                    = isset($_POST['billing_address_1']) ? sanitize_text_field(wp_unslash($_POST['billing_address_1'])) : '';
 		$three_ds_params['billAddrLine1'] = ('' !== $billing_line1) ? $billing_line1 : 'digital';
@@ -662,7 +664,7 @@ class NBO_PAYMENT_GATEWAY_Standard_Gateway extends WC_Payment_Gateway
 		$three_ds_params['shipAddrCity'] = $shipping_city;
 
 		$shipping_state                   = isset($_POST['shipping_state']) ? sanitize_text_field(wp_unslash($_POST['shipping_state'])) : '';
-		$three_ds_params['shipAddrState'] = ('' !== $shipping_state) ? nbo_payment_gateway_parse_state($shipping_state) : 'DIG';
+		$three_ds_params['shipAddrState'] = ('' !== $shipping_state) ? NBO_PAYMENT_GATEWAY_Helpers::parse_state($shipping_state) : 'DIG';
 
 		$shipping_line1 = isset($_POST['shipping_address_1']) ? sanitize_text_field(wp_unslash($_POST['shipping_address_1'])) : '';
 		if ('' === $shipping_line1) {
