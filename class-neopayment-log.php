@@ -1,8 +1,8 @@
 <?php
 /**
- * Logger helper for Neopayment Payment Gateway plugin.
+ * Logger helper for Neopayment plugin.
  *
- * @package NEOPAYMENT_PAYMENT_GATEWAY
+ * @package NEOPAYMENT
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles WooCommerce logs for the payment gateway.
  */
-class NEOPAYMENT_PAYMENT_GATEWAY_Log {
+class NEOPAYMENT_Log {
 
 	/**
 	 * Logger instance.
@@ -43,7 +43,7 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Log {
 	 */
 	public static function log( $level, $message ) {
 		$logger  = self::get_instance();
-		$context = array( 'source' => 'neopayment-payment-gateway' );
+		$context = array( 'source' => 'neopayment' );
 		$logger->{$level}( $message, $context );
 	}
 

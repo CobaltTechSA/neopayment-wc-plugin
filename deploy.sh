@@ -1,7 +1,7 @@
 # !/bin/bash
 
 
-NAME=neopayment-payment-gateway
+NAME=neopayment
 VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
 DEPLOY_DIR=$(pwd)/deploy/$NAME
 ZIP_FILE=$(pwd)/deploy/neopayment-plugin-woocommerce-$VERSION.zip

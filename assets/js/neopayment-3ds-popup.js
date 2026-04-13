@@ -10,7 +10,7 @@ jQuery(
 		function testPopupEnabled() {
 			const w = window.open('', '_blank', 'width=100,height=100');
 			if (!w) {
-				alert(__('Habilite las ventanas emergentes en su navegador y vuelva a intentarlo.', 'neopayment-payment-gateway'));
+				alert(__('Habilite las ventanas emergentes en su navegador y vuelva a intentarlo.', 'neopayment'));
 				return false;
 			}
 			w.close();
@@ -139,15 +139,15 @@ jQuery(
 			if (!popup) {
 				console.warn('[NEOPAYMENT-3DS] The browser blocked the popup.');
 				showPopupWarning(
-					__('Error', 'neopayment-payment-gateway'),
-					__('No se pudo abrir la ventana emergente. Active las ventanas emergentes en su navegador y vuelva a intentarlo.', 'neopayment-payment-gateway')
+					__('Error', 'neopayment'),
+					__('No se pudo abrir la ventana emergente. Active las ventanas emergentes en su navegador y vuelva a intentarlo.', 'neopayment')
 				);
 			}
 		}
 		function showPopupWarning(title, text) {
 			console.warn(`[NEOPAYMENT - 3DS] ${title}: ${text}`);
 			if (typeof swal === 'function') {
-				window.swal({ title, text, icon: 'warning', button: __('Entendido', 'neopayment-payment-gateway') }).then(
+				window.swal({ title, text, icon: 'warning', button: __('Entendido', 'neopayment') }).then(
 					() => {
 						location.reload();
 					}
@@ -169,8 +169,8 @@ jQuery(
 					} else {
 						console.warn('[NEOPAYMENT-3DS] Authentication failed.');
 						showPopupWarning(
-							__('Error de autenticación', 'neopayment-payment-gateway'),
-							__('Inténtelo nuevamente y mantenga la ventana emergente activa.', 'neopayment-payment-gateway')
+							__('Error de autenticación', 'neopayment'),
+							__('Inténtelo nuevamente y mantenga la ventana emergente activa.', 'neopayment')
 						);
 					}
 				}

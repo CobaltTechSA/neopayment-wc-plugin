@@ -1,6 +1,6 @@
 <?php
 /**
- * Standard class for Neopayment Payment Gateway plugin.
+ * Standard class for Neopayment plugin.
  *
  * @package NEOPAYMENT_Payment_Gateway
  */
@@ -10,14 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 require_once 'class-neopayment-constants.php';
 require_once 'neopayment-helpers.php';
-require_once 'class-neopayment-payment-gateway-cc.php';
+require_once 'class-neopayment-cc.php';
 
 /**
  * Handles WooCommerce Standard integration for the payment gateway.
  *
- * Suffix avoids clashing with {@see NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway} if both files were ever loaded.
+ * Suffix avoids clashing with {@see NEOPAYMENT_Standard_Gateway} if both files were ever loaded.
  */
-class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gateway {
+class NEOPAYMENT_Standard_Gateway_Legacy extends WC_Payment_Gateway {
 
 	/**
 	 * Instance for the NEOPAYMENT Standard gateway.
@@ -35,7 +35,7 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 		$this->icon               = ''; // URL of the icon that will be displayed on checkout page near your gateway name.
 		$this->has_fields         = true; // in case you need a custom credit card form.
 		$this->method_title       = 'Neopayment Standard Gateway';
-		$this->method_description = __( 'Acceptance of payments with Visa / Mastercard', 'neopayment-payment-gateway' ); // will be displayed on the options page.
+		$this->method_description = __( 'Acceptance of payments with Visa / Mastercard', 'neopayment' ); // will be displayed on the options page.
 
 		// gateways can support subscriptions, refunds, saved payment methods, but in this tutorial we begin with simple payments.
 		$this->supports = array(
@@ -86,7 +86,7 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 	public function process_admin_options() {
 		if ( ! isset( $_POST['neopayment_standard_nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['neopayment_standard_nonce'] ) ), 'neopayment_standard_save_settings' ) ) {
-			wp_die( esc_html__( 'Unauthorized action.', 'neopayment-payment-gateway' ), esc_html__( 'Security Error', 'neopayment-payment-gateway' ), 403 );
+			wp_die( esc_html__( 'Unauthorized action.', 'neopayment' ), esc_html__( 'Security Error', 'neopayment' ), 403 );
 		}
 		parent::process_admin_options();
 	}
@@ -102,13 +102,13 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 				'<img class="%s" src="%s" alt="%s" />',
 				esc_attr( 'neopayment-gateway-icon' ),
 				esc_url( WC_HTTPS::force_https_url( $path . 'assets/images/visa.svg' ) ),
-				esc_attr__( 'Visa', 'neopayment-payment-gateway' )
+				esc_attr__( 'Visa', 'neopayment' )
 			),
 			sprintf(
 				'<img class="%s" src="%s" alt="%s" />',
 				esc_attr( 'neopayment-gateway-icon' ),
 				esc_url( WC_HTTPS::force_https_url( $path . 'assets/images/mastercard.svg' ) ),
-				esc_attr__( 'Mastercard', 'neopayment-payment-gateway' )
+				esc_attr__( 'Mastercard', 'neopayment' )
 			),
 		);
 
@@ -130,57 +130,57 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 
 		$this->form_fields = array(
 			'enabled'                => array(
-				'title'       => __( 'Enable/Disable', 'neopayment-payment-gateway' ),
-				'label'       => __( 'Enable Neopayment Payment Gateway', 'neopayment-payment-gateway' ),
+				'title'       => __( 'Enable/Disable', 'neopayment' ),
+				'label'       => __( 'Enable Neopayment', 'neopayment' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no',
 			),
 			'title'                  => array(
-				'title'       => __( 'Title', 'neopayment-payment-gateway' ),
+				'title'       => __( 'Title', 'neopayment' ),
 				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'neopayment-payment-gateway' ),
+				'description' => __( 'This controls the title which the user sees during checkout.', 'neopayment' ),
 				'default'     => 'VISA, Mastercard',
 				'desc_tip'    => true,
 			),
 			'description'            => array(
-				'title'       => __( 'Description', 'neopayment-payment-gateway' ),
+				'title'       => __( 'Description', 'neopayment' ),
 				'type'        => 'textarea',
-				'description' => __( 'This controls the description which the user sees during checkout.', 'neopayment-payment-gateway' ),
-				'default'     => __( 'Pay with your VISA or Mastercard card', 'neopayment-payment-gateway' ),
+				'description' => __( 'This controls the description which the user sees during checkout.', 'neopayment' ),
+				'default'     => __( 'Pay with your VISA or Mastercard card', 'neopayment' ),
 			),
 			'testmode'               => array(
-				'title'       => __( 'Test mode', 'neopayment-payment-gateway' ),
-				'label'       => __( 'Enable Test Mode', 'neopayment-payment-gateway' ),
+				'title'       => __( 'Test mode', 'neopayment' ),
+				'label'       => __( 'Enable Test Mode', 'neopayment' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Place the payment gateway in test mode using test API keys.', 'neopayment-payment-gateway' ),
+				'description' => __( 'Place the payment gateway in test mode using test API keys.', 'neopayment' ),
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
 			'test_api_url'           => array(
-				'title' => __( 'Test API URL', 'neopayment-payment-gateway' ),
+				'title' => __( 'Test API URL', 'neopayment' ),
 				'type'  => 'text',
 			),
 
 			'test_api_client_id'     => array(
-				'title' => __( 'Test API Client Id', 'neopayment-payment-gateway' ),
+				'title' => __( 'Test API Client Id', 'neopayment' ),
 				'type'  => 'text',
 			),
 			'test_api_client_secret' => array(
-				'title' => __( 'Test API Client Secret', 'neopayment-payment-gateway' ),
+				'title' => __( 'Test API Client Secret', 'neopayment' ),
 				'type'  => 'password',
 			),
 			'api_url'                => array(
-				'title' => __( 'Production API URL', 'neopayment-payment-gateway' ),
+				'title' => __( 'Production API URL', 'neopayment' ),
 				'type'  => 'text',
 			),
 
 			'api_client_id'          => array(
-				'title' => __( 'Production API Client Id', 'neopayment-payment-gateway' ),
+				'title' => __( 'Production API Client Id', 'neopayment' ),
 				'type'  => 'text',
 			),
 			'api_client_secret'      => array(
-				'title' => __( 'Production API Client Secret', 'neopayment-payment-gateway' ),
+				'title' => __( 'Production API Client Secret', 'neopayment' ),
 				'type'  => 'password',
 			),
 		);
@@ -281,7 +281,7 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 		if ( $this->description ) {
 			// you can instructions for test mode, I mean test card numbers etc.
 			if ( $this->testmode ) {
-				$this->description .= ' ' . __( 'TEST MODE ENABLED', 'neopayment-payment-gateway' ) . '.';
+				$this->description .= ' ' . __( 'TEST MODE ENABLED', 'neopayment' ) . '.';
 				$this->description  = trim( $this->description );
 			}
 			// display the description with <p> tags etc.
@@ -311,7 +311,7 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 		// check if the nonce is set and valid.
 		if ( isset( $_POST[ $this->id . '_nonce' ] ) &&
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $this->id . '_nonce' ] ) ), $this->id . '_process_payment' ) ) {
-			wc_add_notice( __( 'Security check failed. Please try again.', 'neopayment-payment-gateway' ), 'error' );
+			wc_add_notice( __( 'Security check failed. Please try again.', 'neopayment' ), 'error' );
 			return false;
 		}
 
@@ -345,23 +345,23 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 
 		$card_number = str_replace( ' ', '', $card_number );
 		if ( ! neopayment_is_valid_luhn( $card_number ) ) {
-			wc_add_notice( __( 'Invalid card number', 'neopayment-payment-gateway' ), 'error' );
+			wc_add_notice( __( 'Invalid card number', 'neopayment' ), 'error' );
 			$valid = false;
 		}
 
 		$card_expiry = str_replace( ' ', '', $card_expiry );
 		if ( ! neopayment_is_valid_expiry_date( $card_expiry ) ) {
-			wc_add_notice( __( 'Invalid expiry date', 'neopayment-payment-gateway' ), 'error' );
+			wc_add_notice( __( 'Invalid expiry date', 'neopayment' ), 'error' );
 			$valid = false;
 		}
 
 		if ( ! neopayment_is_valid_card_holder( $card_holder ) ) {
-			wc_add_notice( __( 'Invalid card holder', 'neopayment-payment-gateway' ), 'error' );
+			wc_add_notice( __( 'Invalid card holder', 'neopayment' ), 'error' );
 			$valid = false;
 		}
 
 		if ( ! neopayment_is_valid_cvv( $card_cvv ) ) {
-			wc_add_notice( __( 'Invalid card code (CVV)', 'neopayment-payment-gateway' ), 'error' );
+			wc_add_notice( __( 'Invalid card code (CVV)', 'neopayment' ), 'error' );
 			$valid = false;
 		}
 
@@ -379,7 +379,7 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 	public function process_refund( $order_id, $amount = 0, $reason = '' ) {
 		if ( ! isset( $_REQUEST['security'] ) || ! check_ajax_referer( 'order-item', 'security', false ) ) {
 			NEOPAYMENT_Log::debug( 'Refund rechazado: nonce inválido o ausente' );
-			return new WP_Error( 'invalid_nonce', __( 'Unauthorized action.', 'neopayment-payment-gateway' ) );
+			return new WP_Error( 'invalid_nonce', __( 'Unauthorized action.', 'neopayment' ) );
 		}
 
 		$neopayment_client = new NEOPAYMENT_Client(
@@ -441,7 +441,7 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 		// Verify gateway payment nonce before reading POST (classic checkout).
 		if ( isset( $_POST[ $this->id . '_nonce' ] ) ) {
 			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $this->id . '_nonce' ] ) ), $this->id . '_process_payment' ) ) {
-				wc_add_notice( __( 'Security check failed. Please try again.', 'neopayment-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'Security check failed. Please try again.', 'neopayment' ), 'error' );
 				return array(
 					'result' => 'failure',
 				);
@@ -557,17 +557,17 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 				);
 
 			} elseif ( 'refused' === ( $transaction['status'] ?? '' ) ) {
-				wc_add_notice( __( 'We were unable to complete the payment. Please contact with commerce.', 'neopayment-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'We were unable to complete the payment. Please contact with commerce.', 'neopayment' ), 'error' );
 			} else {
-				wc_add_notice( __( 'We were unable to complete the payment. Please check your card details or contact your bank.', 'neopayment-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'We were unable to complete the payment. Please check your card details or contact your bank.', 'neopayment' ), 'error' );
 
 			}
 		} catch ( \NEOPAYMENT_Exception $e ) {
 			if ( ! $e->isSuccessResponse() ) {
 				NEOPAYMENT_Log::debug( $e->getMessage() . ' - ' . wp_json_encode( $e->getResponse() ) );
-				wc_add_notice( __( 'Cannot generate the payment. Please, contact with commerce.', 'neopayment-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'Cannot generate the payment. Please, contact with commerce.', 'neopayment' ), 'error' );
 			} else {
-				wc_add_notice( __( 'Cannot process the payment. Please, contact with commerce.', 'neopayment-payment-gateway' ), 'error' );
+				wc_add_notice( __( 'Cannot process the payment. Please, contact with commerce.', 'neopayment' ), 'error' );
 			}
 		}
 	}
@@ -685,14 +685,14 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 		$order->add_meta_data( 'neopayment_bank_authorization', $transaction['authorization_number'] );
 
 		if ( in_array( $status, $success_status, true ) ) {
-			$order->update_status( 'completed', __( 'Payment completed', 'neopayment-payment-gateway' ) );
+			$order->update_status( 'completed', __( 'Payment completed', 'neopayment' ) );
 			$order->payment_complete( $transaction['identifier'] );
 			if ( function_exists( 'WC' ) && WC()->cart ) {
 				WC()->cart->empty_cart();
 			}
 			return true;
 		} else {
-			$order->update_status( 'failed', __( 'Failed payment', 'neopayment-payment-gateway' ) );
+			$order->update_status( 'failed', __( 'Failed payment', 'neopayment' ) );
 		}
 
 		return false;
@@ -745,14 +745,14 @@ class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Gateway_Legacy extends WC_Payment_Gate
 		<html <?php language_attributes(); ?>>
 		<head>
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
-			<title><?php esc_html_e( 'Processing 3DS…', 'neopayment-payment-gateway' ); ?></title>
+			<title><?php esc_html_e( 'Processing 3DS…', 'neopayment' ); ?></title>
 			<?php wp_head(); ?>
 		</head>
 		<body>
 			<div class="neopayment-3ds-loading">
 				<div class="neopayment-3ds-spinner"></div>
 				<noscript>
-					<p><?php esc_html_e( 'Please enable JavaScript to complete your payment. You will be automatically redirected...', 'neopayment-payment-gateway' ); ?></p>
+					<p><?php esc_html_e( 'Please enable JavaScript to complete your payment. You will be automatically redirected...', 'neopayment' ); ?></p>
 					<meta http-equiv="refresh" content="3;url=<?php echo esc_url( $target ); ?>">
 				</noscript>
 			</div>

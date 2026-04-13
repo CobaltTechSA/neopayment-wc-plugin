@@ -4,8 +4,8 @@ const DependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extra
 module.exports = {
     mode: process.env.NODE_ENV || 'development',
     entry: {
-        'neopayment-payment-gateway-standard': './assets/js/blocks/neopayment-payment-gateway-standard.js',
-        'neopayment-payment-gateway-telered': './assets/js/blocks/neopayment-payment-gateway-telered.js',
+        'neopayment-standard': './assets/js/blocks/neopayment-standard.js',
+        'neopayment-telered': './assets/js/blocks/neopayment-telered.js',
     },
     output: {
         path: path.resolve(__dirname, 'build'),

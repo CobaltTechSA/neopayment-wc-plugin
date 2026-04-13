@@ -1,37 +1,37 @@
 <?php
 
 /**
- * Constants helper for Neopayment Payment Gateway plugin.
+ * Constants helper for Neopayment plugin.
  *
- * @package NEOPAYMENT_PAYMENT_GATEWAY
+ * @package NEOPAYMENT
  */
 
 /**
  * Handles WooCommerce constants for the payment gateway.
  */
-class NEOPAYMENT_PAYMENT_GATEWAY_Constants {
+class NEOPAYMENT_Constants {
 
-	const NEOPAYMENT_PAYMENT_GATEWAY_STANDARD_GATEWAY_ID = 'neopayment_payment_gateway_standard_gateway';
-	const NEOPAYMENT_PAYMENT_GATEWAY_TELERED_GATEWAY_ID  = 'neopayment_payment_gateway_telered_gateway';
+	const NEOPAYMENT_STANDARD_GATEWAY_ID = 'neopayment_standard_gateway';
+	const NEOPAYMENT_TELERED_GATEWAY_ID  = 'neopayment_telered_gateway';
 
-	const NEOPAYMENT_PAYMENT_GATEWAY_PLUGIN_VERSION = '2.4.2';
-	const NEOPAYMENT_PAYMENT_GATEWAY_PLUGIN_NAME    = 'Neopayment Bank Operations Payment Gateway';
+	const NEOPAYMENT_PLUGIN_VERSION = '3.0.0';
+	const NEOPAYMENT_PLUGIN_NAME    = 'Neopayment Bank Operations Payment Gateway';
 
 	// Minimum PHP version required by this plugin.
-	const NEOPAYMENT_PAYMENT_GATEWAY_MINIMUM_PHP_VERSION = '7.2.0';
+	const NEOPAYMENT_MINIMUM_PHP_VERSION = '7.2.0';
 
 	// Minimum WordPress version required by this plugin.
-	const NEOPAYMENT_PAYMENT_GATEWAY_MINIMUM_WP_VERSION = '4.4';
+	const NEOPAYMENT_MINIMUM_WP_VERSION = '4.4';
 
 	// Minimum WooCommerce version required by this plugin.
-	const NEOPAYMENT_PAYMENT_GATEWAY_MINIMUM_WC_VERSION = '5.3';
+	const NEOPAYMENT_MINIMUM_WC_VERSION = '5.3';
 
 
-	const NEOPAYMENT_PAYMENT_GATEWAY_PAYMENT_TYPE_TELERED    = 'TELERED';
-	const NEOPAYMENT_PAYMENT_GATEWAY_PAYMENT_TYPE_VISA       = 'VISA';
-	const NEOPAYMENT_PAYMENT_GATEWAY_PAYMENT_TYPE_MASTERCARD = 'MASTERCARD';
+	const NEOPAYMENT_PAYMENT_TYPE_TELERED    = 'TELERED';
+	const NEOPAYMENT_PAYMENT_TYPE_VISA       = 'VISA';
+	const NEOPAYMENT_PAYMENT_TYPE_MASTERCARD = 'MASTERCARD';
 
-	const NEOPAYMENT_PAYMENT_GATEWAY_PAYMENT_COUNTRIES = array(
+	const NEOPAYMENT_PAYMENT_COUNTRIES = array(
 		'AF' => 'AFG', // Afghanistan.
 		'AX' => 'ALA', // &#197;land Islands.
 		'AL' => 'ALB', // Albania.

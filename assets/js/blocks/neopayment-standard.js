@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import CardFields from './components/neopayment-payment-gateway-card-fields';
+import CardFields from './components/neopayment-card-fields';
 import visaUrl from '../../images/visa.svg';
 import mcUrl from '../../images/mastercard.svg';
 import {
   validateLuhn,
   validateExpiry,
   validateCvc
-} from '../includes/neopayment-payment-gateway-validators';
+} from '../includes/neopayment-validators';
 
 const Label = ({ label }) => (
   <div className="neopayment-payment-label">
-    <span>{ __( 'Card (Visa/Mastercard)', 'neopayment-payment-gateway' ) }</span>
+    <span>{ __( 'Card (Visa/Mastercard)', 'neopayment' ) }</span>
     <div className="neopayment-payment-label__icons">
       <img
         src={ visaUrl }
@@ -64,25 +64,25 @@ function PaymentMethod({
       if (!validateLuhn(cleanNumber)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid card number', 'neopayment-payment-gateway'),
+          message: __('Invalid card number', 'neopayment'),
         };
       }
       if (!validateExpiry(card_expiry)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid date', 'neopayment-payment-gateway'),
+          message: __('Invalid date', 'neopayment'),
         };
       }
       if (!validateCvc(card_cvc)) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Invalid CVC', 'neopayment-payment-gateway'),
+          message: __('Invalid CVC', 'neopayment'),
         };
       }
       if (!card_holder) {
         return {
           type: emitResponse.responseTypes.ERROR,
-          message: __('Holder name is required', 'neopayment-payment-gateway'),
+          message: __('Holder name is required', 'neopayment'),
         };
       }
       return {
@@ -104,9 +104,9 @@ function PaymentMethod({
 };
 
 registerPaymentMethod({
-  name: 'neopayment_payment_gateway_standard_gateway',
+  name: 'neopayment_standard_gateway',
   label: <Label />,
-  ariaLabel: __('Neopayment Standard Gateway', 'neopayment-payment-gateway'),
+  ariaLabel: __('Neopayment Standard Gateway', 'neopayment'),
   canMakePayment: () => true,
   content: <PaymentMethod />,
   edit: <PaymentMethod />,
