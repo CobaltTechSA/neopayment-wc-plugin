@@ -210,7 +210,7 @@ class NEOPAYMENT_Standard_Gateway_Legacy extends WC_Payment_Gateway {
 	 * This method is called on the 'wp_enqueue_scripts' action.
 	 */
 	public function register_plugin_scripts() {
-		if ( ! is_checkout() || is_cart() ) {
+		if ( ! is_checkout() ) {
 			return;
 		}
 
@@ -546,7 +546,8 @@ class NEOPAYMENT_Standard_Gateway_Legacy extends WC_Payment_Gateway {
 					'result'             => 'success',
 					'requires_challenge' => true,
 					'challenge_url'      => $transaction['metadatas']['3ds_authentication_form'],
-					'redirect'           => '',
+					// Prevent Woo classic checkout from hard reloading while 3DS is pending.
+					'redirect'           => '#neopayment-3ds-pending',
 					'callback_url'       => $callback,
 				);
 			} elseif ( $this->validate_payment( $transaction ) ) {

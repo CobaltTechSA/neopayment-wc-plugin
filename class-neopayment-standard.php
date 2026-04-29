@@ -218,12 +218,14 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 */
 	public function register_plugin_scripts()
 	{
-		if (! is_checkout() || is_cart()) {
+		if (! is_checkout()) {
 			return;
 		}
 
 		$base = plugin_dir_url(__FILE__) . 'assets/js/';
 		$ver  = NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION;
+		$standard_script_path = plugin_dir_path(__FILE__) . 'assets/js/neopayment-script.js';
+		$standard_ver = file_exists($standard_script_path) ? (string) filemtime($standard_script_path) : $ver;
 		$popup_script_path = plugin_dir_path(__FILE__) . 'assets/js/neopayment-3ds-popup.js';
 		$popup_ver = file_exists($popup_script_path) ? (string) filemtime($popup_script_path) : $ver;
 
@@ -242,7 +244,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			'neopayment-standard-payment',
 			$base . 'neopayment-script.js',
 			array('jquery'),
-			$ver,
+			$standard_ver,
 			true
 		);
 
@@ -468,6 +470,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 */
 	public function process_payment($order_id)
 	{
+		$callback = esc_url_raw(home_url("/wc-api/{$this->id}_status"));
 
 		// check if the nonce is set and valid.
 		if (isset($_POST[$this->id . '_nonce'])) {
@@ -562,7 +565,12 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 				$card_expiry = str_replace(' ', '', $card_expiry);
 
 				$three_ds_params = $this->neopayment_get_3ds_params();
+				if (! $this->neopayment_has_required_3ds_browser_params($three_ds_params)) {
+					wc_add_notice(__('No se pudo iniciar la autenticación 3DS. Recarga la página e inténtalo nuevamente.', 'neopayment'), 'error');
+					return array( 'result' => 'failure' );
+				}
 			}
+			$three_ds_params = $this->neopayment_normalize_3ds_params($three_ds_params);
 			NEOPAYMENT_Log::debug('three_ds_params=' . wp_json_encode($three_ds_params));
 
 			$transaction = $neopayment_client->sale($order, $card_number, $card_expiry, $card_cvc, $card_holder, $three_ds_params);
@@ -573,7 +581,8 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 					'result'             => 'success',
 					'requires_challenge' => true,
 					'challenge_url'      => $transaction['metadatas']['3ds_authentication_form'],
-					'redirect'           => '',
+					// Prevent Woo classic checkout from hard reloading while 3DS is pending.
+					'redirect'           => '#neopayment-3ds-pending',
 					'neopayment_callback_url'       => $callback,
 				);
 			} elseif ($this->validate_payment($transaction)) {
@@ -604,6 +613,11 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 */
 	private function neopayment_get_3ds_params()
 	{
+		$posted_data = array();
+		if (isset($_POST['post_data']) && is_string($_POST['post_data'])) {
+			parse_str(wp_unslash($_POST['post_data']), $posted_data);
+		}
+
 		if (isset($_POST['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'woocommerce-process_checkout')) {
 			$three_ds_params['email'] = isset($_POST['billing_email']) ? sanitize_email(wp_unslash($_POST['billing_email'])) : '';
 		}
@@ -623,7 +637,13 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		$three_ds_params = array();
 
 		foreach ($three_ds_attrs as $attr) {
-			$three_ds_params[$attr] = isset($_POST[$attr]) ? sanitize_text_field(wp_unslash($_POST[$attr])) : '';
+			$value = '';
+			if (isset($_POST[$attr])) {
+				$value = sanitize_text_field(wp_unslash($_POST[$attr]));
+			} elseif (isset($posted_data[$attr])) {
+				$value = sanitize_text_field($posted_data[$attr]);
+			}
+			$three_ds_params[$attr] = $value;
 		}
 
 		// Order additional data.
@@ -682,6 +702,56 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			$shipping_post = ('' !== $billing_post) ? $billing_post : '0000';
 		}
 		$three_ds_params['shipAddrPostCode'] = $shipping_post;
+
+		return $three_ds_params;
+	}
+
+	/**
+	 * Validate required 3DS browser fields for classic checkout.
+	 *
+	 * @param array $three_ds_params 3DS params payload.
+	 * @return bool
+	 */
+	private function neopayment_has_required_3ds_browser_params($three_ds_params)
+	{
+		$required = array(
+			'browserJavaEnabled',
+			'browserJavascriptEnabled',
+			'browserLanguage',
+			'browserColorDepth',
+			'browserScreenWidth',
+			'browserScreenHeight',
+			'browserTZ',
+			'browserUserAgent',
+			'challengeWindowSize',
+		);
+
+		foreach ($required as $key) {
+			if (! isset($three_ds_params[$key]) || '' === trim((string) $three_ds_params[$key])) {
+				$present_keys = implode(',', array_keys($three_ds_params));
+				NEOPAYMENT_Log::debug("Missing required 3DS browser param: {$key}. Received keys: {$present_keys}");
+				return false;
+			}
+		}
+
+		NEOPAYMENT_Log::debug('Classic checkout 3DS browser params OK.');
+
+		return true;
+	}
+
+	/**
+	 * Normalize 3DS params types expected by API.
+	 *
+	 * @param array $three_ds_params 3DS params payload.
+	 * @return array
+	 */
+	private function neopayment_normalize_3ds_params($three_ds_params)
+	{
+		// Keep browser fields as strings (same format that works in Blocks),
+		// but enforce integer for challengeWindowSize because API validates type.
+		if (isset($three_ds_params['challengeWindowSize']) && '' !== trim((string) $three_ds_params['challengeWindowSize'])) {
+			$three_ds_params['challengeWindowSize'] = (int) $three_ds_params['challengeWindowSize'];
+		}
 
 		return $three_ds_params;
 	}
