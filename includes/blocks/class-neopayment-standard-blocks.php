@@ -1,8 +1,8 @@
 <?php
 /**
- * Blocks Standard class for Neopayment Payment Gateway plugin.
+ * Blocks Standard class for Neopayment plugin.
  *
- * @package NEOPAYMENT_PAYMENT_GATEWAY
+ * @package NEOPAYMENT
  */
 
 namespace NboPaymentGateway\Blocks;
@@ -16,14 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Integration for the NEOPAYMENT Standard Blocks payment method.
  */
-final class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Blocks extends AbstractPaymentMethodType {
+final class NEOPAYMENT_Standard_Blocks extends AbstractPaymentMethodType {
 
 	/**
 	 * Payment method name for the NEOPAYMENT Standard gateway.
 	 *
 	 * @var string
 	 */
-	protected $name = 'neopayment_payment_gateway_standard_gateway';
+	protected $name = 'neopayment_standard_gateway';
 
 
 	/**
@@ -41,8 +41,8 @@ final class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Blocks extends AbstractPaymentMe
 	public function get_payment_method_script_handles() {
 		// Blocks only auto-enqueue handles listed here; 3DS popup must load on checkout too.
 		return array(
-			'neopayment-payment-gateway-standard-blocks-js',
-			'neopayment-payment-gateway-3ds-popup',
+			'neopayment-standard-blocks-js',
+			'neopayment-3ds-popup',
 		);
 	}
 
@@ -58,7 +58,7 @@ final class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Blocks extends AbstractPaymentMe
 			'title'       => $gateway->title,
 			'description' => $gateway->description,
 			'supports'    => $gateway->supports,
-			'icons'       => $this->neopayment_payment_gateway_get_icons(),
+			'icons'       => $this->neopayment_get_icons(),
 			'testmode'    => $gateway->testmode,
 		);
 	}
@@ -66,17 +66,17 @@ final class NEOPAYMENT_PAYMENT_GATEWAY_Standard_Blocks extends AbstractPaymentMe
 	/**
 	 * Card icons.
 	 */
-	protected function neopayment_payment_gateway_get_icons() {
+	protected function neopayment_get_icons() {
 		return array(
 			array(
 				'id'  => 'visa',
-				'src' => NEOPAYMENT_PAYMENT_GATEWAY_URL . 'assets/images/visa.svg',
-				'alt' => __( 'Visa', 'neopayment-payment-gateway' ),
+				'src' => NEOPAYMENT_URL . 'assets/images/visa.svg',
+				'alt' => __( 'Visa', 'neopayment' ),
 			),
 			array(
 				'id'  => 'mastercard',
-				'src' => NEOPAYMENT_PAYMENT_GATEWAY_URL . 'assets/images/mastercard.svg',
-				'alt' => __( 'Mastercard', 'neopayment-payment-gateway' ),
+				'src' => NEOPAYMENT_URL . 'assets/images/mastercard.svg',
+				'alt' => __( 'Mastercard', 'neopayment' ),
 			),
 		);
 	}

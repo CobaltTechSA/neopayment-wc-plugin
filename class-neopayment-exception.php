@@ -1,8 +1,8 @@
 <?php
 /**
- * Exceptions for Neopayment Payment Gateway plugin.
+ * Exceptions for Neopayment plugin.
  *
- * @package NEOPAYMENT_PAYMENT_GATEWAY
+ * @package NEOPAYMENT
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * NEOPAYMENT Exception helper for the payment gateway.
  */
-class NEOPAYMENT_PAYMENT_GATEWAY_Exception extends Exception {
+class NEOPAYMENT_Exception extends Exception {
 
 	/**
 	 * Stores the response data associated with the exception.

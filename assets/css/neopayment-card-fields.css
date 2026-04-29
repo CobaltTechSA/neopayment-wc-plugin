@@ -1,4 +1,4 @@
-.neopayment-payment-gateway-card-fields {
+.neopayment-card-fields {
 	padding: 10px;
 	display: flex;
 	flex-direction: column;
@@ -6,26 +6,26 @@
 	max-width: 100%;
 }
 
-.neopayment-payment-gateway-card-fields__row {
+.neopayment-card-fields__row {
 	display: flex;
 	gap: 15px;
 	flex-wrap: wrap;
 }
 
-.neopayment-payment-gateway-card-fields__group {
+.neopayment-card-fields__group {
 	flex: 1 1 1px;
 	display: flex;
 	flex-direction: column;
 }
 
-.neopayment-payment-gateway-card-fields input {
+.neopayment-card-fields input {
 	padding: 8px;
 	font-size: 14px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
-.neopayment-payment-gateway-card-fields__error {
+.neopayment-card-fields__error {
 	color: #e74c3c;
 	font-size: 0.875rem;
 	margin-top: 0.25rem;
@@ -41,7 +41,7 @@
 	font-size: 1rem;
 }
 
-.neopayment-payment-gateway-card-fields {
+.neopayment-card-fields {
 	padding: 10px;
 	display: flex;
 	flex-direction: column;
@@ -49,26 +49,26 @@
 	max-width: 100%;
 }
 
-.neopayment-payment-gateway-card-fields__row {
+.neopayment-card-fields__row {
 	display: flex;
 	gap: 15px;
 	flex-wrap: wrap;
 }
 
-.neopayment-payment-gateway-card-fields__group {
+.neopayment-card-fields__group {
 	flex: 1 1 1px;
 	display: flex;
 	flex-direction: column;
 }
 
-.neopayment-payment-gateway-card-fields input {
+.neopayment-card-fields input {
 	padding: 8px;
 	font-size: 14px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 }
 
-.neopayment-payment-gateway-card-fields__error {
+.neopayment-card-fields__error {
 	color: #e74c3c;
 	font-size: 0.875rem;
 	margin-top: 0.25rem;

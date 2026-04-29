@@ -5,7 +5,7 @@ import {
   formatExpiry,
   formatCvc,
   validateCard,
-} from '../../includes/neopayment-payment-gateway-validators';
+} from '../../includes/neopayment-validators';
 
 const CardFields = ({ onChange }) => {
   const [card_number, setcard_number] = useState('');
@@ -52,16 +52,16 @@ const CardFields = ({ onChange }) => {
   }, [card_number, card_expiry, card_cvc, card_holder, onChange]);
 
   return (
-    <div className="neopayment-payment-gateway-card-fields">
+    <div className="neopayment-card-fields">
       {/* Holde Name */}
-      <div className="neopayment-payment-gateway-card-fields__group">
+      <div className="neopayment-card-fields__group">
         <label>
-          {__('Card holder', 'neopayment-payment-gateway')}<span class="required">*</span>
+          {__('Card holder', 'neopayment')}<span class="required">*</span>
         </label>
         <input
           id="card_holder"
           type="text"
-          placeholder={__('Full name', 'neopayment-payment-gateway')}
+          placeholder={__('Full name', 'neopayment')}
           maxLength="50"
           value={card_holder}
           onChange={e => setcard_holder(e.target.value)}
@@ -69,15 +69,15 @@ const CardFields = ({ onChange }) => {
           required
         />
         {errors.holder && (
-          <small className="neopayment-payment-gateway-card-fields__error">
-            {__('You must enter the holder name', 'neopayment-payment-gateway')}
+          <small className="neopayment-card-fields__error">
+            {__('You must enter the holder name', 'neopayment')}
           </small>
         )}
       </div>
       {/* Card Number */}
-      <div className="neopayment-payment-gateway-card-fields__group">
+      <div className="neopayment-card-fields__group">
         <label>
-          {__('Card number', 'neopayment-payment-gateway')}<span class="required">*</span>
+          {__('Card number', 'neopayment')}<span class="required">*</span>
         </label>
         <input
           id="card_number"
@@ -94,22 +94,22 @@ const CardFields = ({ onChange }) => {
           required
         />
         {errors.number && touched.number && (
-          <small className="neopayment-payment-gateway-card-fields__error">
-            {__('Invalid card number', 'neopayment-payment-gateway')}
+          <small className="neopayment-card-fields__error">
+            {__('Invalid card number', 'neopayment')}
           </small>
         )}
       </div>
 
       { }
-      <div className="neopayment-payment-gateway-card-fields__row">
-        <div className="neopayment-payment-gateway-card-fields__group">
+      <div className="neopayment-card-fields__row">
+        <div className="neopayment-card-fields__group">
           <label>
-            {__('Expiration date', 'neopayment-payment-gateway')}<span class="required">*</span>
+            {__('Expiration date', 'neopayment')}<span class="required">*</span>
           </label>
           <input
             id="card_expiry"
             type="text"
-            placeholder={__('MM/YY', 'neopayment-payment-gateway')}
+            placeholder={__('MM/YY', 'neopayment')}
             value={card_expiry}
             onBlur={() => setTouched(t => ({ ...t, expiry: true }))}
             onChange={e => {
@@ -123,15 +123,15 @@ const CardFields = ({ onChange }) => {
             required
           />
           {errors.expiry && touched.expiry && (
-            <small className="neopayment-payment-gateway-card-fields__error">
-              {__('Invalid date', 'neopayment-payment-gateway')}
+            <small className="neopayment-card-fields__error">
+              {__('Invalid date', 'neopayment')}
             </small>
           )}
         </div>
 
-        <div className="neopayment-payment-gateway-card-fields__group">
+        <div className="neopayment-card-fields__group">
           <label>
-            {__('CVC', 'neopayment-payment-gateway')}<span class="required">*</span>
+            {__('CVC', 'neopayment')}<span class="required">*</span>
           </label>
           <input
             id="card_cvc"
@@ -144,8 +144,8 @@ const CardFields = ({ onChange }) => {
             required
           />
           {errors.cvc && touched.cvc && (
-            <small className="neopayment-payment-gateway-card-fields__error">
-              {__('Invalid CVC', 'neopayment-payment-gateway')}
+            <small className="neopayment-card-fields__error">
+              {__('Invalid CVC', 'neopayment')}
             </small>
           )}
         </div>

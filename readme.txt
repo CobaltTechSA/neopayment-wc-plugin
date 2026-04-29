@@ -1,14 +1,14 @@
-=== Neopayment Payment Gateway ===
+=== Neopayment ===
 Contributors: neopayment
 Tags: woocommerce, payment gateway, neopayment, panama
 Requires at least: 4.4
 Tested up to: 6.9
 Requires PHP: 7.2.0
-Stable tag: 2.5.2
+Stable tag: 3.0.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html#SEC1
 
-Woocommerce plugin for Neopayment Payment Gateway
+Woocommerce plugin for Neopayment
 
 == Description ==
 This plugin enables secure online payments for WooCommerce stores in Panama using the Neopayment payment gateway.
@@ -26,9 +26,9 @@ Whether you\'re launching a new online store or expanding your payment options i
 
 
 == Installation ==
-1. Upload the plugin files to the `/wp-content/plugins/neopayment-gateway` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/neopayment` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the \'Plugins\' screen in WordPress.
-3. Go to **WooCommerce > Settings > Payments** and enable the \"Neopayment Gateway\".
+3. Go to **WooCommerce > Settings > Payments** and enable the \"Neopayment\".
 4. Configure your Neopayment credentials and settings.
 
 == Frequently Asked Questions ==
