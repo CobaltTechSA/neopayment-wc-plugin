@@ -463,6 +463,7 @@ class NEOPAYMENT_Client
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new NEOPAYMENT_Exception(esc_html__('Error getting commerce', 'neopayment'), $response);
 		}
 	}

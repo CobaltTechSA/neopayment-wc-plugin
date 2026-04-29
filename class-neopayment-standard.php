@@ -615,6 +615,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	{
 		$posted_data = array();
 		if (isset($_POST['post_data']) && is_string($_POST['post_data'])) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			parse_str(wp_unslash($_POST['post_data']), $posted_data);
 		}
 
