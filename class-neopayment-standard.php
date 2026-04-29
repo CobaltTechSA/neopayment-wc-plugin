@@ -86,6 +86,10 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 */
 	public function process_admin_options()
 	{
+		if (! current_user_can('manage_woocommerce')) {
+			wp_die(esc_html__('Insufficient permissions.', 'neopayment'), esc_html__('Security Error', 'neopayment'), 403);
+		}
+
 		if (
 			! isset($_POST['neopayment_standard_nonce']) ||
 			! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['neopayment_standard_nonce'])), 'neopayment_standard_save_settings')
@@ -224,6 +228,10 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 
 		$base = plugin_dir_url(__FILE__) . 'assets/js/';
 		$ver  = NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION;
+		$standard_script_file = plugin_dir_path(__FILE__) . 'assets/js/neopayment-script.js';
+		$popup_script_file    = plugin_dir_path(__FILE__) . 'assets/js/neopayment-3ds-popup.js';
+		$standard_ver         = file_exists($standard_script_file) ? filemtime($standard_script_file) : $ver;
+		$popup_ver            = file_exists($popup_script_file) ? filemtime($popup_script_file) : $ver;
 
 		wp_register_script(
 			'neopayment-sweetalert',
@@ -240,7 +248,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			'neopayment-standard-payment',
 			$base . 'neopayment-script.js',
 			array('jquery'),
-			$ver,
+			$standard_ver,
 			true
 		);
 
@@ -249,7 +257,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			'neopayment-3ds-popup',
 			$base . 'neopayment-3ds-popup.js',
 			array('jquery', 'wc-checkout', 'neopayment-sweetalert'),
-			$ver,
+			$popup_ver,
 			true
 		);
 
@@ -390,9 +398,13 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 */
 	public function process_refund($order_id, $amount = 0, $reason = '')
 	{
-		if (! isset($_REQUEST['security']) || ! check_ajax_referer('order-item', 'security', false)) {
+		if (! check_ajax_referer('order-item', 'security', false)) {
 			NEOPAYMENT_Log::debug('Refund rechazado: nonce inválido o ausente');
 			return new WP_Error('invalid_nonce', __('Unauthorized action.', 'neopayment'));
+		}
+		if (! current_user_can('edit_shop_orders')) {
+			NEOPAYMENT_Log::debug('Refund rechazado: usuario sin permisos');
+			return new WP_Error('insufficient_permissions', __('Insufficient permissions.', 'neopayment'));
 		}
 
 		$neopayment_client = new NEOPAYMENT_Client(
@@ -416,10 +428,38 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		}
 
 		try {
-			$data = $neopayment_client->refund($txn, intval($amount * 100));
+			$amount_in_cents = (int) round(((float) $amount) * 100);
+			$data            = $neopayment_client->refund($txn, $amount_in_cents);
 		} catch (NEOPAYMENT_Exception $e) {
-			NEOPAYMENT_Log::debug('Error processing refund: ' . $e->getMessage());
-			return new WP_Error('neopayment_refund_error', $e->getMessage());
+			$response          = $e->getResponse();
+			$api_message       = $response['body']['message'] ?? $e->getMessage();
+			$api_error_code    = $response['body']['error'] ?? '';
+			$api_response_code = (int) ($response['code'] ?? 0);
+
+			// Some environments expect the refund amount in major units instead of cents.
+			if (409 === $api_response_code && 'invalid_state' === $api_error_code) {
+				$fallback_amount = (int) round((float) $amount);
+				if ($fallback_amount > 0) {
+					NEOPAYMENT_Log::debug("Retry refund with major units: txn={$txn}, amount={$fallback_amount}");
+					try {
+						$data = $neopayment_client->refund($txn, $fallback_amount);
+					} catch (NEOPAYMENT_Exception $retry_exception) {
+						$retry_response = $retry_exception->getResponse();
+						$retry_message  = $retry_response['body']['message'] ?? $retry_exception->getMessage();
+						NEOPAYMENT_Log::debug('Error processing refund (retry): ' . $retry_message);
+						return new WP_Error('neopayment_refund_error', $retry_message);
+					}
+				} else {
+					NEOPAYMENT_Log::debug('Error processing refund: ' . $api_message);
+					return new WP_Error('neopayment_refund_error', $api_message);
+				}
+			} else {
+				NEOPAYMENT_Log::debug('Error processing refund: ' . $api_message);
+				return new WP_Error('neopayment_refund_error', $api_message);
+			}
+		} catch (\Throwable $e) {
+			NEOPAYMENT_Log::debug('Unexpected refund error: ' . $e->getMessage());
+			return new WP_Error('neopayment_refund_error', __('Unexpected refund error. Please check logs.', 'neopayment'));
 		}
 
 		$status = strtolower($data['status'] ?? 'unknown');
@@ -722,9 +762,22 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 */
 	public function neopayment_callback_url()
 	{
+		// Callback received from payment provider; validate order id and order key instead of nonce.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$order_id = isset($_GET['oid']) ? absint($_GET['oid']) : 0;
-		$order    = wc_get_order($order_id);
+		$order_id  = isset($_GET['oid']) ? absint($_GET['oid']) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order_key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+		$order     = wc_get_order($order_id);
+
+		if (! $order) {
+			status_header(400);
+			exit;
+		}
+
+		if ('' !== $order_key && ! hash_equals($order->get_order_key(), $order_key)) {
+			status_header(403);
+			exit;
+		}
 
 		$target = ($order && $order->is_paid())
 			? $order->get_checkout_order_received_url()

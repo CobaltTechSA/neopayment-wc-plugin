@@ -76,6 +76,10 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 	 * Process Admin Validate.
 	 */
 	public function process_admin_options() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'neopayment' ), esc_html__( 'Security Error', 'neopayment' ), 403 );
+		}
+
 		if ( ! isset( $_POST['neopayment_telered_nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['neopayment_telered_nonce'] ) ), 'neopayment_telered_save_settings' ) ) {
 			wp_die( esc_html__( 'Unauthorized action.', 'neopayment' ), esc_html__( 'Security Error', 'neopayment' ), 403 );
@@ -256,10 +260,22 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 	 * Callback function for show payment status
 	 */
 	public function neopayment_callback_url() {
+		// Callback received from payment provider; validate order id and order key instead of nonce.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$order_id = isset( $_GET['oid'] ) ? absint( $_GET['oid'] ) : 0;
+		$order_id  = isset( $_GET['oid'] ) ? absint( $_GET['oid'] ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
 
 		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			status_header( 400 );
+			exit;
+		}
+
+		if ( '' !== $order_key && ! hash_equals( $order->get_order_key(), $order_key ) ) {
+			status_header( 403 );
+			exit;
+		}
 
 		$start = time();
 		while ( ! $order->is_paid() && ( time() - $start ) < 30 ) {
@@ -291,7 +307,7 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 		}
 
 		$data = $this->neopayment_recursive_sanitize( $data_raw );
-		NEOPAYMENT_Log::debug( 'Checkout data: ' . wp_json_encode( $checkout ) );
+		NEOPAYMENT_Log::debug( 'Webhook payload: ' . wp_json_encode( $data ) );
 
 		try {
 			$transaction = $data;

@@ -297,14 +297,17 @@ class NEOPAYMENT_Client
 
 		if (200 !== $response['code']) {
 			\NEOPAYMENT_Log::error('Error al solicitar reembolso: ' . esc_html(wp_json_encode($response)));
-			throw new NEOPAYMENT_Exception(esc_html__('Error requesting refund', 'neopayment'), esc_html(wp_json_encode($response)));
+			$message = $response['body']['message'] ?? esc_html__('Error requesting refund', 'neopayment');
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- API message + structured response for getResponse().
+			throw new NEOPAYMENT_Exception( $message, $response );
 		}
 
 		$body = $response['body'];
 
 		if (empty($body['status']) || ! in_array($body['status'], array('ok', 'error'), true)) {
 			$msg = ! empty($body['message']) ? $body['message'] : __('Refund failed', 'neopayment');
-			throw new NEOPAYMENT_Exception(esc_html($msg), esc_html(wp_json_encode($response)));
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Structured response stored for logging/handlers only.
+			throw new NEOPAYMENT_Exception( esc_html( $msg ), $response );
 		}
 
 		return $body['data'];
@@ -324,8 +327,8 @@ class NEOPAYMENT_Client
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new NEOPAYMENT_Exception('Error processing payment', wp_json_encode($response));
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Response array for getResponse(); not displayed raw.
+			throw new NEOPAYMENT_Exception('Error processing payment', $response);
 		}
 	}
 
@@ -371,8 +374,8 @@ class NEOPAYMENT_Client
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new NEOPAYMENT_Exception('Error processing payment', wp_json_encode($response));
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Response array for getResponse(); not displayed raw.
+			throw new NEOPAYMENT_Exception('Error processing payment', $response);
 		}
 	}
 
@@ -439,8 +442,8 @@ class NEOPAYMENT_Client
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new NEOPAYMENT_Exception('Error processing payment', wp_json_encode($response));
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Response array for getResponse(); not displayed raw.
+			throw new NEOPAYMENT_Exception('Error processing payment', $response);
 		}
 	}
 
@@ -457,7 +460,8 @@ class NEOPAYMENT_Client
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {
-			throw new NEOPAYMENT_Exception(esc_html__('Error getting commerce', 'neopayment'), esc_html(wp_json_encode($response)));
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Response array for getResponse(); not displayed raw.
+			throw new NEOPAYMENT_Exception( esc_html__( 'Error getting commerce', 'neopayment' ), $response );
 		}
 	}
 }
