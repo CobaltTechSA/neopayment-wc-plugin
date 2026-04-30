@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-30T15:45:27+00:00\n"
+"POT-Creation-Date: 2026-04-30T16:35:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: neopayment\n"
@@ -41,17 +41,20 @@ msgstr ""
 
 #: class-neopayment-cc.php:121
 #: assets/js/blocks/components/neopayment-card-fields.js:134
+#: build/neopayment-standard.js:1
 msgid "CVC"
 msgstr ""
 
 #: class-neopayment-cc.php:125
 #: class-neopayment-cc.php:126
 #: assets/js/blocks/components/neopayment-card-fields.js:59
+#: build/neopayment-standard.js:1
 msgid "Card holder"
 msgstr ""
 
 #: class-neopayment-cc.php:131
 #: assets/js/blocks/components/neopayment-card-fields.js:80
+#: build/neopayment-standard.js:1
 msgid "Card number"
 msgstr ""
 
@@ -226,6 +229,7 @@ msgstr ""
 #: class-neopayment-standard.php:364
 #: assets/js/blocks/components/neopayment-card-fields.js:98
 #: assets/js/blocks/neopayment-standard.js:67
+#: build/neopayment-standard.js:1
 msgid "Invalid card number"
 msgstr ""
 
@@ -265,27 +269,27 @@ msgid "Cannot process the payment. Please, contact with commerce."
 msgstr ""
 
 #: class-neopayment-standard-gateway.php:689
-#: class-neopayment-standard.php:780
+#: class-neopayment-standard.php:781
 msgid "Payment completed"
 msgstr ""
 
 #: class-neopayment-standard-gateway.php:696
-#: class-neopayment-standard.php:787
+#: class-neopayment-standard.php:788
 msgid "Failed payment"
 msgstr ""
 
 #: class-neopayment-standard-gateway.php:755
-#: class-neopayment-standard.php:848
+#: class-neopayment-standard.php:849
 msgid "Processing 3DS…"
 msgstr ""
 
 #: class-neopayment-standard-gateway.php:795
-#: class-neopayment-standard.php:889
+#: class-neopayment-standard.php:890
 msgid "Estamos finalizando la autenticación 3DS. Por favor espere..."
 msgstr ""
 
 #: class-neopayment-standard-gateway.php:797
-#: class-neopayment-standard.php:891
+#: class-neopayment-standard.php:892
 msgid "Please enable JavaScript to complete your payment. You will be automatically redirected..."
 msgstr ""
 
@@ -309,6 +313,7 @@ msgstr ""
 
 #: class-neopayment-telered.php:135
 #: assets/js/blocks/neopayment-telered.js:24
+#: build/neopayment-telered.js:1
 msgid "Pay with Clave"
 msgstr ""
 
@@ -322,6 +327,7 @@ msgstr ""
 
 #: includes/blocks/class-neopayment-telered-blocks.php:51
 #: assets/js/blocks/neopayment-telered.js:8
+#: build/neopayment-telered.js:1
 msgid "Clave Card"
 msgstr ""
 
@@ -331,6 +337,7 @@ msgstr ""
 
 #: neopayment.php:143
 #: assets/js/blocks/neopayment-standard.js:15
+#: build/neopayment-standard.js:1
 msgid "Card (Visa/Mastercard)"
 msgstr ""
 
@@ -365,39 +372,48 @@ msgid "%1$s solo está disponible para tiendas localizadas en Panamá."
 msgstr ""
 
 #: assets/js/blocks/components/neopayment-card-fields.js:64
+#: build/neopayment-standard.js:1
 msgid "Full name"
 msgstr ""
 
 #: assets/js/blocks/components/neopayment-card-fields.js:73
+#: build/neopayment-standard.js:1
 msgid "You must enter the holder name"
 msgstr ""
 
 #: assets/js/blocks/components/neopayment-card-fields.js:107
+#: build/neopayment-standard.js:1
 msgid "Expiration date"
 msgstr ""
 
 #: assets/js/blocks/components/neopayment-card-fields.js:112
+#: build/neopayment-standard.js:1
 msgid "MM/YY"
 msgstr ""
 
 #: assets/js/blocks/components/neopayment-card-fields.js:127
 #: assets/js/blocks/neopayment-standard.js:73
+#: build/neopayment-standard.js:1
 msgid "Invalid date"
 msgstr ""
 
 #: assets/js/blocks/components/neopayment-card-fields.js:148
 #: assets/js/blocks/neopayment-standard.js:79
+#: build/neopayment-standard.js:1
 msgid "Invalid CVC"
 msgstr ""
 
 #: assets/js/blocks/neopayment-standard.js:85
+#: build/neopayment-standard.js:1
 msgid "Holder name is required"
 msgstr ""
 
 #: assets/js/blocks/neopayment-standard.js:109
+#: build/neopayment-standard.js:1
 msgid "Neopayment Standard Gateway"
 msgstr ""
 
 #: assets/js/blocks/neopayment-telered.js:17
+#: build/neopayment-telered.js:1
 msgid "Neopayment Telered Gateway"
 msgstr ""
