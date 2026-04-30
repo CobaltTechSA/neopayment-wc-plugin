@@ -614,9 +614,10 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	private function neopayment_get_3ds_params()
 	{
 		$posted_data = array();
-		if (isset($_POST['post_data']) && is_string($_POST['post_data'])) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			parse_str(wp_unslash($_POST['post_data']), $posted_data);
+		$post_data_raw = filter_input(INPUT_POST, 'post_data', FILTER_UNSAFE_RAW);
+		$post_data_raw = is_string($post_data_raw) ? sanitize_textarea_field(wp_unslash($post_data_raw)) : '';
+		if ('' !== $post_data_raw) {
+			parse_str($post_data_raw, $posted_data);
 		}
 
 		if (isset($_POST['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'woocommerce-process_checkout')) {
