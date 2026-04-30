@@ -125,7 +125,7 @@ msgstr ""
 #: class-neopayment-telered-gateway.php:118
 #: class-neopayment-standard-gateway.php:133
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Habilitar/Deshabilitar"
 
 #: class-neopayment-standard-gateway.php:140
 #: class-neopayment-telered-gateway.php:119
@@ -256,7 +256,7 @@ msgstr "CVV no válido"
 #: class-neopayment-standard-gateway.php:454
 #, php-format
 msgid "Reembolso denegado (estado: %s)."
-msgstr ""
+msgstr "Reembolso denegado (estado: %s)."
 
 #: class-neopayment-standard-gateway.php:584
 #: class-neopayment-standard-gateway.php:560
@@ -304,7 +304,7 @@ msgstr "Aceptación de pagos con Clave"
 
 #: class-neopayment-telered-gateway.php:96
 msgid "Telered"
-msgstr ""
+msgstr "Telered"
 
 #: class-neopayment-telered-gateway.php:135
 #: assets/js/blocks/neopayment-telered.js:24
@@ -314,11 +314,11 @@ msgstr "Pagar con Clave"
 
 #: class-neopayment-telered-gateway.php:311
 msgid "Pago completado"
-msgstr ""
+msgstr "Pago completado"
 
 #: class-neopayment-telered-gateway.php:317
 msgid "Pago fallido"
-msgstr ""
+msgstr "Pago fallido"
 
 #: includes/blocks/class-neopayment-telered-blocks.php:51
 #: assets/js/blocks/neopayment-telered.js:8
@@ -340,28 +340,44 @@ msgstr "Tarjeta (Visa/Mastercard)"
 #: neopayment.php:233
 #, php-format
 msgid "%1$s requiere WordPress %2$s or higher. Porfavor %3$sactualiza WordPress &raquo;%4$s"
-msgstr ""
+msgstr "%1$s requiere WordPress %2$s o superior. Por favor, %3$sactualiza WordPress &raquo;%4$s"
 
 #. translators: %1$s - Plugin Name, %2$s - activate WooCommerce link open, %3$s - activate WooCommerce link close.
 #: neopayment.php:259
 #, php-format
 msgid "%1$s requiere que WooCommerce esté activado. Por favor %2$sactiva WooCommerce%3$s."
-msgstr ""
+msgstr "%1$s requiere que WooCommerce esté activado. Por favor, %2$sactiva WooCommerce%3$s."
 
 #. translators: %1$s - Plugin Name, %2$s - install WooCommerce link open, %3$s - install WooCommerce link close.
 #: neopayment.php:275
 #, php-format
 msgid "%1$s requiere que WooCommerce esté instalado y activado. por favor, %2$sinstala WooCommerce%3$s."
-msgstr ""
+msgstr "%1$s requiere que WooCommerce esté instalado y activado. Por favor, %2$sinstala WooCommerce%3$s."
 
 #. translators: %1$s - Plugin Name, %2$s - minimum WooCommerce version, %3$s - update WooCommerce link open, %4$s - update WooCommerce link close, %5$s - download minimum WooCommerce link open, %6$s - download minimum WooCommerce link close.
 #: neopayment.php:294
 #, php-format
 msgid "%1$s requiere WooCommerce %2$s o superior. Por favor, %3$sactualiza WooCommerce%4$s a la última versión, o %5$sdescarga la versión mínima requerida &raquo;%6$s"
-msgstr ""
+msgstr "%1$s requiere WooCommerce %2$s o superior. Por favor, %3$sactualiza WooCommerce%4$s a la última versión, o %5$sdescarga la versión mínima requerida &raquo;%6$s"
 
 #. translators: %1$s - Plugin Name, %2$s - minimum WooCommerce version, %3$s - update WooCommerce link open, %4$s - update WooCommerce link close, %5$s - download minimum WooCommerce link open, %6$s - download minimum WooCommerce link close.
 #: neopayment.php:310
 #, php-format
 msgid "%1$s solo está disponible para tiendas localizadas en Panamá."
-msgstr ""
+msgstr "%1$s solo está disponible para tiendas localizadas en Panamá."
+
+#: assets/js/blocks/components/neopayment-card-fields.js:64
+msgid "Full name"
+msgstr "Nombre completo"
+
+#: assets/js/blocks/components/neopayment-card-fields.js:73
+msgid "You must enter the holder name"
+msgstr "Debes introducir el nombre del titular."
+
+#: assets/js/blocks/components/neopayment-card-fields.js:107
+msgid "Expiration date"
+msgstr "Fecha de expiración"
+
+#: assets/js/blocks/components/neopayment-card-fields.js:112
+msgid "MM/YY"
+msgstr "MM/AA"
