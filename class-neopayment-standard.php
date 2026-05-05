@@ -512,7 +512,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		if (isset($_POST[$this->id . '_nonce'])) {
 			if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST[$this->id . '_nonce'])), $this->id . '_process_payment')) {
 				wc_add_notice(__('Security check failed. Please try again.', 'neopayment'), 'error');
-				return;
+				return array( 'result' => 'failure' );
 			}
 		}
 		// we need it to get any order details.
@@ -629,17 +629,23 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 				);
 			} elseif ('refused' === ($transaction['status'] ?? '')) {
 				wc_add_notice(__('We were unable to complete the payment. Please contact with commerce.', 'neopayment'), 'error');
+				return array( 'result' => 'failure' );
 			} else {
 				wc_add_notice(__('We were unable to complete the payment. Please check your card details or contact your bank.', 'neopayment'), 'error');
+				return array( 'result' => 'failure' );
 			}
 		} catch (\NEOPAYMENT_Exception $e) {
 			if (! $e->isSuccessResponse()) {
 				NEOPAYMENT_Log::debug($e->getMessage() . ' - ' . wp_json_encode($e->getResponse()));
 				wc_add_notice(__('Cannot generate the payment. Please, contact with commerce.', 'neopayment'), 'error');
+				return array( 'result' => 'failure' );
 			} else {
 				wc_add_notice(__('Cannot process the payment. Please, contact with commerce.', 'neopayment'), 'error');
+				return array( 'result' => 'failure' );
 			}
 		}
+
+		return array( 'result' => 'failure' );
 	}
 
 	/**

@@ -8,7 +8,7 @@
  * Version: 3.0.0
  * License: GPL-2.0
  * Text Domain: neopayment
- * Domain Path: /i18n
+ * Domain Path: /i18n/
  *
  * @package NEOPAYMENT
  */
