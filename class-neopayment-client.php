@@ -442,8 +442,12 @@ class NEOPAYMENT_Client
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Response array for getResponse(); not displayed raw.
-			throw new NEOPAYMENT_Exception('Error processing payment', $response);
+			$error_message = 'Error processing payment';
+			if (isset($response['body']['message']) && is_string($response['body']['message']) && '' !== $response['body']['message']) {
+				$error_message = sanitize_text_field($response['body']['message']);
+			}
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new NEOPAYMENT_Exception($error_message, $response);
 		}
 	}
 
