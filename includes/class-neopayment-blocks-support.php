@@ -87,7 +87,7 @@ final class NEOPAYMENT_Blocks_Support {
 			'neopayment-3ds-popup',
 			NEOPAYMENT_URL . 'assets/js/neopayment-3ds-popup.js',
 			array( 'jquery', 'neopayment-standard-blocks-js' ),
-			'2.4.0',
+			file_exists( NEOPAYMENT_PATH . 'assets/js/neopayment-3ds-popup.js' ) ? filemtime( NEOPAYMENT_PATH . 'assets/js/neopayment-3ds-popup.js' ) : NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION,
 			true
 		);
 

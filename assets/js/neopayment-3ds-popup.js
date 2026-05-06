@@ -278,10 +278,11 @@ jQuery(
 					toggleOpenWindowButton(false);
 					setModalStatus('', false);
 				} else if (!callbackHandled) {
-					// Usually happens after OTP submit redirects; keep user informed while callback arrives.
-					showProcessingLayer(true);
+					// Do not block the iframe on intermediate ACS reloads (e.g. wrong OTP retry screens).
+					// Keep the challenge usable and only show a light hint.
+					showProcessingLayer(false);
 					toggleOpenWindowButton(false);
-					setModalStatus(__('Estamos finalizando tu autenticación. Por favor espera...', 'neopayment-payment-gateway'));
+					setModalStatus(__('Procesando autenticación 3DS. Por favor espere...', 'neopayment-payment-gateway'));
 				}
 			};
 

@@ -24,6 +24,20 @@ Accept credit and debit card payments directly on your website through Visa, Mas
 
 Whether you\'re launching a new online store or expanding your payment options in Panama, this plugin offers a reliable solution for accepting card payments.
 
+== Source Code and Build Process ==
+- Public source repository: https://github.com/CobaltTechSA/payment-plugin-woocommerce
+- Main plugin bootstrap file: `neopayment.php`
+- JavaScript source files for block assets:
+  - `assets/js/blocks/neopayment-standard.js`
+  - `assets/js/blocks/neopayment-telered.js`
+- Compiled assets:
+  - `build/neopayment-standard.js`
+  - `build/neopayment-telered.js`
+
+Build commands:
+- `npm install`
+- `npm run build`
+
 
 == Installation ==
 1. Upload the plugin files to the `/wp-content/plugins/neopayment` directory, or install the plugin through the WordPress plugins screen directly.
