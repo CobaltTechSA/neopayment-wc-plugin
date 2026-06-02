@@ -1,0 +1,39 @@
+html,
+body {
+	height: 100%;
+	margin: 0;
+	background: #f4f7fb;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.neopayment-3ds-loading {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 12px;
+	color: #22324a;
+}
+
+.neopayment-3ds-spinner {
+	width: 42px;
+	height: 42px;
+	border: 4px solid #d7deea;
+	border-top-color: #2f6fb3;
+	border-radius: 50%;
+	animation: neopayment3dsspin 0.9s linear infinite;
+}
+
+.neopayment-3ds-text {
+	font-size: 14px;
+	text-align: center;
+	max-width: 320px;
+	line-height: 1.4;
+}
+
+@keyframes neopayment3dsspin {
+	to {
+		transform: rotate(360deg);
+	}
+}

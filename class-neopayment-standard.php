@@ -385,21 +385,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		}
 
 		// detect if the request is from a block-based checkout or classic checkout.
-		$raw_input = file_get_contents('php://input');
-		$body      = json_decode($raw_input, true);
-		$body      = is_array($body) ? $body : array();
-
-		foreach ($body as $key => $value) {
-			if (is_string($value)) {
-				$body[$key] = sanitize_text_field($value);
-			} elseif (is_array($value)) {
-				foreach ($value as $subkey => $subvalue) {
-					if (is_string($subvalue)) {
-						$body[$key][$subkey] = sanitize_text_field($subvalue);
-					}
-				}
-			}
-		}
+		$body = NEOPAYMENT_Helpers::get_sanitized_json_input();
 		// if the request is from a block-based checkout, omit the validation.
 		if (! empty($body['payment_data'])) {
 			return true;
@@ -593,23 +579,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		$neopayment_client = new NEOPAYMENT_Client( $this->api_url, $this->api_client_id, $this->api_client_secret, $this->testmode );
 		try {
 			// detect if the request is from a block-based checkout or classic checkout.
-			$raw_input = file_get_contents('php://input');
-			$body      = json_decode($raw_input, true);
-			if (! is_array($body)) {
-				$body = array();
-			}
-
-			foreach ($body as $key => $value) {
-				if (is_string($value)) {
-					$body[$key] = sanitize_text_field($value);
-				} elseif (is_array($value)) {
-					foreach ($value as $subkey => $subvalue) {
-						if (is_string($subvalue)) {
-							$body[$key][$subkey] = sanitize_text_field($subvalue);
-						}
-					}
-				}
-			}
+			$body = NEOPAYMENT_Helpers::get_sanitized_json_input();
 			$neopayment_is_block = ! empty($body['payment_data']);
 
 			// if the request is from a block-based checkout, we need to handle it differently.
@@ -920,10 +890,12 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	{
 		// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		// WooCommerce verifies `woocommerce-process_checkout` / `woocommerce-pay` nonces before calling gateway `process_payment()`.
-		$posted_data = array();
-		$post_data_raw = filter_input(INPUT_POST, 'post_data', FILTER_UNSAFE_RAW);
-		$post_data_raw = is_string($post_data_raw) ? sanitize_textarea_field(wp_unslash($post_data_raw)) : '';
-		if ('' !== $post_data_raw) {
+		$posted_data   = array();
+		$post_data_raw = '';
+		if ( isset( $_POST['post_data'] ) ) {
+			$post_data_raw = sanitize_textarea_field( wp_unslash( $_POST['post_data'] ) );
+		}
+		if ( '' !== $post_data_raw ) {
 			parse_str($post_data_raw, $posted_data);
 		}
 
@@ -1215,6 +1187,14 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		wp_register_script('neopayment-3ds-handler', '', array(), '1.0', true);
 		wp_enqueue_script('neopayment-3ds-handler');
 
+		wp_register_style(
+			'neopayment-3ds-handler',
+			NEOPAYMENT_URL . 'assets/css/neopayment-3ds-handler.css',
+			array(),
+			NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION
+		);
+		wp_enqueue_style('neopayment-3ds-handler');
+
 		$script_data = sprintf(
 			'var neopayment3dsData = { target: %s, success: %s };',
 			wp_json_encode($target),
@@ -1251,40 +1231,6 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		<head>
 			<meta charset="<?php bloginfo('charset'); ?>">
 			<title><?php esc_html_e('Processing 3DS…', 'neopayment'); ?></title>
-			<style>
-				html, body {
-					height: 100%;
-					margin: 0;
-					background: #f4f7fb;
-					font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-				}
-				.neopayment-3ds-loading {
-					height: 100%;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					flex-direction: column;
-					gap: 12px;
-					color: #22324a;
-				}
-				.neopayment-3ds-spinner {
-					width: 42px;
-					height: 42px;
-					border: 4px solid #d7deea;
-					border-top-color: #2f6fb3;
-					border-radius: 50%;
-					animation: neopayment3dsspin 0.9s linear infinite;
-				}
-				.neopayment-3ds-text {
-					font-size: 14px;
-					text-align: center;
-					max-width: 320px;
-					line-height: 1.4;
-				}
-				@keyframes neopayment3dsspin {
-					to { transform: rotate(360deg); }
-				}
-			</style>
 			<?php wp_head(); ?>
 		</head>
 
@@ -1310,19 +1256,12 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 */
 	public function neopayment_webhook()
 	{
-		$raw_input = file_get_contents('php://input');
-		$data      = json_decode($raw_input, true);
+		$data = NEOPAYMENT_Helpers::get_sanitized_json_input();
 
-		if (! is_array($data)) {
+		if (empty($data)) {
 			NEOPAYMENT_Log::debug('Webhook error: input no es array válido');
 			status_header(400);
 			exit;
-		}
-
-		foreach ($data as $key => $value) {
-			if (is_string($value)) {
-				$data[$key] = sanitize_text_field($value);
-			}
 		}
 
 		NEOPAYMENT_Log::debug('Webhook recibido: ' . wp_json_encode($data));
@@ -1331,8 +1270,8 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			$valid_transaction = $this->validate_payment($data);
 			status_header(204);
 		} catch (\NEOPAYMENT_Exception $e) {
-			$tid = isset($data['tid']) ? $data['tid'] : 'N/A';
-			NEOPAYMENT_Log::debug("Error en webhook. TID: $tid - " . $e->getMessage());
+			$tid = isset($data['tid']) ? sanitize_text_field((string) $data['tid']) : 'N/A';
+			NEOPAYMENT_Log::debug('Error en webhook. TID: ' . $tid . ' - ' . $e->getMessage());
 			status_header(400);
 		}
 		exit;

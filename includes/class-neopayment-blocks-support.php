@@ -6,7 +6,7 @@
  * @package NEOPAYMENT
  */
 
-namespace NboPaymentGateway\Blocks;
+namespace NeopaymentGateway\Blocks;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 
@@ -46,11 +46,11 @@ final class NEOPAYMENT_Blocks_Support {
 	 * @return void
 	 */
 	public static function register_blocks( PaymentMethodRegistry $registry ) {
-		if ( class_exists( '\NboPaymentGateway\Blocks\NEOPAYMENT_Standard_Blocks' ) ) {
-			$registry->register( new \NboPaymentGateway\Blocks\NEOPAYMENT_Standard_Blocks() );
+		if ( class_exists( '\NeopaymentGateway\Blocks\NEOPAYMENT_Standard_Blocks' ) ) {
+			$registry->register( new \NeopaymentGateway\Blocks\NEOPAYMENT_Standard_Blocks() );
 		}
-		if ( class_exists( '\NboPaymentGateway\Blocks\NEOPAYMENT_Telered_Blocks' ) ) {
-			$registry->register( new \NboPaymentGateway\Blocks\NEOPAYMENT_Telered_Blocks() );
+		if ( class_exists( '\NeopaymentGateway\Blocks\NEOPAYMENT_Telered_Blocks' ) ) {
+			$registry->register( new \NeopaymentGateway\Blocks\NEOPAYMENT_Telered_Blocks() );
 		}
 	}
 
@@ -140,5 +140,3 @@ final class NEOPAYMENT_Blocks_Support {
 		);
 	}
 }
-
-NEOPAYMENT_Blocks_Support::init();

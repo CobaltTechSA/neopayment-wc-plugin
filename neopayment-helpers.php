@@ -108,4 +108,50 @@ class NEOPAYMENT_Helpers {
 		}
 		return $state;
 	}
+
+	/**
+	 * Reads and decodes the JSON request body from php://input.
+	 *
+	 * @return array Decoded and recursively sanitized array, or empty array on failure.
+	 */
+	public static function get_sanitized_json_input() {
+		$raw_input = file_get_contents( 'php://input' );
+		if ( ! is_string( $raw_input ) || '' === $raw_input ) {
+			return array();
+		}
+
+		$decoded = json_decode( $raw_input, true );
+		if ( ! is_array( $decoded ) ) {
+			return array();
+		}
+
+		return self::recursive_sanitize( $decoded );
+	}
+
+	/**
+	 * Recursively sanitizes decoded JSON values.
+	 *
+	 * @param mixed $value Value to sanitize.
+	 * @return mixed Sanitized value.
+	 */
+	public static function recursive_sanitize( $value ) {
+		if ( is_array( $value ) ) {
+			$sanitized = array();
+			foreach ( $value as $key => $item ) {
+				$sanitized_key            = is_string( $key ) ? sanitize_key( $key ) : $key;
+				$sanitized[ $sanitized_key ] = self::recursive_sanitize( $item );
+			}
+			return $sanitized;
+		}
+
+		if ( is_string( $value ) ) {
+			return sanitize_text_field( $value );
+		}
+
+		if ( is_bool( $value ) || is_int( $value ) || is_float( $value ) || null === $value ) {
+			return $value;
+		}
+
+		return '';
+	}
 }

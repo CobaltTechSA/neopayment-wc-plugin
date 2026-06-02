@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 require_once 'class-neopayment-constants.php';
+require_once 'neopayment-helpers.php';
 
 /**
  * Handles WooCommerce Telered integration for the payment gateway.
@@ -301,14 +302,13 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 	 */
 	public function neopayment_webhook() {
 
-		$data_raw = json_decode( file_get_contents( 'php://input' ), true );
-		if ( ! is_array( $data_raw ) ) {
+		$data = NEOPAYMENT_Helpers::get_sanitized_json_input();
+		if ( empty( $data ) ) {
 			NEOPAYMENT_Log::debug( 'Webhook error: payload no es JSON' );
 			status_header( 400 );
 			exit;
 		}
 
-		$data = $this->neopayment_recursive_sanitize( $data_raw );
 		NEOPAYMENT_Log::debug( 'Webhook payload: ' . wp_json_encode( $data ) );
 
 		try {
@@ -339,30 +339,10 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 			status_header( 204 );
 
 		} catch ( \NEOPAYMENT_Exception $e ) {
-			NEOPAYMENT_Log::debug( 'Error getting transaction ' . ( $data['tid'] ?? '' ) . ' - ' . $e->getMessage() );
+			$tid = isset( $data['tid'] ) ? sanitize_text_field( (string) $data['tid'] ) : '';
+			NEOPAYMENT_Log::debug( 'Error getting transaction ' . $tid . ' - ' . $e->getMessage() );
 			status_header( 400 );
 		}
-	}
-
-	/**
-	 * Recursive validation/sanitization for 3DS values.
-	 *
-	 * @param mixed $value Value to sanitize (array|string|scalar).
-	 * @return mixed Sanitized value.
-	 */
-	private function neopayment_recursive_sanitize( $value ) {
-		if ( is_array( $value ) ) {
-			foreach ( $value as $k => $v ) {
-				$value[ $k ] = $this->neopayment_recursive_sanitize( $v );
-			}
-			return $value;
-		}
-
-		if ( is_string( $value ) ) {
-			return sanitize_text_field( $value );
-		}
-
-		return $value;
 	}
 
 	/**

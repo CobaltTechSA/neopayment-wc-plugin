@@ -5,7 +5,7 @@
  * @package NEOPAYMENT
  */
 
-namespace NboPaymentGateway\Blocks;
+namespace NeopaymentGateway\Blocks;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
