@@ -21,7 +21,7 @@ class NEOPAYMENT_Constants {
 	const NEOPAYMENT_MINIMUM_PHP_VERSION = '7.2.0';
 
 	// Minimum WordPress version required by this plugin.
-	const NEOPAYMENT_MINIMUM_WP_VERSION = '4.4';
+	const NEOPAYMENT_MINIMUM_WP_VERSION = '5.0';
 
 	// Minimum WooCommerce version required by this plugin.
 	const NEOPAYMENT_MINIMUM_WC_VERSION = '5.3';

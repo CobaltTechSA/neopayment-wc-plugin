@@ -585,16 +585,11 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			// if the request is from a block-based checkout, we need to handle it differently.
 			if ($neopayment_is_block) {
 				NEOPAYMENT_Log::debug('Origin: Checkout Based Blocks');
-				$pdata    = $body['payment_data'];
+				$pdata    = $body['payment_data'] ?? array();
 				$billing  = $body['billing_address'] ?? array();
 				$shipping = $body['shipping_address'] ?? array();
 
-				$data = array();
-				foreach ($pdata as $index => $field) {
-					if (isset($field['key'], $field['value'])) {
-						$data[$field['key']] = wc_clean($field['value']);
-					}
-				}
+				$data = NEOPAYMENT_Helpers::map_blocks_payment_data( $pdata );
 				NEOPAYMENT_Log::debug(' data: ' . wp_json_encode($data));
 
 				// card details.
@@ -896,7 +891,12 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			$post_data_raw = sanitize_textarea_field( wp_unslash( $_POST['post_data'] ) );
 		}
 		if ( '' !== $post_data_raw ) {
-			parse_str($post_data_raw, $posted_data);
+			parse_str( $post_data_raw, $posted_data );
+			if ( is_array( $posted_data ) ) {
+				$posted_data = NEOPAYMENT_Helpers::sanitize_parsed_str_array( $posted_data );
+			} else {
+				$posted_data = array();
+			}
 		}
 
 		$three_ds_attrs = array(
@@ -1122,33 +1122,44 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 	 * @param array $transaction for all data.
 	 * @return false return 'false'.
 	 */
-	private function validate_payment($transaction)
-	{
+	private function validate_payment( $transaction ) {
+		if ( ! is_array( $transaction ) ) {
+			return false;
+		}
 
-		$metas    = $transaction['metadatas'];
-		$order_id = $metas['order_id'];
-		$order    = wc_get_order($order_id);
+		$parsed = NEOPAYMENT_Helpers::parse_gateway_transaction( $transaction );
+		if ( null === $parsed ) {
+			return false;
+		}
+
+		$order = wc_get_order( $parsed['order_id'] );
 		if ( ! $order instanceof WC_Order ) {
 			return false;
 		}
 
-		$status         = $transaction['status'];
-		$success_status = array('authorized', 'notified');
-		$order->update_meta_data('neopayment_bank_code', $transaction['response_code']);
-		$order->update_meta_data('neopayment_transaction_id', $transaction['identifier']);
-		$order->update_meta_data('neopayment_bank_authorization', $transaction['authorization_number']);
+		$order->update_meta_data( 'neopayment_bank_code', $parsed['response_code'] );
+		$order->update_meta_data( 'neopayment_transaction_id', $parsed['identifier'] );
+		$order->update_meta_data( 'neopayment_bank_authorization', $parsed['authorization_number'] );
 
-		if (in_array($status, $success_status, true)) {
+		if ( in_array( $parsed['status'], $parsed['success_statuses'], true ) ) {
 			$this->neopayment_clear_pending_3ds_challenge( $order );
-			$order->update_status('completed', __('Payment completed', 'neopayment'));
-			$order->payment_complete($transaction['identifier']);
-			if (function_exists('WC') && WC()->cart) {
+			$order->update_status( 'completed', __( 'Payment completed', 'neopayment' ) );
+			if ( '' !== $parsed['identifier'] ) {
+				$order->payment_complete( $parsed['identifier'] );
+			} else {
+				$order->payment_complete();
+			}
+			if ( function_exists( 'WC' ) && WC()->cart ) {
 				WC()->cart->empty_cart();
 			}
+			$order->save();
 			return true;
-		} else {
+		}
+
+		if ( in_array( $parsed['status'], $parsed['failure_statuses'], true ) ) {
 			$this->neopayment_clear_pending_3ds_challenge( $order );
-			$order->update_status('failed', __('Failed payment', 'neopayment'));
+			$order->update_status( 'failed', __( 'Failed payment', 'neopayment' ) );
+			$order->save();
 		}
 
 		return false;

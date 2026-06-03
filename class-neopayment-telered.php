@@ -312,28 +312,33 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 		NEOPAYMENT_Log::debug( 'Webhook payload: ' . wp_json_encode( $data ) );
 
 		try {
-			$transaction = $data;
-			$metas       = $transaction['metadatas'] ?? array();
-			$order_id    = $metas['order_id'] ?? null;
-			$order       = $order_id ? wc_get_order( $order_id ) : null;
+			$parsed = NEOPAYMENT_Helpers::parse_gateway_transaction( $data );
+			if ( null === $parsed ) {
+				status_header( 400 );
+				exit;
+			}
 
-			$status         = $transaction['status'] ?? '';
-			$success_status = array( 'authorized', 'notified' );
+			$order = wc_get_order( $parsed['order_id'] );
+			if ( $order instanceof WC_Order ) {
+				$order->update_meta_data( 'neopayment_bank_code', $parsed['response_code'] );
+				$order->update_meta_data( 'neopayment_transaction_id', $parsed['identifier'] );
+				$order->update_meta_data( 'neopayment_bank_authorization', $parsed['authorization_number'] );
 
-			if ( $order ) {
-				$order->add_meta_data( 'neopayment_bank_code', $transaction['response_code'] ?? '' );
-				$order->add_meta_data( 'neopayment_transaction_id', $transaction['identifier'] ?? '' );
-				$order->add_meta_data( 'neopayment_bank_authorization', $transaction['authorization_number'] ?? '' );
-
-				if ( in_array( $status, $success_status, true ) ) {
+				if ( in_array( $parsed['status'], $parsed['success_statuses'], true ) ) {
 					$order->update_status( 'completed', __( 'Pago completado', 'neopayment' ) );
-					$order->payment_complete( $transaction['identifier'] ?? '' );
+					if ( '' !== $parsed['identifier'] ) {
+						$order->payment_complete( $parsed['identifier'] );
+					} else {
+						$order->payment_complete();
+					}
 					if ( function_exists( 'WC' ) && WC()->cart ) {
 						WC()->cart->empty_cart();
 					}
-				} else {
+				} elseif ( in_array( $parsed['status'], $parsed['failure_statuses'], true ) ) {
 					$order->update_status( 'failed', __( 'Pago fallido', 'neopayment' ) );
 				}
+
+				$order->save();
 			}
 
 			status_header( 204 );
