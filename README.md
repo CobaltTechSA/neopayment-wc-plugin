@@ -3,8 +3,8 @@
 
 **Author:** [Neopayment](https:/neopayment.com)  
 **Tags:** woocommerce 
-Requires at least: 5.3
-Tested up to: 6.8
+Requires at least: 5.0
+Tested up to: 7.0
 Stable tag: 2.4.1
 Requires PHP: 7.2
 License: GPLv2 or later
@@ -17,7 +17,7 @@ Accept credit card payments in WooCommerce using the Neopayment payment gateway.
 
 - WooCommerce ≥ 5.3  
 - PHP ≥ 7.2.0  
-- WordPress ≥ 4.4  
+- WordPress ≥ 5.0  
 
 ---
 

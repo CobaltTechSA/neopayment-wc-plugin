@@ -6,6 +6,9 @@
  * Author: Neopayment
  * Author URI: https://neopayment.com
  * Version: 3.0.2
+ * Requires at least: 5.0
+ * Tested up to: 7.0
+ * Requires PHP: 7.2.0
  * License: GPL-2.0
  * Text Domain: neopayment
  * Domain Path: /i18n/
@@ -92,7 +95,7 @@ class NEOPAYMENT {
 		require_once plugin_dir_path(__FILE__) . 'class-neopayment-standard.php';
 		require_once plugin_dir_path(__FILE__) . 'class-neopayment-telered.php';
 		require_once plugin_dir_path(__FILE__) . 'includes/class-neopayment-blocks-support.php';
-		\NboPaymentGateway\Blocks\NEOPAYMENT_Blocks_Support::init();
+		\NeopaymentGateway\Blocks\NEOPAYMENT_Blocks_Support::init();
 
 		// fire it up!
 		add_action( 'plugins_loaded', array( $this, 'neopayment_registry' ), 11 );
@@ -395,7 +398,11 @@ class NEOPAYMENT {
 	 */
 	protected function neopayment_deactivate_plugin() {
 
-		neopayment_deactivate_plugins( plugin_basename( __FILE__ ) );
+		if ( ! function_exists( 'deactivate_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		deactivate_plugins( plugin_basename( __FILE__ ) );
 
 		if ( isset( $_GET['activate'], $_GET['_wpnonce'] ) &&
 			wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'neopayment_activate_action' ) ) {

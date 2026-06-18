@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 require_once 'class-neopayment-constants.php';
+require_once 'neopayment-helpers.php';
 
 /**
  * Handles WooCommerce Telered integration for the payment gateway.
@@ -301,68 +302,52 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 	 */
 	public function neopayment_webhook() {
 
-		$data_raw = json_decode( file_get_contents( 'php://input' ), true );
-		if ( ! is_array( $data_raw ) ) {
+		$data = NEOPAYMENT_Helpers::get_sanitized_json_input();
+		if ( empty( $data ) ) {
 			NEOPAYMENT_Log::debug( 'Webhook error: payload no es JSON' );
 			status_header( 400 );
 			exit;
 		}
 
-		$data = $this->neopayment_recursive_sanitize( $data_raw );
 		NEOPAYMENT_Log::debug( 'Webhook payload: ' . wp_json_encode( $data ) );
 
 		try {
-			$transaction = $data;
-			$metas       = $transaction['metadatas'] ?? array();
-			$order_id    = $metas['order_id'] ?? null;
-			$order       = $order_id ? wc_get_order( $order_id ) : null;
+			$parsed = NEOPAYMENT_Helpers::parse_gateway_transaction( $data );
+			if ( null === $parsed ) {
+				status_header( 400 );
+				exit;
+			}
 
-			$status         = $transaction['status'] ?? '';
-			$success_status = array( 'authorized', 'notified' );
+			$order = wc_get_order( $parsed['order_id'] );
+			if ( $order instanceof WC_Order ) {
+				$order->update_meta_data( 'neopayment_bank_code', $parsed['response_code'] );
+				$order->update_meta_data( 'neopayment_transaction_id', $parsed['identifier'] );
+				$order->update_meta_data( 'neopayment_bank_authorization', $parsed['authorization_number'] );
 
-			if ( $order ) {
-				$order->add_meta_data( 'neopayment_bank_code', $transaction['response_code'] ?? '' );
-				$order->add_meta_data( 'neopayment_transaction_id', $transaction['identifier'] ?? '' );
-				$order->add_meta_data( 'neopayment_bank_authorization', $transaction['authorization_number'] ?? '' );
-
-				if ( in_array( $status, $success_status, true ) ) {
+				if ( in_array( $parsed['status'], $parsed['success_statuses'], true ) ) {
 					$order->update_status( 'completed', __( 'Pago completado', 'neopayment' ) );
-					$order->payment_complete( $transaction['identifier'] ?? '' );
+					if ( '' !== $parsed['identifier'] ) {
+						$order->payment_complete( $parsed['identifier'] );
+					} else {
+						$order->payment_complete();
+					}
 					if ( function_exists( 'WC' ) && WC()->cart ) {
 						WC()->cart->empty_cart();
 					}
-				} else {
+				} elseif ( in_array( $parsed['status'], $parsed['failure_statuses'], true ) ) {
 					$order->update_status( 'failed', __( 'Pago fallido', 'neopayment' ) );
 				}
+
+				$order->save();
 			}
 
 			status_header( 204 );
 
 		} catch ( \NEOPAYMENT_Exception $e ) {
-			NEOPAYMENT_Log::debug( 'Error getting transaction ' . ( $data['tid'] ?? '' ) . ' - ' . $e->getMessage() );
+			$tid = isset( $data['tid'] ) ? sanitize_text_field( (string) $data['tid'] ) : '';
+			NEOPAYMENT_Log::debug( 'Error getting transaction ' . $tid . ' - ' . $e->getMessage() );
 			status_header( 400 );
 		}
-	}
-
-	/**
-	 * Recursive validation/sanitization for 3DS values.
-	 *
-	 * @param mixed $value Value to sanitize (array|string|scalar).
-	 * @return mixed Sanitized value.
-	 */
-	private function neopayment_recursive_sanitize( $value ) {
-		if ( is_array( $value ) ) {
-			foreach ( $value as $k => $v ) {
-				$value[ $k ] = $this->neopayment_recursive_sanitize( $v );
-			}
-			return $value;
-		}
-
-		if ( is_string( $value ) ) {
-			return sanitize_text_field( $value );
-		}
-
-		return $value;
 	}
 
 	/**
