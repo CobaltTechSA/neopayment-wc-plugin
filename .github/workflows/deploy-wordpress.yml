@@ -1,0 +1,39 @@
+name: Deploy to WordPress.org
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to WordPress.org
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.WP_ORG_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
+          SLUG: ${{ secrets.WP_PLUGIN_SLUG }}
