@@ -5,7 +5,7 @@
  * Description: Payments with VISA, MasterCard and Clave
  * Author: Neopayment
  * Author URI: https://neopayment.com
- * Version: 3.0.4
+ * Version: 3.0.5
  * Requires at least: 5.0
  * Tested up to: 7.0
  * Requires PHP: 7.2.0
