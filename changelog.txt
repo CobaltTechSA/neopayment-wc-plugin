@@ -1,3 +1,6 @@
+2026.06.23 - version 3.0.4
+* Added Github workflows
+
 2026.05.12 - version 3.0.2
 * Added support for handling pay_for_order flows and ensuring resumed challenges are correctly initialized and validated.
 * Browser attributes are refactored and validated to ensure consistent behavior across different checkout scenarios.
