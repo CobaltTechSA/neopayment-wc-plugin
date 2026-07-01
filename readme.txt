@@ -43,7 +43,10 @@ Build commands:
 1. Upload the plugin files to the `/wp-content/plugins/neopayment` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the \'Plugins\' screen in WordPress.
 3. Go to **WooCommerce > Settings > Payments** and enable the \"Neopayment\".
-4. Configure your Neopayment credentials and settings.
+4. Enable the **Neopayment** payment method.
+5. Configure your Neopayment credentials and settings.
+6. Save the changes and perform a test transaction before using the plugin in production.
+
 
 == Frequently Asked Questions ==
 
@@ -59,7 +62,31 @@ Visa, Mastercard, and Clave cards.
 
 Yes. You must be an approved merchant with Neopayment to use this plugin.
 
+== Screenshots ==
+
+1. Neopayment payment method configuration in WooCommerce.
+2. Neopayment payment option displayed at checkout.
+
 == Changelog ==
+
+2026.06.23 - version 3.0.5
+* Fix workflows
+
+2026.05.12 - version 3.0.2
+* Added support for pay_for_order flows and 3DS challenge handling
+* Fix OAuth token management for prod and test mode
+* Fix 3DS on order-pay mode
+* Updated payment gateway scripts and dependencies
+
+2026.05.06 - version 3.0.1
+* Introduced modal-based flow for 3D Secure replacing popup
+* Improved 3DS processing feedback and error handling
+* Fix plugin check errors based on WordPress feedback
+* Fix scripts enqueued on cart pages
+
+2026.04.13 - version 3.0.0
+* Renamed plugin to Neopayment
+
 2025.09.22 - version 2.5.2
 * Changed prefix
 * Added nonces
