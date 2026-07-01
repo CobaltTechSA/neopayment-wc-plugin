@@ -72,23 +72,17 @@ Yes. You must be an approved merchant with Neopayment to use this plugin.
 2026.06.23 - version 3.0.5
 * Fix workflows
 
-2026.06.23 - version 3.0.4
-* Added GitHub workflows
-
 2026.05.12 - version 3.0.2
 * Added support for pay_for_order flows and 3DS challenge handling
 * Fix OAuth token management for prod and test mode
 * Fix 3DS on order-pay mode
 * Updated payment gateway scripts and dependencies
-* Updated localization strings and .pot files
 
 2026.05.06 - version 3.0.1
 * Introduced modal-based flow for 3D Secure replacing popup
 * Improved 3DS processing feedback and error handling
-* Fix 3DS response on denied transactions
 * Fix plugin check errors based on WordPress feedback
-* Updated translation files
-* Fix scripts incorrectly enqueued on cart pages
+* Fix scripts enqueued on cart pages
 
 2026.04.13 - version 3.0.0
 * Renamed plugin to Neopayment
