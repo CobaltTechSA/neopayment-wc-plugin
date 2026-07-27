@@ -42,8 +42,17 @@ final class NEOPAYMENT_Standard_Blocks extends AbstractPaymentMethodType {
 		// Blocks only auto-enqueue handles listed here; 3DS popup must load on checkout too.
 		return array(
 			'neopayment-standard-blocks-js',
-			'neopayment-3ds-popup',
+			'neopayment-3ds-popup-blocks',
 		);
+	}
+
+	/**
+	 * Styles for the blocks payment method UI.
+	 *
+	 * @return array
+	 */
+	public function get_payment_method_style_handles() {
+		return array( 'neopayment-card-fields-style' );
 	}
 
 	/**

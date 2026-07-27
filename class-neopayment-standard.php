@@ -266,14 +266,15 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			true
 		);
 
-		// Script for the 3DS popup + classic checkout.
-		wp_enqueue_script(
-			'neopayment-3ds-popup',
+		// Classic-only handle: do not reuse `neopayment-3ds-popup-blocks` (pulls React blocks JS on classic checkout).
+		wp_register_script(
+			'neopayment-3ds-popup-classic',
 			$base . 'neopayment-3ds-popup.js',
 			array( 'jquery', 'neopayment-sweetalert' ),
 			$popup_ver,
 			true
 		);
+		wp_enqueue_script( 'neopayment-3ds-popup-classic' );
 
 		// This will be used to handle the 3DS challenge response.
 		$callback = esc_url_raw(home_url("/wc-api/{$this->id}_status"));
@@ -303,7 +304,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		}
 
 		wp_localize_script(
-			'neopayment-3ds-popup',
+			'neopayment-3ds-popup-classic',
 			'neopayment_3DS',
 			$localized
 		);
