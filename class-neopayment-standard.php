@@ -1176,6 +1176,9 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		$order_id  = isset($_GET['oid']) ? absint($_GET['oid']) : 0;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$order_key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+		// Lightweight JSON poll used while waiting for the async webhook to mark the order paid.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$is_poll = isset($_GET['neopayment_poll']) && '1' === (string) $_GET['neopayment_poll'];
 		$order     = wc_get_order($order_id);
 
 		if (! $order) {
@@ -1188,13 +1191,30 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			exit;
 		}
 
-		$target = ($order && $order->is_paid())
-			? $order->get_checkout_order_received_url()
-			: $order->get_checkout_payment_url();
+		if ( $is_poll ) {
+			$paid = (bool) $order->is_paid();
+			wp_send_json(
+				array(
+					'paid'   => $paid,
+					'target' => $paid ? $order->get_checkout_order_received_url() : $order->get_checkout_payment_url(),
+				)
+			);
+		}
 
-		$success = (bool) ($order && $order->is_paid());
+		$success_url = $order->get_checkout_order_received_url();
+		$fail_url    = $order->get_checkout_payment_url();
+		$success     = (bool) $order->is_paid();
+		$target      = $success ? $success_url : $fail_url;
+		$poll_url    = add_query_arg(
+			array(
+				'oid'             => $order_id,
+				'key'             => $order->get_order_key(),
+				'neopayment_poll' => '1',
+			),
+			home_url( '/wc-api/' . $this->id . '_status' )
+		);
 
-		NEOPAYMENT_Log::debug("neopayment_callback_url: order_id=$order_id, target=$target");
+		NEOPAYMENT_Log::debug("neopayment_callback_url: order_id=$order_id, paid=" . ( $success ? '1' : '0' ) . ", target=$target");
 
 		wp_register_script('neopayment-3ds-handler', '', array(), '1.0', true);
 		wp_enqueue_script('neopayment-3ds-handler');
@@ -1208,30 +1228,74 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		wp_enqueue_style('neopayment-3ds-handler');
 
 		$script_data = sprintf(
-			'var neopayment3dsData = { target: %s, success: %s };',
-			wp_json_encode($target),
-			$success ? 'true' : 'false'
+			'var neopayment3dsData = { target: %s, success: %s, successUrl: %s, failUrl: %s, pollUrl: %s };',
+			wp_json_encode( $target ),
+			$success ? 'true' : 'false',
+			wp_json_encode( $success_url ),
+			wp_json_encode( $fail_url ),
+			wp_json_encode( $poll_url )
 		);
 		wp_add_inline_script('neopayment-3ds-handler', $script_data, 'before');
 
+		// ACS redirects here before/around the webhook. Poll briefly for paid status, notify parent/opener,
+		// then always navigate this window so it never stays stuck on "Procesando 3DS…".
 		$main_script = '
 			document.addEventListener("DOMContentLoaded", function() {
-				var targetWindow = null;
-				if (window.opener && !window.opener.closed) {
-					targetWindow = window.opener;
-				} else if (window.parent && window.parent !== window) {
-					targetWindow = window.parent;
+				function notifyParent(success, target) {
+					var payload = {
+						neopayment3ds: success ? "success" : "fail",
+						redirect_to: target,
+						source: "neopayment_3ds_handler"
+					};
+					var targetWindow = null;
+					if (window.opener && !window.opener.closed) {
+						targetWindow = window.opener;
+					} else if (window.parent && window.parent !== window) {
+						targetWindow = window.parent;
+					}
+					if (targetWindow) {
+						try {
+							targetWindow.postMessage(payload, window.location.origin);
+						} catch (e) {}
+					}
+					setTimeout(function() {
+						window.location.href = target;
+					}, 600);
 				}
 
-				if (targetWindow) {
-					targetWindow.postMessage({
-						neopayment3ds: neopayment3dsData.success ? "success" : "fail",
-						redirect_to: neopayment3dsData.target,
-						source: "neopayment_3ds_handler"
-					}, "' . esc_url(home_url('/')) . '");
-				} else {
-					window.location.href = neopayment3dsData.target;
+				function finish(success, target) {
+					neopayment3dsData.success = !!success;
+					neopayment3dsData.target = target;
+					notifyParent(!!success, target);
 				}
+
+				if (neopayment3dsData.success) {
+					finish(true, neopayment3dsData.successUrl || neopayment3dsData.target);
+					return;
+				}
+
+				var attempts = 0;
+				var maxAttempts = 20;
+				var timer = setInterval(function() {
+					attempts += 1;
+					fetch(neopayment3dsData.pollUrl, { credentials: "same-origin", cache: "no-store" })
+						.then(function(r) { return r.json(); })
+						.then(function(data) {
+							if (data && data.paid) {
+								clearInterval(timer);
+								finish(true, data.target || neopayment3dsData.successUrl);
+							} else if (attempts >= maxAttempts) {
+								clearInterval(timer);
+								finish(false, neopayment3dsData.failUrl || neopayment3dsData.target);
+							}
+						})
+						.catch(function() {
+							if (attempts >= maxAttempts) {
+								clearInterval(timer);
+								finish(false, neopayment3dsData.failUrl || neopayment3dsData.target);
+							}
+						});
+				}, 1000);
 			});
 		';
 		wp_add_inline_script('neopayment-3ds-handler', $main_script);

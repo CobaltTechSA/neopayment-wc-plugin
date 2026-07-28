@@ -454,11 +454,12 @@ class NEOPAYMENT_Client
 
 		$final_metadatas = array_merge($final_metadatas, $metadatas);
 
-		$callback = home_url(
-			'/wc-api/'
-				. NEOPAYMENT_Constants::NEOPAYMENT_STANDARD_GATEWAY_ID
-				. '_status?oid='
-				. $order->get_id()
+		$callback = add_query_arg(
+			array(
+				'oid' => $order->get_id(),
+				'key' => $order->get_order_key(),
+			),
+			home_url( '/wc-api/' . NEOPAYMENT_Constants::NEOPAYMENT_STANDARD_GATEWAY_ID . '_status' )
 		);
 
 		$body = array(

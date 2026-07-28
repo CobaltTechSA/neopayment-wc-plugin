@@ -12,6 +12,7 @@ jQuery(
 		let fallbackCountdownTimer = null;
 		let processingHintTimer = null;
 		let activeChallengeUrl = null;
+		let activeChallengePopup = null;
 		let frameLoadCount = 0;
 		let callbackHandled = false;
 		let blockPageNavigation = false;
@@ -162,7 +163,6 @@ jQuery(
 			document.body.appendChild(overlay);
 
 			cancelBtn.addEventListener('click', () => {
-				// Allow retry for the same challenge URL after a manual close.
 				if (activeChallengeUrl) {
 					openedChallenges.delete(activeChallengeUrl);
 				}
@@ -170,10 +170,15 @@ jQuery(
 				window.location.reload();
 			});
 			openWindowBtn.addEventListener('click', () => {
-				if (!activeChallengeUrl) {
-					return;
+				const popup = openChallengePopup();
+				if (popup) {
+					setModalStatus(
+						__(
+							'Completa la verificación en la nueva ventana. Esta página se actualizará automáticamente al finalizar.',
+							'neopayment-payment-gateway'
+						)
+					);
 				}
-				window.open(activeChallengeUrl, '_blank', `width=${MODAL_WIDTH},height=${MODAL_HEIGHT}`);
 			});
 
 			modalElements = { overlay, iframe, status, processingLayer, openWindowBtn };
@@ -240,13 +245,39 @@ jQuery(
 			}, 1000);
 		}
 
+		function openChallengePopup() {
+			if (!activeChallengeUrl) {
+				return null;
+			}
+			try {
+				if (activeChallengePopup && !activeChallengePopup.closed) {
+					activeChallengePopup.focus();
+					return activeChallengePopup;
+				}
+				activeChallengePopup = window.open(
+					activeChallengeUrl,
+					'neopayment_3ds_challenge',
+					`width=${MODAL_WIDTH},height=${MODAL_HEIGHT},menubar=no,toolbar=no,location=yes,status=yes,resizable=yes,scrollbars=yes`
+				);
+				if (activeChallengePopup) {
+					activeChallengePopup.focus();
+				}
+				return activeChallengePopup;
+			} catch (e) {
+				console.warn('[NEOPAYMENT-3DS] No se pudo abrir ventana emergente:', e);
+				return null;
+			}
+		}
+
 		function open3DSModal(url) {
 			const { overlay, iframe } = ensure3DSModal();
 			activeChallengeUrl = url;
 			frameLoadCount = 0;
 			callbackHandled = false;
+			activeChallengePopup = null;
 			showProcessingLayer(false);
 			toggleOpenWindowButton(false);
+			iframe.style.display = 'block';
 			iframe.src = url;
 			overlay.classList.add('is-open');
 			overlay.style.display = 'flex';
@@ -257,31 +288,38 @@ jQuery(
 			if (iframeLoadTimer) {
 				clearTimeout(iframeLoadTimer);
 			}
+
+			// Offer popup fallback even if iframe "loads": Chrome error pages also fire onload,
+			// so a successful onload does not guarantee the OTP UI is usable.
 			iframeLoadTimer = setTimeout(() => {
-				console.warn('[NEOPAYMENT-3DS] Iframe 3DS no cargó a tiempo.');
+				console.warn('[NEOPAYMENT-3DS] Ofreciendo respaldo de ventana para el challenge 3DS.');
 				clearFallbackCountdown();
 				showProcessingLayer(false);
 				toggleOpenWindowButton(true);
-				setModalStatus(__('La verificación está tardando. Si lo prefieres, ábrela en una nueva ventana.', 'neopayment-payment-gateway'));
+				setModalStatus(
+					__(
+						'Si no ves el formulario para ingresar tu código, continúa la verificación en una nueva ventana.',
+						'neopayment-payment-gateway'
+					)
+				);
 			}, 7000);
 
 			iframe.onload = () => {
 				frameLoadCount += 1;
+				// First paint of the challenge — keep waiting for the fallback timer so the
+				// popup option still appears if the iframe only shows a browser error page.
+				if (frameLoadCount <= 1) {
+					showProcessingLayer(false);
+					return;
+				}
 				if (iframeLoadTimer) {
 					clearTimeout(iframeLoadTimer);
 					iframeLoadTimer = null;
 				}
 				clearFallbackCountdown();
-				// First load is normally the challenge form. Next loads are usually post-submit redirects.
-				if (frameLoadCount <= 1) {
+				if (!callbackHandled) {
 					showProcessingLayer(false);
-					toggleOpenWindowButton(false);
-					setModalStatus('', false);
-				} else if (!callbackHandled) {
-					// Do not block the iframe on intermediate ACS reloads (e.g. wrong OTP retry screens).
-					// Keep the challenge usable and only show a light hint.
-					showProcessingLayer(false);
-					toggleOpenWindowButton(false);
+					toggleOpenWindowButton(true);
 					setModalStatus(__('Procesando autenticación 3DS. Por favor espere...', 'neopayment-payment-gateway'));
 				}
 			};
@@ -296,7 +334,16 @@ jQuery(
 			modalElements.overlay.classList.remove('is-open');
 			modalElements.overlay.style.display = 'none';
 			modalElements.iframe.src = 'about:blank';
+			modalElements.iframe.style.display = 'block';
 			activeChallengeUrl = null;
+			if (activeChallengePopup && !activeChallengePopup.closed) {
+				try {
+					activeChallengePopup.close();
+				} catch (e) {
+					// Ignore cross-window close errors.
+				}
+			}
+			activeChallengePopup = null;
 			frameLoadCount = 0;
 			callbackHandled = false;
 			showProcessingLayer(false);
@@ -310,6 +357,30 @@ jQuery(
 				clearTimeout(iframeLoadTimer);
 				iframeLoadTimer = null;
 			}
+		}
+
+		function handleChallengeComplete(payload) {
+			if (callbackHandled) {
+				return;
+			}
+			callbackHandled = true;
+			const redirectTo = payload?.redirect_to || '';
+			const isSuccess = payload?.neopayment3ds === 'success';
+			close3DSModal();
+			if (isSuccess && redirectTo) {
+				window.location.href = redirectTo;
+				return;
+			}
+			if (isSuccess) {
+				window.location.reload();
+				return;
+			}
+			console.warn('[NEOPAYMENT-3DS] Authentication failed.');
+			showUserMessage(
+				__('Error de autenticación', 'neopayment-payment-gateway'),
+				__('Inténtalo nuevamente. Si el problema persiste, verifica con tu banco.', 'neopayment-payment-gateway'),
+				false
+			);
 		}
 
 		function handlePopupEvents() {
@@ -366,8 +437,6 @@ jQuery(
 				return false;
 			}
 
-			// Classic checkout: intercept Woo successful response and prevent page reload
-			// while the 3DS challenge is in progress.
 			$(document.body).on('checkout_place_order_success', function (event) {
 				const payload = extractChallengePayload(arguments);
 				if (!payload) {
@@ -376,8 +445,6 @@ jQuery(
 				return openChallengeFromPayload(payload, event);
 			});
 
-			// Fallback for themes/plugins that bypass checkout_place_order_success flow.
-			// Includes `pay_for_order` when WooCommerce processes order-pay via AJAX.
 			$(document).ajaxComplete((event, xhr, settings) => {
 				const ajaxUrl = settings?.url || '';
 				if (
@@ -392,7 +459,6 @@ jQuery(
 				}
 			});
 
-			// Intercept fetch (checkout by blocks).
 			if (window.fetch) {
 				const originalFetch = window.fetch;
 				window.fetch = async function (input, init) {
@@ -416,7 +482,6 @@ jQuery(
 			}
 		}
 		function handleCheckoutResponse(response) {
-			// Classic checkout.
 			if (response.requires_challenge && response.challenge_url) {
 				if (openedChallenges.has(response.challenge_url)) {
 					return;
@@ -426,7 +491,6 @@ jQuery(
 				return;
 			}
 
-			// Checkout blocks.
 			if (response.payment_result?.payment_details) {
 				const details = response.payment_result.payment_details.reduce(
 					(acc, { key, value }) => {
@@ -500,29 +564,23 @@ jQuery(
 			window.addEventListener(
 				'message',
 				(event) => {
-					// Only accept completion messages from our own callback page.
 					if (event.origin !== window.location.origin) {
 						return;
 					}
 					if (!event.data?.neopayment3ds || event.data?.source !== 'neopayment_3ds_handler') {
 						return;
 					}
-					// Ignore messages not coming from the active 3DS iframe.
-					if (!modalElements || event.source !== modalElements.iframe.contentWindow) {
+
+					const fromIframe =
+						modalElements && event.source === modalElements.iframe.contentWindow;
+					const fromPopup =
+						activeChallengePopup && event.source === activeChallengePopup;
+
+					if (!fromIframe && !fromPopup) {
 						return;
 					}
-					callbackHandled = true;
-					close3DSModal();
-					if (event.data.neopayment3ds === 'success') {
-						window.location.href = event.data.redirect_to || window.location.href;
-					} else {
-						console.warn('[NEOPAYMENT-3DS] Authentication failed.');
-						showUserMessage(
-							__('Error de autenticación', 'neopayment-payment-gateway'),
-							__('Inténtalo nuevamente. Si el problema persiste, verifica con tu banco.', 'neopayment-payment-gateway'),
-							false
-						);
-					}
+
+					handleChallengeComplete(event.data);
 				}
 			);
 		}
