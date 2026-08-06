@@ -72,6 +72,9 @@ Yes. You must be an approved merchant with Neopayment to use this plugin.
 2026.06.23 - version 3.0.5
 * Fix workflows
 
+2026.06.23 - version 3.0.4
+* Added GitHub workflows
+
 2026.05.12 - version 3.0.2
 * Added support for pay_for_order flows and 3DS challenge handling
 * Fix OAuth token management for prod and test mode
