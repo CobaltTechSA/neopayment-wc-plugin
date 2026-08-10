@@ -37,6 +37,7 @@ final class NEOPAYMENT_Blocks_Support {
 
 		add_action( 'init', array( __CLASS__, 'register_scripts' ) );
 		add_action( 'init', array( __CLASS__, 'register_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_checkout_styles' ), 20 );
 	}
 
 	/**
@@ -73,7 +74,7 @@ final class NEOPAYMENT_Blocks_Support {
 				'wp-element',
 				'wp-i18n',
 			),
-			$standard_asset['version'] ?? NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION,
+			$standard_asset['version'] ?? \NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION,
 			true
 		);
 
@@ -83,11 +84,24 @@ final class NEOPAYMENT_Blocks_Support {
 			NEOPAYMENT_PATH . 'i18n'
 		);
 
+		$popup_ver = file_exists( NEOPAYMENT_PATH . 'assets/js/neopayment-3ds-popup.js' )
+			? (string) filemtime( NEOPAYMENT_PATH . 'assets/js/neopayment-3ds-popup.js' )
+			: \NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION;
+
 		wp_register_script(
-			'neopayment-3ds-popup',
+			'neopayment-sweetalert',
+			NEOPAYMENT_URL . 'assets/js/sweetAlert/sweetalert.min.js',
+			array(),
+			'2.1.2',
+			true
+		);
+
+		// Blocks-only handle
+		wp_register_script(
+			'neopayment-3ds-popup-blocks',
 			NEOPAYMENT_URL . 'assets/js/neopayment-3ds-popup.js',
-			array( 'jquery', 'neopayment-standard-blocks-js' ),
-			file_exists( NEOPAYMENT_PATH . 'assets/js/neopayment-3ds-popup.js' ) ? filemtime( NEOPAYMENT_PATH . 'assets/js/neopayment-3ds-popup.js' ) : NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION,
+			array( 'jquery', 'neopayment-sweetalert', 'neopayment-standard-blocks-js' ),
+			$popup_ver,
 			true
 		);
 
@@ -115,7 +129,7 @@ final class NEOPAYMENT_Blocks_Support {
 				'wp-element',
 				'wp-i18n',
 			),
-			$telered_asset['version'] ?? NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION,
+			$telered_asset['version'] ?? \NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION,
 			true
 		);
 
@@ -132,11 +146,30 @@ final class NEOPAYMENT_Blocks_Support {
 	 * @return void
 	 */
 	public static function register_styles() {
-		wp_enqueue_style(
+		wp_register_style(
 			'neopayment-card-fields-style',
 			NEOPAYMENT_URL . 'assets/css/neopayment-card-fields.css',
 			array(),
-			'1.0.0'
+			\NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION
 		);
+	}
+
+	/**
+	 * Enqueues checkout styles for classic flows when Blocks did not load them.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_checkout_styles() {
+		if ( wp_style_is( 'neopayment-card-fields-style', 'enqueued' ) ) {
+			return;
+		}
+
+		$is_order_pay = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-pay' );
+		$is_checkout  = function_exists( 'is_checkout' ) && is_checkout();
+		if ( ! $is_checkout && ! $is_order_pay ) {
+			return;
+		}
+
+		wp_enqueue_style( 'neopayment-card-fields-style' );
 	}
 }

@@ -1,9 +1,9 @@
-const __ = (window.wp && window.wp.i18n && window.wp.i18n.__)
-	? window.wp.i18n.__
-	: (s) => s;
-
 jQuery(
 	($) => {
+		const __ = (window.wp && window.wp.i18n && window.wp.i18n.__)
+			? window.wp.i18n.__
+			: (s) => s;
+
 		const MODAL_WIDTH = 560;
 		const MODAL_HEIGHT = 760;
 		const openedChallenges = new Set();
