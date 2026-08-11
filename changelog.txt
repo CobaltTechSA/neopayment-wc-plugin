@@ -1,3 +1,8 @@
+2026.08.11 - version 3.0.6
+* Fix vulnerabilities
+* Changes to improve the handling of the 3DS authentication flow
+* Minor textual adjustments and translation updates have been included.
+
 2026.06.23 - version 3.0.5
 * Fix workflows
 
