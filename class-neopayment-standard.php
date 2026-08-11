@@ -240,6 +240,10 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			return;
 		}
 
+		if ( ! $is_order_pay && $this->is_blocks_checkout_page() ) {
+			return;
+		}
+
 		$base = plugin_dir_url(__FILE__) . 'assets/js/';
 		$ver  = NEOPAYMENT_Constants::NEOPAYMENT_PLUGIN_VERSION;
 		$standard_script_path = plugin_dir_path(__FILE__) . 'assets/js/neopayment-script.js';
@@ -266,14 +270,15 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			true
 		);
 
-		// Script for the 3DS popup + classic checkout.
-		wp_enqueue_script(
-			'neopayment-3ds-popup',
+		// Classic-only handle
+		wp_register_script(
+			'neopayment-3ds-popup-classic',
 			$base . 'neopayment-3ds-popup.js',
 			array( 'jquery', 'neopayment-sweetalert' ),
 			$popup_ver,
 			true
 		);
+		wp_enqueue_script( 'neopayment-3ds-popup-classic' );
 
 		// This will be used to handle the 3DS challenge response.
 		$callback = esc_url_raw(home_url("/wc-api/{$this->id}_status"));
@@ -303,10 +308,30 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		}
 
 		wp_localize_script(
-			'neopayment-3ds-popup',
+			'neopayment-3ds-popup-classic',
 			'neopayment_3DS',
 			$localized
 		);
+	}
+
+	/**
+	 * Whether the current checkout page is the WooCommerce Blocks checkout.
+	 *
+	 * @return bool
+	 */
+	private function is_blocks_checkout_page() {
+		if ( function_exists( 'has_block' ) && has_block( 'woocommerce/checkout' ) ) {
+			return true;
+		}
+
+		if (
+			class_exists( '\Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' )
+			&& is_callable( array( '\Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils', 'is_checkout_block_default' ) )
+		) {
+			return (bool) \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::is_checkout_block_default();
+		}
+
+		return false;
 	}
 
 	/**
