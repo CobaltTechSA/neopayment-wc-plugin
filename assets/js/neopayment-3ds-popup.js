@@ -4,17 +4,35 @@ jQuery(
 			? window.wp.i18n.__
 			: (s) => s;
 
+		/**
+		 * Toggle challenge UI:
+		 * - false (default): open 3DS in a browser popup window.
+		 * - true: iframe modal flow.
+		 */
+		const USE_3DS_MODAL = false;
+
 		const MODAL_WIDTH = 560;
 		const MODAL_HEIGHT = 760;
 		const openedChallenges = new Set();
 		let modalElements = null;
+		let popupWaitElements = null;
 		let iframeLoadTimer = null;
 		let fallbackCountdownTimer = null;
 		let processingHintTimer = null;
+		let popupWatchTimer = null;
 		let activeChallengeUrl = null;
+		let activeChallengePopup = null;
 		let frameLoadCount = 0;
 		let callbackHandled = false;
 		let blockPageNavigation = false;
+		/** True once a popup window actually opened (not blocked). */
+		let popupDidOpen = false;
+		/** True when the shopper closed the popup before finishing 3DS. */
+		let popupClosedByUser = false;
+
+		/* ------------------------------------------------------------------ */
+		/* Modal */
+		/* ------------------------------------------------------------------ */
 
 		function ensure3DSModal() {
 			if (modalElements) {
@@ -63,11 +81,11 @@ jQuery(
 			header.style.justifyContent = 'space-between';
 
 			const title = document.createElement('span');
-			title.textContent = __('Verificación segura 3DS', 'neopayment-payment-gateway');
+			title.textContent = __('Verificación de seguridad', 'neopayment-payment-gateway');
 
 			const iframe = document.createElement('iframe');
 			iframe.className = 'neopayment-3ds-modal__frame';
-			iframe.setAttribute('title', __('Autenticación 3DS', 'neopayment-payment-gateway'));
+			iframe.setAttribute('title', __('Verificación de seguridad', 'neopayment-payment-gateway'));
 			iframe.setAttribute('allow', 'payment');
 			iframe.style.height = `${MODAL_HEIGHT}px`;
 			iframe.style.maxHeight = '80vh';
@@ -97,7 +115,7 @@ jQuery(
 			processingSpinner.style.animation = 'neopayment3dsspin 0.9s linear infinite';
 
 			const processingText = document.createElement('p');
-			processingText.textContent = __('Procesando autenticación 3DS. Por favor espere...', 'neopayment-payment-gateway');
+			processingText.textContent = __('Estamos verificando tu pago. Un momento, por favor…', 'neopayment-payment-gateway');
 			processingText.style.margin = '0';
 			processingText.style.fontSize = '14px';
 			processingText.style.color = '#334155';
@@ -128,7 +146,7 @@ jQuery(
 			const openWindowBtn = document.createElement('button');
 			openWindowBtn.type = 'button';
 			openWindowBtn.className = 'neopayment-3ds-modal__open-window';
-			openWindowBtn.textContent = __('Abrir en nueva ventana', 'neopayment-payment-gateway');
+			openWindowBtn.textContent = __('Abrir en otra ventana', 'neopayment-payment-gateway');
 			openWindowBtn.style.border = '1px solid #ccd5e2';
 			openWindowBtn.style.background = '#fff';
 			openWindowBtn.style.color = '#22324a';
@@ -141,7 +159,7 @@ jQuery(
 			const cancelBtn = document.createElement('button');
 			cancelBtn.type = 'button';
 			cancelBtn.className = 'neopayment-3ds-modal__cancel';
-			cancelBtn.textContent = __('Cancelar verificación', 'neopayment-payment-gateway');
+			cancelBtn.textContent = __('Cancelar', 'neopayment-payment-gateway');
 			cancelBtn.style.border = '1px solid #ccd5e2';
 			cancelBtn.style.background = '#fff';
 			cancelBtn.style.color = '#22324a';
@@ -219,10 +237,8 @@ jQuery(
 		function startFallbackCountdown(seconds) {
 			let remaining = seconds;
 			setModalStatus(
-				__(
-					'Cargando verificación 3DS... Si tarda demasiado, podrás abrirla en nueva ventana en',
-					'neopayment-payment-gateway'
-				) + ` ${remaining}s`
+				__('Cargando la verificación… Si tarda mucho, podrás abrirla en otra ventana en', 'neopayment-payment-gateway') +
+					` ${remaining}s`
 			);
 			clearFallbackCountdown();
 			fallbackCountdownTimer = setInterval(() => {
@@ -232,10 +248,8 @@ jQuery(
 					return;
 				}
 				setModalStatus(
-					__(
-						'Cargando verificación 3DS... Si tarda demasiado, podrás abrirla en nueva ventana en',
-						'neopayment-payment-gateway'
-					) + ` ${remaining}s`
+					__('Cargando la verificación… Si tarda mucho, podrás abrirla en otra ventana en', 'neopayment-payment-gateway') +
+						` ${remaining}s`
 				);
 			}, 1000);
 		}
@@ -262,7 +276,7 @@ jQuery(
 				clearFallbackCountdown();
 				showProcessingLayer(false);
 				toggleOpenWindowButton(true);
-				setModalStatus(__('La verificación está tardando. Si lo prefieres, ábrela en una nueva ventana.', 'neopayment-payment-gateway'));
+				setModalStatus(__('Esto está tardando más de lo habitual. Puedes abrirlo en otra ventana.', 'neopayment-payment-gateway'));
 			}, 7000);
 
 			iframe.onload = () => {
@@ -282,7 +296,7 @@ jQuery(
 					// Keep the challenge usable and only show a light hint.
 					showProcessingLayer(false);
 					toggleOpenWindowButton(false);
-					setModalStatus(__('Procesando autenticación 3DS. Por favor espere...', 'neopayment-payment-gateway'));
+					setModalStatus(__('Estamos verificando tu pago. Un momento, por favor…', 'neopayment-payment-gateway'));
 				}
 			};
 
@@ -310,6 +324,271 @@ jQuery(
 				clearTimeout(iframeLoadTimer);
 				iframeLoadTimer = null;
 			}
+		}
+
+		/* ------------------------------------------------------------------ */
+		/* Popup flow (default)                                               */
+		/* ------------------------------------------------------------------ */
+
+		function ensurePopupWaitPanel() {
+			if (popupWaitElements) {
+				return popupWaitElements;
+			}
+
+			const overlay = document.createElement('div');
+			overlay.className = 'neopayment-3ds-popup-wait';
+			overlay.style.position = 'fixed';
+			overlay.style.inset = '0';
+			overlay.style.display = 'none';
+			overlay.style.alignItems = 'center';
+			overlay.style.justifyContent = 'center';
+			overlay.style.background = 'rgba(0,0,0,.55)';
+			overlay.style.zIndex = '99998';
+			overlay.style.padding = '16px';
+
+			const card = document.createElement('div');
+			card.style.maxWidth = '420px';
+			card.style.width = '100%';
+			card.style.background = '#fff';
+			card.style.borderRadius = '10px';
+			card.style.boxShadow = '0 16px 50px rgba(0,0,0,.35)';
+			card.style.padding = '20px 18px';
+			card.style.textAlign = 'center';
+
+			const title = document.createElement('h3');
+			title.textContent = __('Verificación de seguridad', 'neopayment-payment-gateway');
+			title.style.margin = '0 0 10px';
+			title.style.fontSize = '18px';
+			title.style.color = '#22324a';
+
+			const text = document.createElement('p');
+			text.className = 'neopayment-3ds-popup-wait__text';
+			text.style.margin = '0 0 16px';
+			text.style.fontSize = '14px';
+			text.style.lineHeight = '1.45';
+			text.style.color = '#475569';
+
+			const actions = document.createElement('div');
+			actions.style.display = 'flex';
+			actions.style.gap = '10px';
+			actions.style.justifyContent = 'center';
+			actions.style.flexWrap = 'wrap';
+
+			const reopenBtn = document.createElement('button');
+			reopenBtn.type = 'button';
+			reopenBtn.textContent = __('Intentarlo nuevamente', 'neopayment-payment-gateway');
+			reopenBtn.style.border = '1px solid #2f6fb3';
+			reopenBtn.style.background = '#2f6fb3';
+			reopenBtn.style.color = '#fff';
+			reopenBtn.style.padding = '8px 12px';
+			reopenBtn.style.borderRadius = '6px';
+			reopenBtn.style.fontSize = '13px';
+			reopenBtn.style.cursor = 'pointer';
+
+			const cancelBtn = document.createElement('button');
+			cancelBtn.type = 'button';
+			cancelBtn.textContent = __('Cancelar', 'neopayment-payment-gateway');
+			cancelBtn.style.border = '1px solid #ccd5e2';
+			cancelBtn.style.background = '#fff';
+			cancelBtn.style.color = '#22324a';
+			cancelBtn.style.padding = '8px 12px';
+			cancelBtn.style.borderRadius = '6px';
+			cancelBtn.style.fontSize = '13px';
+			cancelBtn.style.cursor = 'pointer';
+
+			reopenBtn.addEventListener('click', () => {
+				if (!activeChallengeUrl) {
+					return;
+				}
+
+				// Challenge URLs are typically one-time.
+				if (popupDidOpen || popupClosedByUser) {
+					closeChallengePopup(true);
+					showUserMessage(
+						__('Verificación incompleta', 'neopayment-payment-gateway'),
+						__(
+							'Cerraste la ventana de verificación. Inténtalo nuevamente para continuar.',
+							'neopayment-payment-gateway'
+						),
+						true
+					);
+					return;
+				}
+
+				// Popup was blocked and never opened, safe to retry the same URL.
+				start3DSChallenge(activeChallengeUrl);
+			});
+			cancelBtn.addEventListener('click', () => {
+				if (activeChallengeUrl) {
+					openedChallenges.delete(activeChallengeUrl);
+				}
+				closeChallengePopup(true);
+				window.location.reload();
+			});
+
+			actions.appendChild(reopenBtn);
+			actions.appendChild(cancelBtn);
+			card.appendChild(title);
+			card.appendChild(text);
+			card.appendChild(actions);
+			overlay.appendChild(card);
+			document.body.appendChild(overlay);
+
+			popupWaitElements = { overlay, text, reopenBtn };
+			return popupWaitElements;
+		}
+
+		function showPopupWaitPanel(message, options = {}) {
+			const panel = ensurePopupWaitPanel();
+			panel.text.textContent = message;
+			const reopenLabel = options.reopenLabel || __('Intentarlo nuevamente', 'neopayment-payment-gateway');
+			panel.reopenBtn.textContent = reopenLabel;
+			panel.overlay.style.display = 'flex';
+			document.body.classList.add('neopayment-3ds-modal-open');
+			blockPageNavigation = true;
+		}
+
+		function hidePopupWaitPanel() {
+			if (!popupWaitElements) {
+				return;
+			}
+			popupWaitElements.overlay.style.display = 'none';
+			document.body.classList.remove('neopayment-3ds-modal-open');
+			blockPageNavigation = false;
+		}
+
+		function clearPopupWatch() {
+			if (popupWatchTimer) {
+				clearInterval(popupWatchTimer);
+				popupWatchTimer = null;
+			}
+		}
+
+		function isPopupBlocked(popup) {
+			if (!popup) {
+				return true;
+			}
+			try {
+				return popup.closed === true;
+			} catch (e) {
+				return true;
+			}
+		}
+
+		function notifyPopupBlocked() {
+			showUserMessage(
+				__('No se pudo abrir la verificación', 'neopayment-payment-gateway'),
+				__(
+					'Tu navegador bloqueó una ventana necesaria para verificar el pago. Permite ventanas emergentes en este sitio e inténtalo nuevamente.',
+					'neopayment-payment-gateway'
+				),
+				false
+			);
+			showPopupWaitPanel(
+				__(
+					'No pudimos abrir la verificación. Permite ventanas emergentes en tu navegador y pulsa Intentarlo nuevamente.',
+					'neopayment-payment-gateway'
+				)
+			);
+		}
+
+		function openChallengePopup(url) {
+			activeChallengeUrl = url;
+			callbackHandled = false;
+			popupClosedByUser = false;
+
+			let popup = null;
+			try {
+				// Unique name avoids reusing a closing/closed window handle.
+				popup = window.open(
+					url,
+					`neopayment_3ds_${Date.now()}`,
+					`width=${MODAL_WIDTH},height=${MODAL_HEIGHT},scrollbars=yes,resizable=yes`
+				);
+			} catch (e) {
+				popup = null;
+			}
+
+			activeChallengePopup = popup;
+
+			// Some browsers return a Window even when blocked; re-check shortly after.
+			window.setTimeout(() => {
+				if (callbackHandled) {
+					return;
+				}
+				if (isPopupBlocked(popup)) {
+					activeChallengePopup = null;
+					popupDidOpen = false;
+					notifyPopupBlocked();
+					return;
+				}
+
+				popupDidOpen = true;
+				showPopupWaitPanel(
+					__(
+						'Completa la verificación en la ventana que se abrió. Mantén esta página abierta hasta terminar.',
+						'neopayment-payment-gateway'
+					)
+				);
+
+				clearPopupWatch();
+				popupWatchTimer = window.setInterval(() => {
+					if (callbackHandled) {
+						clearPopupWatch();
+						return;
+					}
+					if (isPopupBlocked(activeChallengePopup)) {
+						clearPopupWatch();
+						activeChallengePopup = null;
+						popupClosedByUser = true;
+						if (!callbackHandled) {
+							showPopupWaitPanel(
+								__(
+									'Cerraste la ventana de verificación. Pulsa Intentarlo nuevamente para continuar.',
+									'neopayment-payment-gateway'
+								),
+								{
+									reopenLabel: __('Intentarlo nuevamente', 'neopayment-payment-gateway'),
+								}
+							);
+						}
+					}
+				}, 700);
+			}, 350);
+
+			return popup;
+		}
+
+		function closeChallengePopup(forceCloseWindow = false) {
+			clearPopupWatch();
+			hidePopupWaitPanel();
+			if (forceCloseWindow && activeChallengePopup && !activeChallengePopup.closed) {
+				try {
+					activeChallengePopup.close();
+				} catch (e) {
+					// Ignore cross-window close errors.
+				}
+			}
+			activeChallengePopup = null;
+			activeChallengeUrl = null;
+			callbackHandled = false;
+			blockPageNavigation = false;
+			popupDidOpen = false;
+			popupClosedByUser = false;
+		}
+
+		/**
+		 * Single entry point for classic / blocks / order-pay challenge opening.
+		 */
+		function start3DSChallenge(url) {
+			if (!url) {
+				return;
+			}
+			if (USE_3DS_MODAL) {
+				open3DSModal(url);
+				return;
+			}
+			openChallengePopup(url);
 		}
 
 		function handlePopupEvents() {
@@ -357,7 +636,7 @@ jQuery(
 				}
 				if (!openedChallenges.has(challengeUrl)) {
 					openedChallenges.add(challengeUrl);
-					open3DSModal(challengeUrl);
+					start3DSChallenge(challengeUrl);
 				}
 				if (event) {
 					event.preventDefault();
@@ -422,7 +701,7 @@ jQuery(
 					return;
 				}
 				openedChallenges.add(response.challenge_url);
-				open3DSModal(response.challenge_url);
+				start3DSChallenge(response.challenge_url);
 				return;
 			}
 
@@ -446,7 +725,7 @@ jQuery(
 						return;
 					}
 					openedChallenges.add(details.challenge_url);
-					open3DSModal(details.challenge_url);
+					start3DSChallenge(details.challenge_url);
 					return;
 				}
 
@@ -507,20 +786,33 @@ jQuery(
 					if (!event.data?.neopayment3ds || event.data?.source !== 'neopayment_3ds_handler') {
 						return;
 					}
-					// Ignore messages not coming from the active 3DS iframe.
-					if (!modalElements || event.source !== modalElements.iframe.contentWindow) {
+
+					const fromIframe =
+						modalElements && event.source === modalElements.iframe.contentWindow;
+					const fromPopup =
+						activeChallengePopup && event.source === activeChallengePopup;
+					if (!fromIframe && !fromPopup) {
 						return;
 					}
+
 					callbackHandled = true;
-					close3DSModal();
+					if (USE_3DS_MODAL) {
+						close3DSModal();
+					} else {
+						closeChallengePopup(true);
+					}
+
 					if (event.data.neopayment3ds === 'success') {
 						window.location.href = event.data.redirect_to || window.location.href;
 					} else {
 						console.warn('[NEOPAYMENT-3DS] Authentication failed.');
 						showUserMessage(
-							__('Error de autenticación', 'neopayment-payment-gateway'),
-							__('Inténtalo nuevamente. Si el problema persiste, verifica con tu banco.', 'neopayment-payment-gateway'),
-							false
+							__('No se pudo verificar el pago', 'neopayment-payment-gateway'),
+							__(
+								'No pudimos completar la verificación. Inténtalo nuevamente. Si el problema continúa, contacta a tu banco.',
+								'neopayment-payment-gateway'
+							),
+							true
 						);
 					}
 				}
@@ -542,7 +834,7 @@ jQuery(
 				return;
 			}
 			openedChallenges.add(raw);
-			open3DSModal(raw);
+			start3DSChallenge(raw);
 			try {
 				const u = new URL(window.location.href);
 				if (u.searchParams.get('neopayment_open_3ds') === '1') {
