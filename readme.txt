@@ -24,21 +24,6 @@ Accept credit and debit card payments directly on your website through Visa, Mas
 
 Whether you\'re launching a new online store or expanding your payment options in Panama, this plugin offers a reliable solution for accepting card payments.
 
-== Source Code and Build Process ==
-- Public source repository: https://github.com/CobaltTechSA/payment-plugin-woocommerce
-- Main plugin bootstrap file: `neopayment.php`
-- JavaScript source files for block assets:
-  - `assets/js/blocks/neopayment-standard.js`
-  - `assets/js/blocks/neopayment-telered.js`
-- Compiled assets:
-  - `build/neopayment-standard.js`
-  - `build/neopayment-telered.js`
-
-Build commands:
-- `npm install`
-- `npm run build`
-
-
 == Installation ==
 1. Upload the plugin files to the `/wp-content/plugins/neopayment` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the \'Plugins\' screen in WordPress.
@@ -69,92 +54,92 @@ Yes. You must be an approved merchant with Neopayment to use this plugin.
 
 == Changelog ==
 
-2026.08.19 - version 3.0.8
+= 2026.08.19 - version 3.0.8 =
 * Fix assets resources
 
-2026.08.11 - version 3.0.7
+= 2026.08.11 - version 3.0.7 =
 * Version update
 
-2026.08.01 - version 3.0.6
+= 2026.08.01 - version 3.0.6 =
 * Fix vulnerabilities
 * Changes to improve the handling of the 3DS authentication flow
 * Minor textual adjustments and translation updates have been included.
 
-2026.06.23 - version 3.0.5
+= 2026.06.23 - version 3.0.5 =
 * Fix workflows
 
-2026.06.23 - version 3.0.4
+= 2026.06.23 - version 3.0.4 =
 * Added GitHub workflows
 
-2026.05.12 - version 3.0.2
+= 2026.05.12 - version 3.0.2 =
 * Added support for pay_for_order flows and 3DS challenge handling
 * Fix OAuth token management for prod and test mode
 * Fix 3DS on order-pay mode
 * Updated payment gateway scripts and dependencies
 
-2026.05.06 - version 3.0.1
+= 2026.05.06 - version 3.0.1 =
 * Introduced modal-based flow for 3D Secure replacing popup
 * Improved 3DS processing feedback and error handling
 * Fix plugin check errors based on WordPress feedback
 * Fix scripts enqueued on cart pages
 
-2026.04.13 - version 3.0.0
+= 2026.04.13 - version 3.0.0 =
 * Renamed plugin to Neopayment
 
-2025.09.22 - version 2.5.2
+= 2025.09.22 - version 2.5.2 =
 * Changed prefix
 * Added nonces
 * Resubmitted plugin
 
-2025.09.22 - version 2.5.1
+= 2025.09.22 - version 2.5.1 =
 * Resubmitted plugin
 
-2025.09.22 - version 2.5.0
+= 2025.09.22 - version 2.5.0 =
 * Renamed plugin slug
 
-2025.08.07 - version 2.4.2
+= 2025.08.07 - version 2.4.2 =
 * Code convention fixes
 * Refactorized plugin classes names
 
-2025.07.14 - version 2.4.1
+= 2025.07.14 - version 2.4.1 =
 * Show 3DS Challenge on Popup
 * Added support for refunds
 * Deleted support for API v1
 * Added metadata for identify origin
 
-2025.07.3 - version 2.3.1
+= 2025.07.3 - version 2.3.1 =
 * Added support for WordPress block mode
 
-2025.04.10 - version 2.2.0
+= 2025.04.10 - version 2.2.0 =
 * Added APIv2 for eClave payments
 * Fix support for 3DS payments
 
-2025.01.30 - version 2.1.0
+= 2025.01.30 - version 2.1.0 =
 * Added support for 3DS payments
 
-2024.11.23 - version 2.0.0
- * Adapted for API V2
+= 2024.11.23 - version 2.0.0 =
+* Adapted for API V2
 
-2024.10.15 - version 1.2.0
- * Added native payments for VISA and Mastercard
- * Added translations
+= 2024.10.15 - version 1.2.0 =
+* Added native payments for VISA and Mastercard
+* Added translations
 
-2024.03.11 - version 1.1.0
- * Enable VISA and MASTERCARD payments
+= 2024.03.11 - version 1.1.0 =
+* Enable VISA and MASTERCARD payments
 
-2024.02.19 - version 1.0.4
- * Fix create Clave payments
- * Added deploy script
+= 2024.02.19 - version 1.0.4 =
+* Fix create Clave payments
+* Added deploy script
 
-2023.12.20 - version 1.0.3
- * Fix Version update
+= 2023.12.20 - version 1.0.3 =
+* Fix Version update
 
-2023.11.20 - version 1.0.2
- * Auto-update Production URL to metrobank.cobalt.tech after November 30th, 2023
- * Added error logs
+= 2023.11.20 - version 1.0.2 =
+* Auto-update Production URL to metrobank.cobalt.tech after November 30th, = 2023
+* Added error logs
 
-2023.07.03 - version 1.0.1
- * Fix webhook response for Clave payments
+= 2023.07.03 - version 1.0.1 =
+* Fix webhook response for Clave payments
 
-2023.02.04 - version 1.0.0
- * First Release
+= 2023.02.04 - version 1.0.0 =
+* First Release
