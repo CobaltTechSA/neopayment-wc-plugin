@@ -4,7 +4,7 @@ Tags: woocommerce, payment gateway, neopayment, panama
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 7.2.0
-Stable tag: 3.0.7
+Stable tag: 3.0.8
 License: GPLv2
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html#SEC1
 
@@ -68,6 +68,9 @@ Yes. You must be an approved merchant with Neopayment to use this plugin.
 2. Neopayment payment option displayed at checkout.
 
 == Changelog ==
+
+2026.08.19 - version 3.0.8
+* Fix assets resources
 
 2026.08.11 - version 3.0.7
 * Version update
