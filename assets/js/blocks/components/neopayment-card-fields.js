@@ -109,9 +109,24 @@ const CardFields = ({ onChange }) => {
           <input
             id="card_expiry"
             type="text"
+            inputMode="numeric"
+            autoComplete="cc-exp"
             placeholder={__('MM/YY', 'neopayment')}
+            maxLength={5}
             value={card_expiry}
             onBlur={() => setTouched(t => ({ ...t, expiry: true }))}
+            onPaste={e => {
+              const text = e.clipboardData?.getData('text') || '';
+              if (!text) {
+                return;
+              }
+              e.preventDefault();
+              const formatted = formatExpiry(text);
+              setcard_expiry(formatted);
+              if (formatted.length === 5) {
+                setTouched(t => ({ ...t, expiry: true }));
+              }
+            }}
             onChange={e => {
               const formatted = formatExpiry(e.target.value);
               setcard_expiry(formatted);

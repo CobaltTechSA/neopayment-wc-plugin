@@ -24,13 +24,26 @@ export function validateLuhn(num) {
 	return sum % 10 === 0;
 }
 
-// format expiry date.
+// format expiry date as MM/YY.
 export function formatExpiry(value) {
-	let digits = value.replace( /\D/g, '' ).slice( 0, 4 );
-	if (digits.length >= 3) {
-		return `${digits.slice( 0, 2 )}/${digits.slice( 2 )}`;
+	const raw = String( value || '' );
+	const withYear = raw.match( /^(\d{2})\s*\/\s*(\d{3,4})$/ );
+	if (withYear) {
+		const year = withYear[2];
+		const yy   = year.length === 4 ? year.slice( -2 ) : year.slice( 0, 2 );
+		return `${withYear[1]}/${yy}`;
 	}
-	return digits;
+
+	const digits = raw.replace( /\D/g, '' );
+	if (digits.length >= 6) {
+		return `${digits.slice( 0, 2 )}/${digits.slice( -2 )}`;
+	}
+
+	const limited = digits.slice( 0, 4 );
+	if (limited.length >= 3) {
+		return `${limited.slice( 0, 2 )}/${limited.slice( 2 )}`;
+	}
+	return limited;
 }
 
 // validate expiry date.

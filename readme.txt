@@ -2,7 +2,7 @@
 Contributors: neopayment
 Tags: woocommerce, payment gateway, neopayment, panama
 Requires at least: 5.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.2.0
 Stable tag: 3.0.8
 License: GPLv2

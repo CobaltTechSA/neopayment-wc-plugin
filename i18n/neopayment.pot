@@ -59,7 +59,7 @@ msgid "Card number"
 msgstr ""
 
 #: class-neopayment-cc.php:135
-msgid "Expiry (MM/YY)"
+msgid "Expiry"
 msgstr ""
 
 #: class-neopayment-cc.php:136

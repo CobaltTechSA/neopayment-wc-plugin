@@ -18,7 +18,7 @@ msgstr ""
 #. Author of the plugin
 #: neopayment.php
 msgid "Neopayment"
-msgstr ""
+msgstr "Neopayment"
 
 #. Plugin URI of the plugin
 #: neopayment.php
@@ -59,8 +59,8 @@ msgid "Card number"
 msgstr "Número de tarjeta"
 
 #: class-neopayment-cc.php:135
-msgid "Expiry (MM/YY)"
-msgstr "Fecha de vencimiento (MM/AA)"
+msgid "Expiry"
+msgstr "Vencimiento"
 
 #: class-neopayment-cc.php:136
 msgid "MM / YY"

@@ -118,7 +118,7 @@ class NEOPAYMENT_CC extends WC_Payment_Gateway_CC {
 
 		$cvc_field = '<p class="form-row form-row-last">
             <label for="' . esc_attr( $this->id ) . '-card-cvc">' . esc_html__( 'Card code', 'neopayment' ) . '&nbsp;<span class="required">*</span></label>
-            <input id="' . esc_attr( $this->id ) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" inputmode="password" autocomplete="off" autocorrect="no" autocapitalize="no" spellcheck="no" type="password" maxlength="4" placeholder="' . esc_attr__( 'CVC', 'neopayment' ) . '" ' . $this->neopayment_field_name( 'card-cvc' ) . ' style="width:100px" />
+            <input id="' . esc_attr( $this->id ) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" inputmode="password" autocomplete="off" autocorrect="no" autocapitalize="no" spellcheck="no" type="password" maxlength="4" placeholder="' . esc_attr__( 'CVC', 'neopayment' ) . '" ' . $this->neopayment_field_name( 'card-cvc' ) . ' />
         </p>';
 
 		$card_holder_field = '<p class="form-row form-row-wide">
@@ -132,8 +132,8 @@ class NEOPAYMENT_CC extends WC_Payment_Gateway_CC {
                 <input id="' . esc_attr( $this->id ) . '-card-number" class="input-text wc-credit-card-form-card-number" inputmode="numeric" autocomplete="cc-number" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" placeholder="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;" ' . $this->neopayment_field_name( 'card-number' ) . ' />
             </p>',
 			'card-expiry-field' => '<p class="form-row form-row-first">
-                <label for="' . esc_attr( $this->id ) . '-card-expiry">' . esc_html__( 'Expiry (MM/YY)', 'neopayment' ) . '&nbsp;<span class="required">*</span></label>
-                <input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" inputmode="numeric" autocomplete="cc-exp" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" placeholder="' . esc_attr__( 'MM / YY', 'neopayment' ) . '" ' . $this->neopayment_field_name( 'card-expiry' ) . ' />
+                <label for="' . esc_attr( $this->id ) . '-card-expiry">' . esc_html__( 'Expiry', 'neopayment' ) . '&nbsp;<span class="required">*</span></label>
+                <input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry neopayment-card-expiry" inputmode="numeric" autocomplete="cc-exp" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" maxlength="7" placeholder="' . esc_attr__( 'MM / YY', 'neopayment' ) . '" ' . $this->neopayment_field_name( 'card-expiry' ) . ' />
             </p>',
 		);
 
@@ -147,7 +147,7 @@ class NEOPAYMENT_CC extends WC_Payment_Gateway_CC {
 		$fields = wp_parse_args( array(), apply_filters( 'woocommerce_credit_card_form_fields', $default_fields, $this->id ) );
 		?>
 
-		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class="wc-credit-card-form wc-payment-form">
+		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class="wc-credit-card-form wc-payment-form neopayment-cc-form">
 			<?php
 			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core action.
 			do_action( 'woocommerce_credit_card_form_start', $this->id );

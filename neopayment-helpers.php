@@ -46,15 +46,26 @@ class NEOPAYMENT_Helpers {
 	 * @return bool
 	 */
 	public static function is_valid_expiry_date( $expiry_date ) {
-		if ( empty( $expiry_date ) ) {
+		if ( ! is_string( $expiry_date ) && ! is_numeric( $expiry_date ) ) {
 			return false;
 		}
 
-		settype( $expiry_date, 'string' );
-		$date         = DateTime::createFromFormat( 'm/y', $expiry_date );
-		$current_date = new DateTime();
+		$expiry_date = str_replace( ' ', '', (string) $expiry_date );
+		if ( ! preg_match( '/^(0[1-9]|1[0-2])\/\d{2}$/', $expiry_date ) ) {
+			return false;
+		}
 
-		return $date > $current_date;
+		$expiry = DateTime::createFromFormat( '!m/y', $expiry_date );
+		if ( ! $expiry instanceof DateTime ) {
+			return false;
+		}
+
+		$now = new DateTime( current_time( 'mysql' ) );
+
+		$expiry_index = ( (int) $expiry->format( 'Y' ) * 12 ) + (int) $expiry->format( 'n' );
+		$now_index    = ( (int) $now->format( 'Y' ) * 12 ) + (int) $now->format( 'n' );
+
+		return $expiry_index >= $now_index;
 	}
 
 	/**
