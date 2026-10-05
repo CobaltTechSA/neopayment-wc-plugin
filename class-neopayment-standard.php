@@ -110,20 +110,20 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		$path  = plugin_dir_url(__FILE__);
 		$icons = array(
 			sprintf(
-				'<img class="%s" src="%s" alt="%s" />',
+				'<img class="%s" src="%s" alt="%s" width="40" height="24" />',
 				esc_attr('neopayment-icon'),
 				esc_url(WC_HTTPS::force_https_url($path . 'assets/images/visa.svg')),
 				esc_attr__('Visa', 'neopayment')
 			),
 			sprintf(
-				'<img class="%s" src="%s" alt="%s" />',
+				'<img class="%s" src="%s" alt="%s" width="34" height="24" />',
 				esc_attr('neopayment-icon'),
 				esc_url(WC_HTTPS::force_https_url($path . 'assets/images/mastercard.svg')),
 				esc_attr__('Mastercard', 'neopayment')
 			),
 		);
 
-		$pay_icons = '<div style="vertical-align: middle; display: inline-block; margin-left: 22px">';
+		$pay_icons = '<div class="neopayment-icons" style="vertical-align: middle; display: inline-flex; align-items: center; gap: 6px; margin-left: 8px">';
 		foreach ($icons as $icon) {
 			$pay_icons .= $icon;
 		}
@@ -677,6 +677,12 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			}
 			$three_ds_params = $this->neopayment_normalize_3ds_params($three_ds_params);
 			NEOPAYMENT_Log::debug('three_ds_params=' . wp_json_encode($three_ds_params));
+
+			$card_expiry = str_replace(' ', '', (string) $card_expiry);
+			if (! NEOPAYMENT_Helpers::is_valid_expiry_date($card_expiry)) {
+				wc_add_notice(__('Invalid expiry date', 'neopayment'), 'error');
+				return array( 'result' => 'failure' );
+			}
 
 			$transaction = $neopayment_client->sale($order, $card_number, $card_expiry, $card_cvc, $card_holder, $three_ds_params);
 			NEOPAYMENT_Log::debug('Checkout data: ' . wp_json_encode($transaction));

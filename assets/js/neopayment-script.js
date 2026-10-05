@@ -93,7 +93,106 @@ let jq = null;
 			}
 		}
 
+		/**
+		 * Reduces a card expiry to `MM / YY`.
+		 *
+		 * WooCommerce's jquery.payment formatter accepts `MM / YYYY` (up to four year digits).
+		 * A complete four-digit year (paste or autofill, e.g. 2026) keeps the last two digits.
+		 * A third year digit typed by hand is dropped.
+		 *
+		 * @param {string} value Raw expiry field value.
+		 * @returns {string|null} Clamped value, or null when the value is already within MM/YY.
+		 */
+		function clampExpiryValue(value) {
+			const raw = String(value || '');
+			const parts = raw.match(/^(\d{1,2})\s*\/\s*(\d{1,4})\s*$/);
+			if (parts && parts[2].length > 2) {
+				const month = parts[1].padStart(2, '0');
+				const year = parts[2].length === 4 ? parts[2].slice(-2) : parts[2].slice(0, 2);
+				return month + ' / ' + year;
+			}
+
+			const digits = raw.replace(/\D/g, '');
+			if (digits.length > 4) {
+				const month = digits.slice(0, 2);
+				const yearDigits = digits.slice(2);
+				const year = yearDigits.length >= 4 ? yearDigits.slice(0, 4).slice(-2) : yearDigits.slice(0, 2);
+				return month + ' / ' + year;
+			}
+
+			return null;
+		}
+
+		/**
+		 * Stops the expiry field from accepting more than four digits (MMYY).
+		 *
+		 * @param {KeyboardEvent} event
+		 * @returns {void}
+		 */
+		function blockExtraExpiryDigit(event) {
+			const field = event.target;
+			if (!field || !field.classList || !field.classList.contains('neopayment-card-expiry')) {
+				return;
+			}
+			if (event.ctrlKey || event.metaKey || event.altKey) {
+				return;
+			}
+			if (!/^\d$/.test(event.key)) {
+				return;
+			}
+
+			const start = typeof field.selectionStart === 'number' ? field.selectionStart : field.value.length;
+			const end = typeof field.selectionEnd === 'number' ? field.selectionEnd : field.value.length;
+			const selectedDigits = field.value.slice(start, end).replace(/\D/g, '').length;
+			const nextLength = field.value.replace(/\D/g, '').length - selectedDigits + 1;
+			if (nextLength > 4) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+
+		/**
+		 * Binds expiry limiting after WooCommerce attaches jquery.payment,
+		 * so a four-digit year cannot remain in the field.
+		 *
+		 * @returns {void}
+		 */
+		function bindExpiryLimit() {
+			const $field = $('.neopayment-card-expiry');
+			if (!$field.length) {
+				return;
+			}
+
+			$field.off('.neopaymentExpiry');
+			$field.on('paste.neopaymentExpiry', function (event) {
+				const clipboard = event.originalEvent && event.originalEvent.clipboardData;
+				const text = clipboard ? clipboard.getData('text') : '';
+				const next = clampExpiryValue(text);
+				if (next !== null) {
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					this.value = next;
+				}
+			});
+			$field.on('input.neopaymentExpiry change.neopaymentExpiry', function () {
+				const field = this;
+				window.setTimeout(function () {
+					const next = clampExpiryValue(field.value);
+					if (next !== null && next !== field.value) {
+						field.value = next;
+					}
+				}, 0);
+			});
+		}
+
+		document.addEventListener('keydown', blockExtraExpiryDigit, true);
+
 		$(document).ready(function () {
+			$(document.body).on('wc-credit-card-form-init updated_checkout', function () {
+				window.setTimeout(bindExpiryLimit, 0);
+			});
+			window.setTimeout(bindExpiryLimit, 0);
+
 			$(document).on('change', 'input[type=radio][name=payment_method]', function () {
 				onPaymentMethodChange($(this).val());
 			});
@@ -104,6 +203,13 @@ let jq = null;
 				'form.checkout, form[name="checkout"]',
 				function () {
 					ensureBrowserData();
+					bindExpiryLimit();
+					$('.neopayment-card-expiry').each(function () {
+						const next = clampExpiryValue(this.value);
+						if (next !== null) {
+							this.value = next;
+						}
+					});
 					return true;
 				}
 			);
@@ -111,6 +217,12 @@ let jq = null;
 			// Pay-for-order: native form POST — no `checkout_place_order`; populate fields on submit.
 			$(document).on('submit', 'form#order_review', function () {
 				ensureBrowserData();
+				$('.neopayment-card-expiry').each(function () {
+					const next = clampExpiryValue(this.value);
+					if (next !== null) {
+						this.value = next;
+					}
+				});
 			});
 
 			$(document.body).on('updated_checkout', function () {
