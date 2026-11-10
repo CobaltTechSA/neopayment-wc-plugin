@@ -235,12 +235,12 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 		// we need it to get any order detailes.
 		$order = wc_get_order( $order_id );
 
-		NEOPAYMENT_Log::debug( "api_client_id=$this->api_client_id, api_client_secret=$this->api_client_secret" );
+		NEOPAYMENT_Log::debug( 'Telered process_payment: order_id=' . $order_id );
 		$neopayment_client = new NEOPAYMENT_Client( $this->api_url, $this->api_client_id, $this->api_client_secret, $this->testmode );
 		try {
 			$checkout = $neopayment_client->checkout( $order, NEOPAYMENT_Constants::NEOPAYMENT_PAYMENT_TYPE_TELERED );
 
-			NEOPAYMENT_Log::debug( 'Checkout data: ' . wp_json_encode( $checkout ) );
+			NEOPAYMENT_Log::payload( 'debug', 'Checkout data: ', $checkout );
 
 			// Mark as on-hold (we're awaiting the cheque).
 			// $order->update_status('on-hold', __( 'Awaiting cheque payment', 'woocommerce' ));.
@@ -251,7 +251,7 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 			);
 		} catch ( \NEOPAYMENT_Exception $e ) {
 			if ( ! $e->isSuccessResponse() ) {
-				NEOPAYMENT_Log::debug( $e->getMessage() . ' - ' . wp_json_encode( $e->getResponse() ) );
+				NEOPAYMENT_Log::payload( 'debug', $e->getMessage() . ' - ', $e->getResponse() );
 				wc_add_notice( 'No se ha podido generar el pago. Por favor contacte con el comercio.', 'error' );
 			} else {
 				wc_add_notice( 'No se ha podido procesar el pago. Por favor contacte con el comercio.', 'error' );
@@ -309,7 +309,7 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 			exit;
 		}
 
-		NEOPAYMENT_Log::debug( 'Webhook payload: ' . wp_json_encode( $data ) );
+		NEOPAYMENT_Log::payload( 'debug', 'Webhook payload: ', $data );
 
 		try {
 			$parsed = NEOPAYMENT_Helpers::parse_gateway_transaction( $data );
@@ -345,7 +345,7 @@ class NEOPAYMENT_Telered_Gateway extends WC_Payment_Gateway {
 
 		} catch ( \NEOPAYMENT_Exception $e ) {
 			$tid = isset( $data['tid'] ) ? sanitize_text_field( (string) $data['tid'] ) : '';
-			NEOPAYMENT_Log::debug( 'Error getting transaction ' . $tid . ' - ' . $e->getMessage() );
+			NEOPAYMENT_Log::debug( 'Error getting transaction ' . $tid . ' - ' . NEOPAYMENT_Log::redact_text( $e->getMessage() ) );
 			status_header( 400 );
 		}
 	}

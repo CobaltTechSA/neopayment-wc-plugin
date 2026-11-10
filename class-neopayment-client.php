@@ -294,8 +294,10 @@ class NEOPAYMENT_Client
 				NEOPAYMENT_Log::debug( "Authentication completed: expires_in={$expires_in}, option={$this->access_token_option}" );
 			} else {
 				$token_url = $this->base_url . '/oauth/token';
-				NEOPAYMENT_Log::error(
-					'Error getting access token HTTP ' . (int) $response['code'] . ' POST ' . $token_url . ' — ' . wp_json_encode( $response )
+				NEOPAYMENT_Log::payload(
+					'error',
+					'Error getting access token HTTP ' . (int) $response['code'] . ' POST ' . $token_url . ' — ',
+					$response
 				);
 				return null;
 			}
@@ -333,10 +335,10 @@ class NEOPAYMENT_Client
 		);
 
 		$response = $this->get($endpoint);
-		\NEOPAYMENT_Log::debug('Respuesta de reembolso: ' . esc_html(wp_json_encode($response)));
+		\NEOPAYMENT_Log::payload( 'debug', 'Respuesta de reembolso: ', $response );
 
 		if (200 !== $response['code']) {
-			\NEOPAYMENT_Log::error('Error al solicitar reembolso: ' . esc_html(wp_json_encode($response)));
+			\NEOPAYMENT_Log::payload( 'error', 'Error al solicitar reembolso: ', $response );
 			$message = $response['body']['message'] ?? esc_html__('Error requesting refund', 'neopayment');
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- API message + structured response for getResponse().
 			throw new NEOPAYMENT_Exception( $message, $response );
@@ -410,7 +412,7 @@ class NEOPAYMENT_Client
 		);
 
 		$response = $this->post($this->get_route('checkout'), $body);
-		\NEOPAYMENT_Log::debug('Response: ' . wp_json_encode($response));
+		\NEOPAYMENT_Log::payload( 'debug', 'Response: ', $response );
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {
@@ -478,7 +480,7 @@ class NEOPAYMENT_Client
 		);
 
 		$response = $this->post($this->get_route('sale'), $body);
-		\NEOPAYMENT_Log::debug('Response: ' . wp_json_encode($response));
+		\NEOPAYMENT_Log::payload( 'debug', 'Response: ', $response );
 		if (200 === $response['code']) {
 			return $response['body']['data'];
 		} else {

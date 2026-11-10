@@ -477,7 +477,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 		if (! $order_id || ! $amount) {
 			return new WP_Error('invalid_order', 'Invalid order ID or amount');
 		}
-		NEOPAYMENT_Log::debug("process_refund: order_id={$order_id}, amount={$amount}, reason={$reason}");
+		NEOPAYMENT_Log::debug( 'process_refund: order_id=' . $order_id . ', amount=' . $amount . ', reason=' . NEOPAYMENT_Log::redact_text( (string) $reason ) );
 		$order = wc_get_order($order_id);
 
 		if (! $order) {
@@ -493,7 +493,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			$data            = $neopayment_client->refund($txn, $amount_in_cents);
 		} catch (NEOPAYMENT_Exception $e) {
 			$response          = $e->getResponse();
-			$api_message       = $response['body']['message'] ?? $e->getMessage();
+			$api_message       = NEOPAYMENT_Log::redact_text( (string) ( $response['body']['message'] ?? $e->getMessage() ) );
 			$api_error_code    = $response['body']['error'] ?? '';
 			$api_response_code = (int) ($response['code'] ?? 0);
 
@@ -506,7 +506,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 						$data = $neopayment_client->refund($txn, $fallback_amount);
 					} catch (NEOPAYMENT_Exception $retry_exception) {
 						$retry_response = $retry_exception->getResponse();
-						$retry_message  = $retry_response['body']['message'] ?? $retry_exception->getMessage();
+						$retry_message  = NEOPAYMENT_Log::redact_text( (string) ( $retry_response['body']['message'] ?? $retry_exception->getMessage() ) );
 						NEOPAYMENT_Log::debug('Error processing refund (retry): ' . $retry_message);
 						return new WP_Error('neopayment_refund_error', $retry_message);
 					}
@@ -519,7 +519,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 				return new WP_Error('neopayment_refund_error', $api_message);
 			}
 		} catch (\Throwable $e) {
-			NEOPAYMENT_Log::debug('Unexpected refund error: ' . $e->getMessage());
+			NEOPAYMENT_Log::debug( 'Unexpected refund error: ' . NEOPAYMENT_Log::redact_text( $e->getMessage() ) );
 			return new WP_Error('neopayment_refund_error', __('Unexpected refund error. Please check logs.', 'neopayment'));
 		}
 
@@ -532,7 +532,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 					'Reembolso de %s aprobado vía NEOPAYMENT (refund_id %s). Motivo: %s',
 					wc_price($amount),
 					$data['identifier'] ?? $data['id'] ?? '',
-					$reason
+					NEOPAYMENT_Log::redact_text( (string) $reason )
 				)
 			);
 			if (! empty($data['identifier'])) {
@@ -615,7 +615,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 				$shipping = $body['shipping_address'] ?? array();
 
 				$data = NEOPAYMENT_Helpers::map_blocks_payment_data( $pdata );
-				NEOPAYMENT_Log::debug(' data: ' . wp_json_encode($data));
+				NEOPAYMENT_Log::debug( 'Blocks payment field keys: ' . implode( ',', array_keys( $data ) ) );
 
 				// card details.
 				$card_number = $data['card_number'] ?? '';
@@ -676,10 +676,9 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 				return array( 'result' => 'failure' );
 			}
 			$three_ds_params = $this->neopayment_normalize_3ds_params($three_ds_params);
-			NEOPAYMENT_Log::debug('three_ds_params=' . wp_json_encode($three_ds_params));
 
 			$transaction = $neopayment_client->sale($order, $card_number, $card_expiry, $card_cvc, $card_holder, $three_ds_params);
-			NEOPAYMENT_Log::debug('Checkout data: ' . wp_json_encode($transaction));
+			NEOPAYMENT_Log::payload( 'debug', 'Checkout data: ', $transaction );
 
 			if ('authenticating' === ($transaction['status'] ?? '')) {
 				$challenge_url = isset( $transaction['metadatas']['3ds_authentication_form'] )
@@ -718,7 +717,7 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			}
 		} catch (\NEOPAYMENT_Exception $e) {
 			if (! $e->isSuccessResponse()) {
-				NEOPAYMENT_Log::debug($e->getMessage() . ' - ' . wp_json_encode($e->getResponse()));
+				NEOPAYMENT_Log::payload( 'debug', $e->getMessage() . ' - ', $e->getResponse() );
 				wc_add_notice(__('Cannot generate the payment. Please, contact with commerce.', 'neopayment'), 'error');
 				return array( 'result' => 'failure' );
 			} else {
@@ -1300,14 +1299,14 @@ class NEOPAYMENT_Standard_Gateway extends WC_Payment_Gateway
 			exit;
 		}
 
-		NEOPAYMENT_Log::debug('Webhook recibido: ' . wp_json_encode($data));
+		NEOPAYMENT_Log::payload( 'debug', 'Webhook recibido: ', $data );
 
 		try {
 			$valid_transaction = $this->validate_payment($data);
 			status_header(204);
 		} catch (\NEOPAYMENT_Exception $e) {
 			$tid = isset($data['tid']) ? sanitize_text_field((string) $data['tid']) : 'N/A';
-			NEOPAYMENT_Log::debug('Error en webhook. TID: ' . $tid . ' - ' . $e->getMessage());
+			NEOPAYMENT_Log::debug( 'Error en webhook. TID: ' . $tid . ' - ' . NEOPAYMENT_Log::redact_text( $e->getMessage() ) );
 			status_header(400);
 		}
 		exit;
