@@ -7,7 +7,7 @@
  * Author URI: https://neopayment.com
  * Version: 3.0.8
  * Requires at least: 5.0
- * Tested up to: 7.0
+ * Tested up to: 7.1
  * Requires PHP: 7.2.0
  * License: GPL-2.0
  * Text Domain: neopayment

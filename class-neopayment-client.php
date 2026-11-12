@@ -424,7 +424,7 @@ class NEOPAYMENT_Client
 	 *
 	 * @param WC_Order $order         WooCommerce order object.
 	 * @param string   $card_number   Credit card number.
-	 * @param string   $expiry_date   Card expiration date (MM/YY or MM/YYYY).
+	 * @param string   $expiry_date   Card expiration date (MM/YY).
 	 * @param string   $cvv           Card CVV code.
 	 * @param string   $card_holder   Name of the card holder.
 	 * @param array    $three_ds_params Optional. Parameters related to 3D Secure authentication.

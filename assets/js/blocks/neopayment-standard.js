@@ -17,11 +17,15 @@ const Label = ({ label }) => (
       <img
         src={ visaUrl }
         alt="Visa"
+        width="40"
+        height="24"
         className="neopayment-payment-label__icon"
       />
       <img
         src={ mcUrl }
         alt="Mastercard"
+        width="34"
+        height="24"
         className="neopayment-payment-label__icon"
       />
     </div>
